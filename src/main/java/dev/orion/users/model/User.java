@@ -18,6 +18,7 @@ package dev.orion.users.model;
 
 import java.util.UUID;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -30,7 +31,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import lombok.Getter;
 import lombok.Setter;
-
 /**
  * User Entity
  */
@@ -51,21 +51,20 @@ public class User extends PanacheEntityBase {
     private String email;
 
     @JsonIgnore
+    @Column(length = 256)
     private String password;
 
-    
     public User(){
         this.hash = UUID.randomUUID().toString();
     }
 
     /**
-     * Uses Apache Commons Codec package to converts the password to a md5 hash.
-     * 
-     * @param password : The password of the user
+     * Converts the text plain password to a SHA-256 using Apache Commons Codecs.
+     *
+     * @param password : The password of the user in text plain
      */
-    public void setPassword(String password){
-        String md5Hex = DigestUtils.md5Hex(password).toUpperCase();
-        this.password = md5Hex;
+    public void setPassword(String password) {
+        this.password = DigestUtils.sha256Hex(password);
     }
-    
+
 }

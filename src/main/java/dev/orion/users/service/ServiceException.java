@@ -34,10 +34,10 @@ public class ServiceException extends WebApplicationException {
 
     /**
      * A static method to init the message
-     * 
+     *
      * @param message : An error message
      * @param status : A HTTP error code
-     * 
+     *
      * @return A Response object
      */
     private static Response init(String message, Status status) {
@@ -46,5 +46,5 @@ public class ServiceException extends WebApplicationException {
         .entity(Map.of("message", message))
         .build();
     }
-    
+
 }

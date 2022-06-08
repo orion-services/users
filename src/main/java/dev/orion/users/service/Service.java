@@ -28,6 +28,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.microprofile.faulttolerance.Retry;
+
 import dev.orion.users.model.User;
 import dev.orion.users.repository.UserRepository;
 
@@ -37,17 +39,17 @@ import dev.orion.users.repository.UserRepository;
 @Path("/api/user")
 @Transactional
 public class Service {
-    
+
     @Inject
     UserRepository repo;
 
     /**
      * Creates a user in the service.
-     * 
+     *
      * @param String name : The name of the user
      * @param String email : The email of the user
      * @param String password : The password of the user
-     * 
+     *
      * @return The user object in JSON format
      * @throws ServiceException Returns a HTTP 409 if the e-mail already exists
      * in the data base
@@ -56,10 +58,11 @@ public class Service {
     @Path("/create")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
     public User create(@FormParam("name") @NotEmpty String name,
                        @FormParam("email") @NotEmpty @Email String email,
                        @FormParam("password") @NotEmpty String password) throws ServiceException{
-                           
+
         User user = new User();
         if (!repo.checkEmail(email)){
             user.setName(name);

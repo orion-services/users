@@ -29,9 +29,9 @@ public class UserRepository implements PanacheRepository<User> {
 
     /**
      * Verifies if the e-mail already exists in the database
-     * 
+     *
      * @param email : An e-mail address
-     * 
+     *
      * @return Returns true if the e-mail already exists
      */
     public boolean checkEmail(String email){
@@ -41,5 +41,5 @@ public class UserRepository implements PanacheRepository<User> {
             exists = false;
         return exists;
     }
-    
+
 }

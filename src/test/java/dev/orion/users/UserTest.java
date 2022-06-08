@@ -27,7 +27,7 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
-public class UserTest {
+class UserTest {
 
   /**
    * Tests if the service throws an HTTP 409 when the e-mail already exists in
@@ -35,7 +35,7 @@ public class UserTest {
    */
   @Test
   @Order(1)
-  public void createUser() {
+  void createUser() {
     given()
         .when()
         .param("name", "Orion")
@@ -51,7 +51,7 @@ public class UserTest {
    */
   @Test
   @Order(2)
-  public void createUserNameEmpty() {
+  void createUserNameEmpty() {
     given()
         .when()
         .param("name", "")
@@ -67,7 +67,7 @@ public class UserTest {
    */
   @Test
   @Order(3)
-  public void createUserEmailProblem() {
+  void createUserEmailProblem() {
     given()
         .when()
         .param("name", "Orion")
@@ -83,7 +83,7 @@ public class UserTest {
    */
   @Test
   @Order(4)
-  public void createUserPasswordEmpty() {
+  void createUserPasswordEmpty() {
     given()
         .when()
         .param("name", "Orion")
@@ -100,7 +100,7 @@ public class UserTest {
    */
   @Test
   @Order(5)
-  public void createDuplicateUser() {
+  void createDuplicateUser() {
     given()
         .when()
         .param("name", "Orion")
