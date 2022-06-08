@@ -16,6 +16,8 @@
  */
 package dev.orion.users.model;
 
+import java.util.UUID;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -27,20 +29,21 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
  * User Entity
  */
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter @Setter
 public class User extends PanacheEntityBase {
 
     @Id
     @GeneratedValue
     @JsonIgnore
     private Long id;
+
+    private String hash;
 
     private String name;
 
@@ -49,6 +52,11 @@ public class User extends PanacheEntityBase {
 
     @JsonIgnore
     private String password;
+
+    
+    public User(){
+        this.hash = UUID.randomUUID().toString();
+    }
 
     /**
      * Uses Apache Commons Codec package to converts the password to a md5 hash.
