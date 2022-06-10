@@ -19,7 +19,8 @@ package dev.orion.users.repository;
 import javax.enterprise.context.ApplicationScoped;
 
 import dev.orion.users.model.User;
-import io.quarkus.hibernate.orm.panache.PanacheRepository;
+import io.quarkus.hibernate.reactive.panache.PanacheRepository;
+import io.smallrye.mutiny.Uni;
 
 /**
  * Implements the repository pattern for the user entity
@@ -34,12 +35,8 @@ public class UserRepository implements PanacheRepository<User> {
      *
      * @return Returns true if the e-mail already exists
      */
-    public boolean checkEmail(String email){
-        boolean exists = true;
-        User user = find("email", email).firstResult();
-        if(user == null)
-            exists = false;
-        return exists;
+    public Uni<User> checkEmail(String email){
+      return find("email", email).firstResult();
     }
 
 }
