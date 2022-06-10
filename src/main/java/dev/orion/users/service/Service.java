@@ -17,7 +17,6 @@
 package dev.orion.users.service;
 
 import javax.inject.Inject;
-import javax.transaction.Transactional;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -28,16 +27,15 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.faulttolerance.Retry;
-
 import dev.orion.users.model.User;
 import dev.orion.users.repository.UserRepository;
+import io.quarkus.hibernate.reactive.panache.Panache;
+import io.smallrye.mutiny.Uni;
 
 /**
  * User API
  */
 @Path("/api/user")
-@Transactional
 public class Service {
 
     @Inject
@@ -52,28 +50,28 @@ public class Service {
      *
      * @return The user object in JSON format
      * @throws ServiceException Returns a HTTP 409 if the e-mail already exists
-     * in the data base
+     *                          in the data base
      */
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Retry(maxRetries = 1, delay = 2000)
-    public User create(@FormParam("name") @NotEmpty String name,
-                       @FormParam("email") @NotEmpty @Email String email,
-                       @FormParam("password") @NotEmpty String password) throws ServiceException{
+    // @Retry(maxRetries = 1, delay = 2000)
+    public Uni<User> create(@FormParam("name") @NotEmpty String name,
+            @FormParam("email") @NotEmpty @Email String email,
+            @FormParam("password") @NotEmpty String password) throws ServiceException {
 
-        User user = new User();
-        if (!repo.checkEmail(email)){
-            user.setName(name);
-            user.setEmail(email);
-            user.setPassword(password);
-            repo.persist(user);
-        }
-        else{
-            throw new ServiceException("The e-mail already exists", Response.Status.CONFLICT);
-        }
-        return user;
+        return repo.checkEmail(email)
+                .onItem().ifNotNull()
+                .failWith(new ServiceException("The e-mail already exists", Response.Status.CONFLICT))
+                .onItem().ifNull().switchTo(() -> {
+                    User user = new User();
+                    user.setName(name);
+                    user.setEmail(email);
+                    user.setPassword(password);
+                    return Panache.<User>withTransaction(user::persist);
+                });
+
     }
 
 }
