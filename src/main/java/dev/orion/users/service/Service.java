@@ -58,7 +58,7 @@ public class Service {
      *
      * @return The user object in JSON format
      * @throws ServiceException Returns a HTTP 409 if the e-mail already exists
-     *                          in the data base
+     * in the database
      */
     @POST
     @Path("/create")
@@ -82,6 +82,8 @@ public class Service {
      * @param password : The password of the user
      *
      * @return A JWT (JSON Web Token)
+     * @throws ServiceException Returns a HTTP 401 if the services is not able
+     * to find the user in the database
      */
     @POST
     @Path("/login")
@@ -94,7 +96,7 @@ public class Service {
 
         return repo.login(email, password)
             .onItem().ifNotNull().transform(this::generateJWT)
-            .onItem().ifNull().failWith(new ServiceException("User not found", Response.Status.NOT_FOUND));
+            .onItem().ifNull().failWith(new ServiceException("User not found", Response.Status.UNAUTHORIZED));
     }
 
     /**

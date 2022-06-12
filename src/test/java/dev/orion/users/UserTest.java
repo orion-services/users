@@ -31,7 +31,7 @@ class UserTest {
 
   /**
    * Tests if the service throws an HTTP 409 when the e-mail already exists in
-   * the data base
+   * the data base.
    */
   @Test
   @Order(1)
@@ -47,7 +47,7 @@ class UserTest {
   }
 
   /**
-   * Tests a user creation with a name parameter empty
+   * Tests a user creation with a name parameter empty.
    */
   @Test
   @Order(2)
@@ -63,7 +63,7 @@ class UserTest {
   }
 
   /**
-   * Tests a user creation with a problem in the e-mail parameter
+   * Tests a user creation with a problem in the e-mail parameter.
    */
   @Test
   @Order(3)
@@ -79,7 +79,7 @@ class UserTest {
   }
 
   /**
-   * Tests a user creation with a password empty
+   * Tests a user creation with a password empty.
    */
   @Test
   @Order(4)
@@ -95,8 +95,8 @@ class UserTest {
   }
 
   /**
-   * Tests if the server returns a HTTP 409 when receive an duplicated user 
-   * (same e-mail)
+   * Tests if the server returns a HTTP 409 when receive an duplicated user
+   * (same e-mail).
    */
   @Test
   @Order(5)
@@ -109,6 +109,94 @@ class UserTest {
         .post("/api/user/create")
         .then()
         .statusCode(409);
+  }
+
+  /**
+   * Tests if the user is able to generates a JWT.
+   */
+  @Test
+  @Order(6)
+  void login() {
+    given()
+        .when()
+        .param("email", "orion@test.com")
+        .param("password", "1234")
+        .post("/api/user/login")
+        .then()
+        .statusCode(200);
+  }
+
+  /**
+   * Sends a wrong e-mail to check if the server return a 401 error.
+   */
+  @Test
+  @Order(7)
+  void loginWrongEmail() {
+    given()
+        .when()
+        .param("email", "orion@test")
+        .param("password", "1234")
+        .post("/api/user/login")
+        .then()
+        .statusCode(401);
+  }
+
+  /**
+   * Sends an invalid e-mail format to check if the server return a 400 error.
+   */
+  @Test
+  @Order(8)
+  void loginWrongInvalidEmail() {
+    given()
+        .when()
+        .param("email", "orion#test.com")
+        .param("password", "1234")
+        .post("/api/user/login")
+        .then()
+        .statusCode(400);
+  }
+
+  /**
+   * Sends a wrong password to check if the server return a 401 error.
+   */
+  @Test
+  @Order(9)
+  void loginWrongPassword() {
+    given()
+        .when()
+        .param("email", "orion@test")
+        .param("password", "12345678")
+        .post("/api/user/login")
+        .then()
+        .statusCode(401);
+  }
+
+  /**
+   * Sends a empty e-mail to check if the server return a 400 error.
+   */
+  @Test
+  @Order(10)
+  void loginEmptyName() {
+    given()
+        .when()
+        .param("password", "1234")
+        .post("/api/user/login")
+        .then()
+        .statusCode(400);
+  }
+
+  /**
+   * Sends a empty password to check if the server return a 400 error.
+   */
+  @Test
+  @Order(11)
+  void loginEmptyPassword() {
+    given()
+        .when()
+        .param("email", "orion@test.com")
+        .post("/api/user/login")
+        .then()
+        .statusCode(400);
   }
 
 }
