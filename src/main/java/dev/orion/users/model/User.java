@@ -54,7 +54,10 @@ public class User extends PanacheEntityBase {
     @Column(length = 256)
     private String password;
 
-    public User(){
+    /**
+     * User constructor.
+     */
+    public User() {
         this.hash = UUID.randomUUID().toString();
     }
 
