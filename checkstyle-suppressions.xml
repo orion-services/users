@@ -7,5 +7,6 @@
 
     <suppress files="User.java" checks="JavadocPackageCheck" />
     <suppress files="UserRepository.java" checks="JavadocPackageCheck" />
+    <suppress files=" Service.java" checks="JavadocPackageCheck" />
     <suppress files="ServiceException.java" checks="JavadocPackageCheck" />
 </suppressions>
