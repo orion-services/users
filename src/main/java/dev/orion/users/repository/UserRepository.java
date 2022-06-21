@@ -29,24 +29,24 @@ import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 
 /**
- * Implements the repository pattern for the user entity
+ * Implements the repository pattern for the user entity.
  */
 @ApplicationScoped
 public class UserRepository implements PanacheRepository<User> {
 
   /**
-   * Verifies if the e-mail already exists in the database
+   * Verifies if the e-mail already exists in the database.
    *
    * @param email : An e-mail address
    *
    * @return Returns true if the e-mail already exists
    */
-  public Uni<User> checkEmail(String email) {
+  public Uni<User> checkEmail(final String email) {
     return find("email", email).firstResult();
   }
 
   /**
-   * Creates a user in the database
+   * Creates a user in the database.
    *
    * @param name     : A name of the user
    * @param email    : A valid e-mail
@@ -54,7 +54,9 @@ public class UserRepository implements PanacheRepository<User> {
    *
    * @return Returns a user asynchronously
    */
-  public Uni<User> createUser(String name, String email, String password) {
+  public Uni<User> createUser(final String name, final String email,
+                              final String password) {
+
     User user = new User();
     user.setName(name);
     user.setEmail(email);
@@ -70,10 +72,13 @@ public class UserRepository implements PanacheRepository<User> {
    *
    * @return Returns a user asynchronously
    */
-  public Uni<User> login(String email, String password) {
+  public Uni<User> login(final String email, final String password) {
     String shaPassword = DigestUtils.sha256Hex(password);
-    Map<String, Object> params = Parameters.with("email", email).and("password", shaPassword).map();
-    return find("email = :email and password = :password", params).firstResult();
+    Map<String, Object> params = Parameters.with("email", email)
+      .and("password", shaPassword).map();
+
+    return find("email = :email and password = :password", params)
+      .firstResult();
   }
 
 }

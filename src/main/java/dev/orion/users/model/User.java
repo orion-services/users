@@ -32,24 +32,29 @@ import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import lombok.Getter;
 import lombok.Setter;
 /**
- * User Entity
+ * User Entity.
  */
 @Entity
 @Getter @Setter
 public class User extends PanacheEntityBase {
 
+    /** Primary key. */
     @Id
     @GeneratedValue
     @JsonIgnore
     private Long id;
 
+    /** The hash used to identify the user.  */
     private String hash;
 
+    /** The name of the user. */
     private String name;
 
+    /** The e-mail of the user. */
     @Email
     private String email;
 
+     /** The password of the user. */
     @JsonIgnore
     @Column(length = 256)
     private String password;
@@ -62,12 +67,12 @@ public class User extends PanacheEntityBase {
     }
 
     /**
-     * Converts the text plain password to a SHA-256 using Apache Commons Codecs.
+     * Converts the text plain password to a SHA-256 using Apache Commons
+     * Codecs.
      *
-     * @param password : The password of the user in text plain
+     * @param strPassword : The password of the user in text plain
      */
-    public void setPassword(String password) {
-        this.password = DigestUtils.sha256Hex(password);
+    public void setPassword(final String strPassword) {
+        this.password = DigestUtils.sha256Hex(strPassword);
     }
-
 }

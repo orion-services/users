@@ -41,20 +41,21 @@ import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Uni;
 
 /**
- * User API
+ * User API.
  */
 @Path("/api/user")
 public class Service {
 
+    /** The user's repository. */
     @Inject
-    UserRepository repo;
+    private UserRepository repo;
 
     /**
      * Creates a user in the service.
      *
-     * @param String name : The name of the user
-     * @param String email : The email of the user
-     * @param String password : The password of the user
+     * @param name : The name of the user
+     * @param email : The email of the user
+     * @param password : The password of the user
      *
      * @return The user object in JSON format
      * @throws ServiceException Returns a HTTP 409 if the e-mail already exists
@@ -65,14 +66,20 @@ public class Service {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
-    public Uni<User> create(@FormParam("name") @NotEmpty String name,
-            @FormParam("email") @NotEmpty @Email String email,
-            @FormParam("password") @NotEmpty String password) throws ServiceException {
+    public Uni<User> create(
+        @FormParam("name") @NotEmpty final String name,
+        @FormParam("email") @NotEmpty @Email final String email,
+        @FormParam("password") @NotEmpty final String password
+        ) throws ServiceException {
 
         return repo.checkEmail(email)
-                .onItem().ifNotNull()
-                    .failWith(new ServiceException("The e-mail already exists", Response.Status.CONFLICT))
-                .onItem().ifNull().switchTo(() ->  repo.createUser(name, email, password));
+                .onItem()
+                    .ifNotNull()
+                    .failWith(new ServiceException("The e-mail already exists",
+                        Response.Status.CONFLICT))
+                .onItem()
+                    .ifNull()
+                    .switchTo(() ->  repo.createUser(name, email, password));
     }
 
     /**
@@ -91,12 +98,18 @@ public class Service {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 1, delay = 2000)
-    public Uni<String> login(@RestForm @NotEmpty @Email String email,
-            @RestForm @NotEmpty String password) {
+    public Uni<String> login(@RestForm @NotEmpty @Email final String email,
+            @RestForm @NotEmpty final String password) {
 
         return repo.login(email, password)
-            .onItem().ifNotNull().transform(this::generateJWT)
-            .onItem().ifNull().failWith(new ServiceException("User not found", Response.Status.UNAUTHORIZED));
+            .onItem()
+                .ifNotNull()
+                .transform(this::generateJWT)
+
+            .onItem()
+                .ifNull()
+                .failWith(new ServiceException("User not found",
+                    Response.Status.UNAUTHORIZED));
     }
 
     /**
@@ -106,7 +119,7 @@ public class Service {
      *
      * @return Returns the JWT
      */
-    private String generateJWT(User user) {
+    private String generateJWT(final User user) {
         return Jwt.issuer("http://localhost:8080")
                 .upn(user.getEmail())
                 .groups(new HashSet<>(Arrays.asList("User")))

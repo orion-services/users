@@ -136,6 +136,28 @@
           </systemPropertyVariables>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>3.1.2</version>
+        <dependencies>
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>8.45</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <suppressionsLocation>checkstyle-suppressions.xml</suppressionsLocation>
+        </configuration>
+        <executions>
+          <execution>
+              <goals>
+                <goal>check</goal>
+              </goals>
+          </execution>
+      </executions>
+      </plugin>
     </plugins>
   </build>
   <profiles>
@@ -156,6 +178,7 @@
                 <goals>
                   <goal>integration-test</goal>
                   <goal>verify</goal>
+                  <goal>check</goal>
                 </goals>
                 <configuration>
                   <systemPropertyVariables>
