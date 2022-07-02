@@ -24,8 +24,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
@@ -66,13 +64,4 @@ public class User extends PanacheEntityBase {
         this.hash = UUID.randomUUID().toString();
     }
 
-    /**
-     * Converts the text plain password to a SHA-256 using Apache Commons
-     * Codecs.
-     *
-     * @param strPassword : The password of the user in text plain
-     */
-    public void setPassword(final String strPassword) {
-        this.password = DigestUtils.sha256Hex(strPassword);
-    }
 }
