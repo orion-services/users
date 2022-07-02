@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Use case - Create
+title: Create User
 parent: Home
 nav_order: 1
 ---
 
-# Create
+# Create User
 
 ## Normal flow
 
@@ -16,9 +16,8 @@ nav_order: 1
 * The server stores the new user
 * The server returns to the client the name, e-mail and hash as an object.
 
-
 ## Sequence
 
 <center>
-    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/Create/sequence.puml" alt="Sequence" width="25%" height="25%"/>
+    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml" alt="Sequence" width="25%" height="25%"/>
 </center>
