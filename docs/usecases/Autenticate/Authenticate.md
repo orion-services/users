@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Authenticate
-parent: Home
+parent: Use Cases
 nav_order: 2
 ---
 

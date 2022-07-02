@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Create User
-parent: Home
+parent: Use Cases
 nav_order: 1
 ---
 
@@ -19,5 +19,7 @@ nav_order: 1
 ## Sequence
 
 <center>
-    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml" alt="Sequence" width="25%" height="25%"/>
+    <a href="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml">
+    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml" alt="Sequence" width="50%" height="50%"/>
+    </a>
 </center>
