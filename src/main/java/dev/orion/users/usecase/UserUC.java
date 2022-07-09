@@ -17,13 +17,17 @@
 package dev.orion.users.usecase;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.validation.Validation;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.validator.Validator;
+import org.apache.commons.validator.routines.EmailValidator;
 
 import dev.orion.users.model.User;
 import dev.orion.users.repository.UserRepository;
 import dev.orion.users.repository.Repository;
 import io.smallrye.mutiny.Uni;
+import lombok.val;
 
 /**
  * Implements the use cases for user entity.
@@ -47,18 +51,19 @@ public class UserUC implements UseCase {
      */
     @Override
     public Uni<User> createUser(final String name, final String email,
-        final String password) {
+            final String password) {
         Uni<User> user = null;
-        if ((name != null) && (email != null) && (password != null)) {
+        if (name.isBlank() || !EmailValidator.getInstance().isValid(email) ||
+                password.isBlank()) {
+            throw new IllegalArgumentException("Blank arguments or invalid e-mail");
+        } else {
             if (password.length() < SIZE_PASSWORD) {
                 throw new IllegalArgumentException(
-                    "The password length is less than eight characters");
+                        "Password less than eight characters");
             } else {
                 user = repository.createUser(name, email,
-                    DigestUtils.sha256Hex(password));
+                        DigestUtils.sha256Hex(password));
             }
-        } else {
-            throw new IllegalArgumentException("All arguments are required");
         }
         return user;
     }
@@ -66,7 +71,7 @@ public class UserUC implements UseCase {
     /**
      * Authenticates the user in the service (UC: Authenticate).
      *
-     * @param email  : The email of the user
+     * @param email    : The email of the user
      * @param password : The password of the user
      * @return A Uni<User> object
      */
@@ -75,7 +80,7 @@ public class UserUC implements UseCase {
         Uni<User> user = null;
         if ((email != null) && (password != null)) {
             user = repository.authenticate(email,
-                DigestUtils.sha256Hex(password));
+                    DigestUtils.sha256Hex(password));
         } else {
             throw new IllegalArgumentException("All arguments are required");
         }

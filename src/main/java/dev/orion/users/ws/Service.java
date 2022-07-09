@@ -18,6 +18,7 @@ package dev.orion.users.ws;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.logging.Logger;
 
 import javax.annotation.security.PermitAll;
 import javax.validation.constraints.Email;
@@ -45,6 +46,9 @@ import io.smallrye.mutiny.Uni;
  */
 @Path("/api/user")
 public class Service {
+
+        /** logger. */
+        private static final Logger LOGGER = Logger.getLogger(Service.class.getName());
 
         /** Business logic of the system. */
         private UseCase uc = new UserUC();
@@ -74,17 +78,18 @@ public class Service {
                 try {
                         return uc.createUser(name, email, password)
                                 .onItem().ifNotNull().transform(user -> user)
+                                .log()
                                 .onFailure().transform(e -> {
                                         String message = e.getMessage();
                                         throw new ServiceException(
                                                 message,
-                                                Response.Status.CONFLICT);
+                                                Response.Status.BAD_REQUEST);
                                 });
                 } catch (Exception e) {
                         String message = e.getMessage();
                         throw new ServiceException(
                                 message,
-                                Response.Status.CONFLICT);
+                                Response.Status.BAD_REQUEST);
                 }
         }
 

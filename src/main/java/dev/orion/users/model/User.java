@@ -23,6 +23,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -46,15 +49,18 @@ public class User extends PanacheEntityBase {
     private String hash;
 
     /** The name of the user. */
+    @NotNull(message = "The name can't be null")
     private String name;
 
     /** The e-mail of the user. */
-    @Email
+    @NotNull(message = "The e-mail can't be null")
+    @Email(message = "The e-mail format is necessary")
     private String email;
 
      /** The password of the user. */
     @JsonIgnore
     @Column(length = 256)
+    @NotNull(message = "The password can't be null")
     private String password;
 
     /**
