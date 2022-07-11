@@ -1,0 +1,28 @@
+@startuml
+
+title Create User
+actor Client
+
+Client -> Service: @POST /create (name, email, password)
+
+activate Service #F9F3FC
+
+Service --> UseCase : createUser(name, email, password)
+activate UseCase #F9F3FC
+
+UseCase --> Repository : createUser(name, email, password)
+activate Repository #F9F3FC
+Repository -> Repository: checkEmail(email)
+activate Repository #F9F3FC
+Repository -> Repository: persist(user)
+Repository -->> UseCase : user
+deactivate Repository
+deactivate Repository
+
+UseCase -->> Service : user
+deactivate UseCase
+
+Service -->> Client : user
+deactivate Service
+
+@enduml

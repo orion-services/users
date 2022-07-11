@@ -1,0 +1,8 @@
+remote_theme: pmarsceill/just-the-docs
+
+aux_links:
+  "Orion Users":
+    - "https://github.com/orion-services/users"
+
+# Footer content appears at the bottom of every page's main content
+footer_content: "Copyright &copy; 2022 Orion Services. Distributed by Apache 2.0 license."

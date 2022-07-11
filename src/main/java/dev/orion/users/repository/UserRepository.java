@@ -20,11 +20,8 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
-import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 
@@ -32,7 +29,29 @@ import io.smallrye.mutiny.Uni;
  * Implements the repository pattern for the user entity.
  */
 @ApplicationScoped
-public class UserRepository implements PanacheRepository<User> {
+public class UserRepository implements Repository {
+
+  /**
+   * Creates a user in the service.
+   *
+   * @param name     : A name of the user
+   * @param email    : A valid e-mail
+   * @param password : A password of the user
+   *
+   * @return Returns a user asynchronously
+   */
+  @Override
+  public Uni<User> createUser(final String name, final String email,
+      final String password) {
+
+      return checkEmail(email)
+        .onItem()
+        .ifNotNull()
+        .failWith(new IllegalArgumentException("The e-mail already exists"))
+        .onItem()
+        .ifNull()
+        .switchTo(() -> persistUser(name, email, password));
+  }
 
   /**
    * Verifies if the e-mail already exists in the database.
@@ -41,22 +60,21 @@ public class UserRepository implements PanacheRepository<User> {
    *
    * @return Returns true if the e-mail already exists
    */
-  public Uni<User> checkEmail(final String email) {
+  private Uni<User> checkEmail(final String email) {
     return find("email", email).firstResult();
   }
 
   /**
-   * Creates a user in the database.
+   * Persists a user in the service.
    *
-   * @param name     : A name of the user
-   * @param email    : A valid e-mail
-   * @param password : A password of the user
+   * @param name  : The name of the user
+   * @param email : An e-mail address of the a user
+   * @param password : The password of the user
    *
-   * @return Returns a user asynchronously
+   * @return Returns Uni<User> object
    */
-  public Uni<User> createUser(final String name, final String email,
-                              final String password) {
-
+  private Uni<User> persistUser(final String name, final String email,
+    final String password) {
     User user = new User();
     user.setName(name);
     user.setEmail(email);
@@ -72,13 +90,12 @@ public class UserRepository implements PanacheRepository<User> {
    *
    * @return Returns a user asynchronously
    */
-  public Uni<User> login(final String email, final String password) {
-    String shaPassword = DigestUtils.sha256Hex(password);
-    Map<String, Object> params = Parameters.with("email", email)
-      .and("password", shaPassword).map();
-
+  @Override
+  public Uni<User> authenticate(final String email, final String password) {
+      Map<String, Object> params = Parameters.with("email", email)
+        .and("password", password).map();
     return find("email = :email and password = :password", params)
-      .firstResult();
+        .firstResult();
   }
 
 }

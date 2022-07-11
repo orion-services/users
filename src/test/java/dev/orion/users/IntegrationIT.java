@@ -27,12 +27,8 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
-class UserTest {
+class IntegrationIT {
 
-  /**
-   * Tests if the service throws an HTTP 409 when the e-mail already exists in
-   * the data base.
-   */
   @Test
   @Order(1)
   void createUser() {
@@ -40,50 +36,54 @@ class UserTest {
         .when()
         .param("name", "Orion")
         .param("email", "orion@test.com")
-        .param("password", "1234")
+        .param("password", "12345678")
         .post("/api/user/create")
         .then()
         .statusCode(200);
   }
 
-  /**
-   * Tests a user creation with a name parameter empty.
-   */
   @Test
   @Order(2)
-  void createUserNameEmpty() {
+  void createUserWithEmptyName() {
     given()
         .when()
         .param("name", "")
         .param("email", "orion@test.com")
-        .param("password", "1234")
+        .param("password", "12345678")
         .post("/api/user/create")
         .then()
         .statusCode(400);
   }
 
-  /**
-   * Tests a user creation with a problem in the e-mail parameter.
-   */
   @Test
   @Order(3)
-  void createUserEmailProblem() {
+  void createUserWithWrongEmail() {
     given()
         .when()
         .param("name", "Orion")
         .param("email", "orionteste.com")
-        .param("password", "1234")
+        .param("password", "12345678")
         .post("/api/user/create")
         .then()
         .statusCode(400);
   }
 
-  /**
-   * Tests a user creation with a password empty.
-   */
   @Test
   @Order(4)
-  void createUserPasswordEmpty() {
+  void createUserWithEmptyEmail() {
+    given()
+        .when()
+        .param("name", "Orion")
+        .param("email", "")
+        .param("password", "12345678")
+        .post("/api/user/create")
+        .then()
+        .statusCode(400);
+  }
+
+  @Test
+  @Order(5)
+  void createUserWithEmptyPassword() {
     given()
         .when()
         .param("name", "Orion")
@@ -94,44 +94,34 @@ class UserTest {
         .statusCode(400);
   }
 
-  /**
-   * Tests if the server returns a HTTP 409 when receive an duplicated user
-   * (same e-mail).
-   */
   @Test
-  @Order(5)
+  @Order(6)
   void createDuplicateUser() {
     given()
         .when()
         .param("name", "Orion")
         .param("email", "orion@test.com")
-        .param("password", "1234")
+        .param("password", "12345678")
         .post("/api/user/create")
         .then()
-        .statusCode(409);
+        .statusCode(400);
   }
 
-  /**
-   * Tests if the user is able to generates a JWT.
-   */
   @Test
-  @Order(6)
+  @Order(7)
   void login() {
     given()
         .when()
         .param("email", "orion@test.com")
-        .param("password", "1234")
+        .param("password", "12345678")
         .post("/api/user/login")
         .then()
         .statusCode(200);
   }
 
-  /**
-   * Sends a wrong e-mail to check if the server return a 401 error.
-   */
   @Test
-  @Order(7)
-  void loginWrongEmail() {
+  @Order(8)
+  void loginWithWrongEmail() {
     given()
         .when()
         .param("email", "orion@test")
@@ -141,12 +131,9 @@ class UserTest {
         .statusCode(401);
   }
 
-  /**
-   * Sends an invalid e-mail format to check if the server return a 400 error.
-   */
   @Test
-  @Order(8)
-  void loginWrongInvalidEmail() {
+  @Order(9)
+  void loginWithInvalidEmail() {
     given()
         .when()
         .param("email", "orion#test.com")
@@ -156,26 +143,20 @@ class UserTest {
         .statusCode(400);
   }
 
-  /**
-   * Sends a wrong password to check if the server return a 401 error.
-   */
   @Test
-  @Order(9)
+  @Order(10)
   void loginWrongPassword() {
     given()
         .when()
         .param("email", "orion@test")
-        .param("password", "12345678")
+        .param("password", "123456789")
         .post("/api/user/login")
         .then()
         .statusCode(401);
   }
 
-  /**
-   * Sends a empty e-mail to check if the server return a 400 error.
-   */
   @Test
-  @Order(10)
+  @Order(11)
   void loginEmptyName() {
     given()
         .when()
@@ -185,11 +166,8 @@ class UserTest {
         .statusCode(400);
   }
 
-  /**
-   * Sends a empty password to check if the server return a 400 error.
-   */
   @Test
-  @Order(11)
+  @Order(12)
   void loginEmptyPassword() {
     given()
         .when()
