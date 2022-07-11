@@ -17,17 +17,14 @@
 package dev.orion.users.usecase;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.validation.Validation;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.validator.Validator;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import dev.orion.users.model.User;
-import dev.orion.users.repository.UserRepository;
 import dev.orion.users.repository.Repository;
+import dev.orion.users.repository.UserRepository;
 import io.smallrye.mutiny.Uni;
-import lombok.val;
 
 /**
  * Implements the use cases for user entity.

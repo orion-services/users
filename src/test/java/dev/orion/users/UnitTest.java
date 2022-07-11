@@ -49,7 +49,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user")
   @Order(1)
-  public void createUserTest() {
+  void createUserTest() {
     Mockito.when(repository.createUser("Orion", "orion@test.com", DigestUtils.sha256Hex("12345678")))
       .thenReturn(Uni.createFrom().item(new User()));
     Uni<User> uni = uc.createUser("Orion", "orion@test.com", "12345678");
@@ -59,7 +59,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with a blank name")
   @Order(2)
-  public void createUserWithBlankName() {
+  void createUserWithBlankName() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.createUser("", "orion@test.com", "12345678");
     });
@@ -68,7 +68,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with a blank name")
   @Order(3)
-  public void createUserWithBlankEmail() {
+  void createUserWithBlankEmail() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.createUser("Orion", "", "12345678");
     });
@@ -77,7 +77,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with a blank password")
   @Order(4)
-  public void createUserWithBlankPassword() {
+  void createUserWithBlankPassword() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.createUser("Orion", "orion@test.com", "");
     });
@@ -86,7 +86,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with an invalid e-mail")
   @Order(5)
-  public void createUserWithInvalidEmail() {
+  void createUserWithInvalidEmail() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.createUser("Orion", "orion#test.com", "12345678");
     });
@@ -95,7 +95,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with invalid password")
   @Order(6)
-  public void createUserWithInvalidPasswordTest() {
+  void createUserWithInvalidPasswordTest() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.createUser("Orion", "orion@test.com", "12345");
     });
@@ -104,7 +104,7 @@ class UnitTest {
   @Test
   @DisplayName("Create a user with a null name")
   @Order(7)
-  public void createUserWithNullName() {
+  void createUserWithNullName() {
     Assertions.assertThrows(NullPointerException.class, () -> {
       uc.createUser(null, "orion#test.com", "12345678");
     });

@@ -47,9 +47,6 @@ import io.smallrye.mutiny.Uni;
 @Path("/api/user")
 public class Service {
 
-        /** logger. */
-        private static final Logger LOGGER = Logger.getLogger(Service.class.getName());
-
         /** Business logic of the system. */
         private UseCase uc = new UserUC();
 
