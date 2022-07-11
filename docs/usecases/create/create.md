@@ -24,12 +24,37 @@ nav_order: 1
 ## Sequence of normal flow
 
 <center>
-    <a href="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml">
-    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/feature/architecture/docs/usecases/create/sequence.puml" alt="Sequence" width="70%" height="70%"/>
+    <a href="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/create/sequence.puml">
+    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/create/sequence.puml" alt="Sequence" width="70%" height="70%"/>
     </a>
 </center>
 
 # Technical specifications
+
+## HTTP endpoints
+
+* Method: POST
+* URL:  /api/user/create
+* Consume: application/x-www-form-urlencoded
+* Produce: application/json
+* Examples:
+
+    * Request:
+    ```shell
+            curl -X 'POST' \
+            'http://localhost:8080/api/user/create' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/x-www-form-urlencoded' \
+            -d 'name=Orion&email=orion%40test.com&password=12345678'
+    ```
+    * Response object:
+    ```json
+        {
+            "hash": "49819fac-58d9-4a09-9ee0-1eb1c7141eda",
+            "name": "Orion",
+            "email": "orion@test.com"
+        }
+    ```
 
 ## Exceptions
 
