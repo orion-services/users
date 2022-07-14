@@ -33,8 +33,8 @@ nav_order: 1
 
 ## HTTP endpoints
 
+* /api/user/create
 * Method: POST
-* URL:  /api/user/create
 * Consume: application/x-www-form-urlencoded
 * Produce: application/json
 * Examples:

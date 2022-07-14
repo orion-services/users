@@ -75,11 +75,11 @@ public class UserRepository implements Repository {
    */
   private Uni<User> persistUser(final String name, final String email,
     final String password) {
-    User user = new User();
-    user.setName(name);
-    user.setEmail(email);
-    user.setPassword(password);
-    return Panache.<User>withTransaction(user::persist);
+      User user = new User();
+      user.setName(name);
+      user.setEmail(email);
+      user.setPassword(password);
+      return Panache.<User>withTransaction(user::persist);
   }
 
   /**
