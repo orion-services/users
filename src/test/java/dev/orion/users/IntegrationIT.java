@@ -109,72 +109,85 @@ class IntegrationIT {
 
   @Test
   @Order(7)
-  void login() {
+  void authenticate() {
     given()
         .when()
         .param("email", "orion@test.com")
         .param("password", "12345678")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(200);
   }
 
   @Test
   @Order(8)
-  void loginWithWrongEmail() {
+  void authenticateWithWrongEmail() {
     given()
         .when()
         .param("email", "orion@test")
         .param("password", "1234")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(401);
   }
 
   @Test
   @Order(9)
-  void loginWithInvalidEmail() {
+  void authenticateWithInvalidEmail() {
     given()
         .when()
         .param("email", "orion#test.com")
         .param("password", "1234")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(400);
   }
 
   @Test
   @Order(10)
-  void loginWrongPassword() {
+  void authenticateWrongPassword() {
     given()
         .when()
         .param("email", "orion@test")
         .param("password", "123456789")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(401);
   }
 
   @Test
   @Order(11)
-  void loginEmptyName() {
+  void authenticateEmptyName() {
     given()
         .when()
         .param("password", "1234")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(400);
   }
 
   @Test
   @Order(12)
-  void loginEmptyPassword() {
+  void authenticateEmptyPassword() {
     given()
         .when()
         .param("email", "orion@test.com")
-        .post("/api/user/login")
+        .post("/api/user/authenticate")
         .then()
         .statusCode(400);
+  }
+
+  @Test
+  @Order(13)
+  void createAuthenticate() {
+    given()
+        .when()
+        .param("name", "Orion")
+        .param("email", "orionOrion@test.com")
+        .param("password", "12345678")
+        .post("/api/user/createAuthenticate")
+        .then()
+        .statusCode(200);
   }
 
 }

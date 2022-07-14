@@ -50,8 +50,8 @@ public class UserUC implements UseCase {
     public Uni<User> createUser(final String name, final String email,
             final String password) {
         Uni<User> user = null;
-        if (name.isBlank() || !EmailValidator.getInstance().isValid(email) ||
-                password.isBlank()) {
+        if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
+            || password.isBlank()) {
             throw new IllegalArgumentException("Blank arguments or invalid e-mail");
         } else {
             if (password.length() < SIZE_PASSWORD) {
