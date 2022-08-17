@@ -1,11 +1,23 @@
+package dev.orion.users.usecase;
+import dev.orion.users.infra.repository.Repository;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.UserRepository;
+import io.smallrye.mutiny.Uni;
 public class AutheticateUser implements UseCase{
      /** The minimum size of the password required. */
      private static final int SIZE_PASSWORD = 8;
 
      /** User repository. */
-     private Repository repository = new UserRepository();
- 
-     /**
+     protected Repository repository = new UserRepository();
+
+    @Override
+    public Uni<User> createUser(String name, String email, String password) {
+        return null;
+    }
+
+    /**
       * Authenticates the user in the service (UC: Authenticate).
       *
       * @param email    : The email of the user

@@ -21,9 +21,9 @@ import javax.enterprise.context.ApplicationScoped;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
-import dev.orion.users.model.User;
-import dev.orion.users.repository.Repository;
-import dev.orion.users.repository.UserRepository;
+import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.Repository;
+import dev.orion.users.infra.repository.UserRepository;
 import io.smallrye.mutiny.Uni;
 
 /**
