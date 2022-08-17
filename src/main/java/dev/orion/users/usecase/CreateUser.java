@@ -1,3 +1,14 @@
+package dev.orion.users.usecase;
+import javax.enterprise.context.ApplicationScoped;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.validator.routines.EmailValidator;
+
+import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.Repository;
+import dev.orion.users.infra.repository.UserRepository;
+import io.smallrye.mutiny.Uni;
+
 public class CreateUser implements UseCase{
     private static final int SIZE_PASSWORD = 8;
 
@@ -29,5 +40,10 @@ public class CreateUser implements UseCase{
             }
         }
         return user;
+    }
+
+    @Override
+    public Uni<User> authenticate(String email, String password) {
+        return null;
     }
 }

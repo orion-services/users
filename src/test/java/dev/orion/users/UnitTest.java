@@ -31,8 +31,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import dev.orion.users.model.User;
-import dev.orion.users.repository.Repository;
+import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.usecase.UserUC;
 import io.smallrye.mutiny.Uni;
 

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.ws;
+package dev.orion.users.presentation.ws;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,8 +36,8 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.RestForm;
 
-import dev.orion.users.dto.Authentication;
-import dev.orion.users.model.User;
+import dev.orion.users.validation.dto.Authentication;
+import dev.orion.users.domain.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import io.smallrye.jwt.build.Jwt;
