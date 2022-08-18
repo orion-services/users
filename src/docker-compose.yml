@@ -1,0 +1,19 @@
+version: '3'
+services:
+  mysql8:
+    image: mysql:8
+    container_name: mysql8-orion
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=orion
+      - MYSQL_USER=orion
+      - MYSQL_PASSWORD=orion
+    ports:
+      - 3306:3306
+    volumes:
+      - mysql8-storage:/var/lib/mysql
+    security_opt:
+      - seccomp:unconfined
+volumes:
+  mysql8-storage:
