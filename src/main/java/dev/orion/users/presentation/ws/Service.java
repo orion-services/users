@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -54,7 +55,8 @@ public class Service {
         private Optional<String> issuer;
 
         /** Business logic of the system. */
-        private UseCase uc = new UserUC();
+        @Inject
+        public UseCase uc;
 
         /**
         * Creates a user inside the service.

@@ -19,9 +19,12 @@ package dev.orion.users.usecase;
 import dev.orion.users.domain.model.User;
 import io.smallrye.mutiny.Uni;
 
+import javax.enterprise.context.ApplicationScoped;
+
 /**
  * Use cases interface for User entity.
  */
+
 public interface UseCase {
 
     /**
