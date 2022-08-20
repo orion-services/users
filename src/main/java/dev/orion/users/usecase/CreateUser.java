@@ -8,7 +8,9 @@ import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.infra.repository.UserRepository;
 import io.smallrye.mutiny.Uni;
+import org.jboss.resteasy.reactive.common.NotImplementedYet;
 
+@ApplicationScoped
 public class CreateUser implements UseCase{
     private static final int SIZE_PASSWORD = 8;
 
@@ -42,8 +44,20 @@ public class CreateUser implements UseCase{
         return user;
     }
 
+    /**
+     * @param email    : The email of the user 
+     * @param password : The password of the user
+     * @return
+     */
     @Override
     public Uni<User> authenticate(String email, String password) {
         return null;
     }
+
+    /**
+     * @param email    : The email of the user 
+     * @param password : The password of the user
+     * @return
+     */
+
 }

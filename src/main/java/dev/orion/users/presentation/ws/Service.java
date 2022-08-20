@@ -32,6 +32,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import dev.orion.users.usecase.AuthenticateUser;
+import dev.orion.users.usecase.CreateUser;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claims;
@@ -40,7 +42,6 @@ import org.jboss.resteasy.reactive.RestForm;
 import dev.orion.users.validation.dto.Authentication;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.usecase.UseCase;
-import dev.orion.users.usecase.UserUC;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Uni;
 
@@ -55,8 +56,10 @@ public class Service {
         private Optional<String> issuer;
 
         /** Business logic of the system. */
-        @Inject
-        public UseCase uc;
+
+        public UseCase authUser = new AuthenticateUser();
+
+        public UseCase createUser = new CreateUser();
 
         /**
         * Creates a user inside the service.
@@ -81,7 +84,7 @@ public class Service {
                 @FormParam("password") @NotEmpty final String password) {
 
                 try {
-                        return uc.createUser(name, email, password)
+                        return createUser.createUser(name, email, password)
                                 .onItem().ifNotNull().transform(user -> user)
                                 .log()
                                 .onFailure().transform(e -> {
@@ -122,7 +125,7 @@ public class Service {
 
                 try {
                         return
-                        uc.createUser(name, email, password)
+                                createUser.createUser(name, email, password)
                                 .onItem().ifNotNull().transform(user -> {
                                         String token = generateJWT(user);
                                         Authentication auth = new Authentication();
@@ -159,7 +162,7 @@ public class Service {
                 @RestForm @NotEmpty @Email final String email,
                 @RestForm @NotEmpty final String password) {
 
-                return uc.authenticate(email, password)
+                return authUser.authenticate(email, password)
                         .onItem()
                                 .ifNotNull()
                                 .transform(this::generateJWT)
