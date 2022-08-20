@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.dto;
+package dev.orion.users.validation.dto;
 
-import dev.orion.users.model.User;
+import dev.orion.users.domain.model.User;
 import lombok.Getter;
 import lombok.Setter;
 

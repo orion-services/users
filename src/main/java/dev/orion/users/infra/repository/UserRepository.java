@@ -14,13 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.repository;
+package dev.orion.users.infra.repository;
 
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import dev.orion.users.model.User;
+import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
