@@ -20,6 +20,7 @@ import dev.orion.users.domain.model.User;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.List;
 
 /**
  * Use cases interface for User entity.
@@ -46,4 +47,10 @@ public interface UseCase {
      * @return A Uni<User> object
      */
      Uni<User> authenticate(String email, String password);
+
+     Uni<List<User>> listUser();
+
+     Uni<User> removeUser();
+
+     Uni<User> deleteUser();
 }

@@ -30,8 +30,7 @@ import org.mockito.InjectMocks;
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
 class IntegrationIT {
-  @InjectMocks
-  Service service;
+
   @Test
   @Order(1)
   void createUser() {

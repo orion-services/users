@@ -16,11 +16,13 @@
  */
 package dev.orion.users.infra.repository;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
@@ -97,5 +99,23 @@ public class UserRepository implements Repository {
     return find("email = :email and password = :password", params)
         .firstResult();
   }
+
+    /**
+     * @param query 
+     * @return
+     */
+    @Override
+    public Uni<List<User>> listByQuery(UserQuery query) {
+        return null;
+    }
+
+    /**
+     * @param id 
+     * @return
+     */
+    @Override
+    public Uni<User> removeUser(String id) {
+        return null;
+    }
 
 }

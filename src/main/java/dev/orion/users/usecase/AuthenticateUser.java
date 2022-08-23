@@ -8,6 +8,7 @@ import io.smallrye.mutiny.Uni;
 import org.jboss.resteasy.reactive.common.NotImplementedYet;
 
 import javax.enterprise.context.ApplicationScoped;
+import java.util.List;
 
 @ApplicationScoped
 public class AuthenticateUser implements UseCase{
@@ -46,4 +47,28 @@ public class AuthenticateUser implements UseCase{
          }
          return user;
      }
+
+    /**
+     * @return  A
+     */
+    @Override
+    public Uni<List<User>> listUser() {
+        return null;
+    }
+
+    /**
+     * @return 
+     */
+    @Override
+    public Uni<User> removeUser() {
+        return null;
+    }
+
+    /**
+     * @return 
+     */
+    @Override
+    public Uni<User> deleteUser() {
+        return null;
+    }
 }

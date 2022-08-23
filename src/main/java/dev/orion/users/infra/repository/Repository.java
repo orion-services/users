@@ -17,8 +17,11 @@
 package dev.orion.users.infra.repository;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.infra.repository.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
+
+import java.util.List;
 
 /**
  * User repository.
@@ -45,5 +48,9 @@ public interface Repository extends PanacheRepository<User> {
      * @return Returns a user asynchronously
      */
     Uni<User> authenticate(String email, String password);
+
+    Uni<List<User>> listByQuery(UserQuery query);
+
+    Uni<User> removeUser(String id);
 
 }
