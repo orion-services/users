@@ -63,11 +63,11 @@ public class Service {
         private UseCase listUser = new ListUser();
 
         @GET
-
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public Uni<List<User>> find() {
-                return listUser.listUser(new UserQuery())
+        public Uni<List<User>> find(@BeanParam UserQuery query) {
+
+                return listUser.listUser(query)
                                 .onItem()
                                 .ifNotNull()
                                 .transform(user -> user);

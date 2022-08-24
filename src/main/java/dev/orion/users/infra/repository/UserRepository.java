@@ -108,8 +108,7 @@ public class UserRepository implements Repository {
   public Uni<List<User>> listByQuery(UserQuery query) {
     Map<String, Object> params = Parameters.with("id", query.getUserId())
         .and("name", query.getUserName()).map();
-
-    return find("", params).list();
+    return find("hash = :id or name like :name", params).list();
   }
 
   /**
