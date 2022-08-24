@@ -17,7 +17,7 @@
 package dev.orion.users.infra.repository;
 
 import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.dto.UserQuery;
+import dev.orion.users.validation.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 

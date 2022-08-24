@@ -22,7 +22,7 @@ import java.util.Map;
 import javax.enterprise.context.ApplicationScoped;
 
 import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.dto.UserQuery;
+import dev.orion.users.validation.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
@@ -46,7 +46,7 @@ public class UserRepository implements Repository {
   public Uni<User> createUser(final String name, final String email,
       final String password) {
 
-      return checkEmail(email)
+    return checkEmail(email)
         .onItem()
         .ifNotNull()
         .failWith(new IllegalArgumentException("The e-mail already exists"))
@@ -69,19 +69,19 @@ public class UserRepository implements Repository {
   /**
    * Persists a user in the service.
    *
-   * @param name  : The name of the user
-   * @param email : An e-mail address of the a user
+   * @param name     : The name of the user
+   * @param email    : An e-mail address of the a user
    * @param password : The password of the user
    *
    * @return Returns Uni<User> object
    */
   private Uni<User> persistUser(final String name, final String email,
-    final String password) {
-      User user = new User();
-      user.setName(name);
-      user.setEmail(email);
-      user.setPassword(password);
-      return Panache.<User>withTransaction(user::persist);
+      final String password) {
+    User user = new User();
+    user.setName(name);
+    user.setEmail(email);
+    user.setPassword(password);
+    return Panache.<User>withTransaction(user::persist);
   }
 
   /**
@@ -94,28 +94,31 @@ public class UserRepository implements Repository {
    */
   @Override
   public Uni<User> authenticate(final String email, final String password) {
-      Map<String, Object> params = Parameters.with("email", email)
+    Map<String, Object> params = Parameters.with("email", email)
         .and("password", password).map();
     return find("email = :email and password = :password", params)
         .firstResult();
   }
 
-    /**
-     * @param query 
-     * @return
-     */
-    @Override
-    public Uni<List<User>> listByQuery(UserQuery query) {
-        return null;
-    }
+  /**
+   * @param query
+   * @return
+   */
+  @Override
+  public Uni<List<User>> listByQuery(UserQuery query) {
+    Map<String, Object> params = Parameters.with("id", query.getUserId())
+        .and("name", query.getUserName()).map();
 
-    /**
-     * @param id 
-     * @return
-     */
-    @Override
-    public Uni<User> removeUser(String id) {
-        return null;
-    }
+    return find("", params).list();
+  }
+
+  /**
+   * @param id
+   * @return
+   */
+  @Override
+  public Uni<User> removeUser(String id) {
+    return null;
+  }
 
 }

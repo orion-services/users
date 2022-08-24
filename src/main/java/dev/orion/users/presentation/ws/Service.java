@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
-import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
@@ -36,8 +35,10 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.RestForm;
+import org.jboss.resteasy.reactive.RestQuery;
 
 import dev.orion.users.validation.dto.Authentication;
+import dev.orion.users.validation.dto.UserQuery;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.usecase.UseCase;
 import io.smallrye.jwt.build.Jwt;
@@ -51,26 +52,29 @@ public class Service {
 
         /* Configure the issuer for JWT generation. */
         @ConfigProperty(name = "user.issuer")
-        private Optional<String> issuer;
+        public Optional<String> issuer;
 
         /** Business logic of the system. */
 
-        public UseCase authUser = new AuthenticateUser();
+        private UseCase authUser = new AuthenticateUser();
 
-        public UseCase createUser = new CreateUser();
+        private UseCase createUser = new CreateUser();
 
-        public UseCase listUser = new ListUser();
+        private UseCase listUser = new ListUser();
+
         @GET
-        @Path("")
+
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public Uni<List<User>> find(){
-                return listUser.listUser();
+        public Uni<List<User>> find() {
+                return listUser.listUser(new UserQuery())
+                                .onItem()
+                                .ifNotNull()
+                                .transform(user -> user);
         }
 
-
         /**
-        * Creates a user inside the service.
+         * Creates a user inside the service.
          *
          * @param name     : The name of the user
          * @param email    : The email of the user
@@ -78,8 +82,9 @@ public class Service {
          *
          * @return The user object in JSON format
          * @throws ServiceException Returns a HTTP 409 if the e-mail already
-         * exists in the database or if the password is lower than eight
-         * characters
+         *                          exists in the database or if the password is lower
+         *                          than eight
+         *                          characters
          */
         @POST
         @Path("/create")
@@ -87,30 +92,30 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<User> create(
-                @FormParam("name") @NotEmpty final String name,
-                @FormParam("email") @NotEmpty @Email final String email,
-                @FormParam("password") @NotEmpty final String password) {
+                        @FormParam("name") @NotEmpty final String name,
+                        @FormParam("email") @NotEmpty @Email final String email,
+                        @FormParam("password") @NotEmpty final String password) {
 
                 try {
                         return createUser.createUser(name, email, password)
-                                .onItem().ifNotNull().transform(user -> user)
-                                .log()
-                                .onFailure().transform(e -> {
-                                        String message = e.getMessage();
-                                        throw new ServiceException(
-                                                message,
-                                                Response.Status.BAD_REQUEST);
-                                });
+                                        .onItem().ifNotNull().transform(user -> user)
+                                        .log()
+                                        .onFailure().transform(e -> {
+                                                String message = e.getMessage();
+                                                throw new ServiceException(
+                                                                message,
+                                                                Response.Status.BAD_REQUEST);
+                                        });
                 } catch (Exception e) {
                         String message = e.getMessage();
                         throw new ServiceException(
-                                message,
-                                Response.Status.BAD_REQUEST);
+                                        message,
+                                        Response.Status.BAD_REQUEST);
                 }
         }
 
         /**
-        * Creates a user and authenticate.
+         * Creates a user and authenticate.
          *
          * @param name     : The name of the user
          * @param email    : The email of the user
@@ -118,8 +123,9 @@ public class Service {
          *
          * @return The Authentication DTO
          * @throws ServiceException Returns a HTTP 409 if the e-mail already
-         * exists in the database or if the password is lower than eight
-         * characters
+         *                          exists in the database or if the password is lower
+         *                          than eight
+         *                          characters
          */
         @POST
         @Path("/createAuthenticate")
@@ -127,26 +133,25 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<Authentication> createAuthenticate(
-                @FormParam("name") @NotEmpty final String name,
-                @FormParam("email") @NotEmpty @Email final String email,
-                @FormParam("password") @NotEmpty final String password) {
+                        @FormParam("name") @NotEmpty final String name,
+                        @FormParam("email") @NotEmpty @Email final String email,
+                        @FormParam("password") @NotEmpty final String password) {
 
                 try {
-                        return
-                                createUser.createUser(name, email, password)
-                                .onItem().ifNotNull().transform(user -> {
-                                        String token = generateJWT(user);
-                                        Authentication auth = new Authentication();
-                                        auth.setToken(token);
-                                        auth.setUser(user);
-                                        return auth;
-                                })
-                                .log();
+                        return createUser.createUser(name, email, password)
+                                        .onItem().ifNotNull().transform(user -> {
+                                                String token = generateJWT(user);
+                                                Authentication auth = new Authentication();
+                                                auth.setToken(token);
+                                                auth.setUser(user);
+                                                return auth;
+                                        })
+                                        .log();
                 } catch (Exception e) {
                         String message = e.getMessage();
                         throw new ServiceException(
-                                message,
-                                Response.Status.BAD_REQUEST);
+                                        message,
+                                        Response.Status.BAD_REQUEST);
                 }
         }
 
@@ -158,7 +163,7 @@ public class Service {
          *
          * @return A JWT (JSON Web Token)
          * @throws ServiceException Returns a HTTP 401 if the services is not
-         *      able to find the user in the database
+         *                          able to find the user in the database
          */
         @POST
         @Path("/authenticate")
@@ -167,14 +172,14 @@ public class Service {
         @Produces(MediaType.TEXT_PLAIN)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<String> authenticate(
-                @RestForm @NotEmpty @Email final String email,
-                @RestForm @NotEmpty final String password) {
+                        @RestForm @NotEmpty @Email final String email,
+                        @RestForm @NotEmpty final String password) {
 
                 return authUser.authenticate(email, password)
-                        .onItem()
+                                .onItem()
                                 .ifNotNull()
                                 .transform(this::generateJWT)
-                        .onItem()
+                                .onItem()
                                 .ifNull()
                                 .failWith(new ServiceException("User not found",
                                                 Response.Status.UNAUTHORIZED));
@@ -189,10 +194,10 @@ public class Service {
          */
         private String generateJWT(final User user) {
                 return Jwt.issuer(issuer.orElse("http://localhost:8080"))
-                        .upn(user.getEmail())
-                        .groups(new HashSet<>(Arrays.asList("user")))
-                        .claim(Claims.c_hash, user.getHash())
-                        .sign();
+                                .upn(user.getEmail())
+                                .groups(new HashSet<>(Arrays.asList("user")))
+                                .claim(Claims.c_hash, user.getHash())
+                                .sign();
         }
 
 }

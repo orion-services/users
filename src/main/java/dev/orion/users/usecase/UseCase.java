@@ -17,15 +17,14 @@
 package dev.orion.users.usecase;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.validation.dto.UserQuery;
 import io.smallrye.mutiny.Uni;
 
-import javax.enterprise.context.ApplicationScoped;
 import java.util.List;
 
 /**
  * Use cases interface for User entity.
  */
-
 
 public interface UseCase {
 
@@ -37,20 +36,20 @@ public interface UseCase {
      * @param password : The password of the user
      * @return A Uni<User> object
      */
-     Uni<User> createUser(String name, String email, String password);
+    Uni<User> createUser(String name, String email, String password);
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
      *
-     * @param email  : The email of the user
+     * @param email    : The email of the user
      * @param password : The password of the user
      * @return A Uni<User> object
      */
-     Uni<User> authenticate(String email, String password);
+    Uni<User> authenticate(String email, String password);
 
-     Uni<List<User>> listUser();
+    Uni<List<User>> listUser(UserQuery query);
 
-     Uni<User> removeUser();
+    Uni<User> removeUser();
 
-     Uni<User> deleteUser();
+    Uni<User> deleteUser();
 }

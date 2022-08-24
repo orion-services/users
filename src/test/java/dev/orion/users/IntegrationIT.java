@@ -18,14 +18,12 @@ package dev.orion.users;
 
 import static io.restassured.RestAssured.given;
 
-import dev.orion.users.presentation.ws.Service;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import io.quarkus.test.junit.QuarkusTest;
-import org.mockito.InjectMocks;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)

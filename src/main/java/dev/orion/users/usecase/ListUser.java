@@ -3,17 +3,17 @@ package dev.orion.users.usecase;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.infra.repository.UserRepository;
+import dev.orion.users.validation.dto.UserQuery;
 import io.smallrye.mutiny.Uni;
 
 import java.util.List;
 
-public class ListUser implements UseCase{
+public class ListUser implements UseCase {
 
     private Repository repository = new UserRepository();
 
-
     /**
-     * @param name     : The name of the user 
+     * @param name     : The name of the user
      * @param email    : The e-mail of the user
      * @param password : The password of the user
      * @return
@@ -24,7 +24,7 @@ public class ListUser implements UseCase{
     }
 
     /**
-     * @param email    : The email of the user 
+     * @param email    : The email of the user
      * @param password : The password of the user
      * @return
      */
@@ -34,17 +34,16 @@ public class ListUser implements UseCase{
     }
 
     /**
-     * @return 
+     * @return
      */
     @Override
-    public Uni<List<User>> listUser() {
-         Uni<List<User>> users =this.repository.findAll().list();
+    public Uni<List<User>> listUser(UserQuery query) {
 
-        return users;
+        return repository.listByQuery(query);
     }
 
     /**
-     * @return 
+     * @return
      */
     @Override
     public Uni<User> removeUser() {
@@ -52,7 +51,7 @@ public class ListUser implements UseCase{
     }
 
     /**
-     * @return 
+     * @return
      */
     @Override
     public Uni<User> deleteUser() {

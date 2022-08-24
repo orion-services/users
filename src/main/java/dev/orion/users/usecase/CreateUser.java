@@ -1,4 +1,5 @@
 package dev.orion.users.usecase;
+
 import javax.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -7,13 +8,13 @@ import org.apache.commons.validator.routines.EmailValidator;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.infra.repository.UserRepository;
+import dev.orion.users.validation.dto.UserQuery;
 import io.smallrye.mutiny.Uni;
-import org.jboss.resteasy.reactive.common.NotImplementedYet;
 
 import java.util.List;
 
 @ApplicationScoped
-public class CreateUser implements UseCase{
+public class CreateUser implements UseCase {
     private static final int SIZE_PASSWORD = 8;
 
     /** User repository. */
@@ -32,7 +33,7 @@ public class CreateUser implements UseCase{
             final String password) {
         Uni<User> user = null;
         if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
-            || password.isBlank()) {
+                || password.isBlank()) {
             throw new IllegalArgumentException("Blank arguments or invalid e-mail");
         } else {
             if (password.length() < SIZE_PASSWORD) {
@@ -47,7 +48,7 @@ public class CreateUser implements UseCase{
     }
 
     /**
-     * @param email    : The email of the user 
+     * @param email    : The email of the user
      * @param password : The password of the user
      * @return
      */
@@ -57,15 +58,7 @@ public class CreateUser implements UseCase{
     }
 
     /**
-     * @return 
-     */
-    @Override
-    public Uni<List<User>> listUser() {
-        return null;
-    }
-
-    /**
-     * @return 
+     * @return
      */
     @Override
     public Uni<User> removeUser() {
@@ -73,15 +66,20 @@ public class CreateUser implements UseCase{
     }
 
     /**
-     * @return 
+     * @return
      */
     @Override
     public Uni<User> deleteUser() {
         return null;
     }
 
+    @Override
+    public Uni<List<User>> listUser(UserQuery query) {
+        return null;
+    }
+
     /**
-     * @param email    : The email of the user 
+     * @param email    : The email of the user
      * @param password : The password of the user
      * @return
      */
