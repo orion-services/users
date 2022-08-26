@@ -8,10 +8,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.infra.repository.UserRepository;
-import dev.orion.users.validation.dto.UserQuery;
 import io.smallrye.mutiny.Uni;
-
-import java.util.List;
 
 @ApplicationScoped
 public class CreateUser implements UseCase {
@@ -46,42 +43,4 @@ public class CreateUser implements UseCase {
         }
         return user;
     }
-
-    /**
-     * @param email    : The email of the user
-     * @param password : The password of the user
-     * @return
-     */
-    @Override
-    public Uni<User> authenticate(String email, String password) {
-        return null;
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public Uni<User> removeUser() {
-        return null;
-    }
-
-    /**
-     * @return
-     */
-    @Override
-    public Uni<User> deleteUser() {
-        return null;
-    }
-
-    @Override
-    public Uni<List<User>> listUser(UserQuery query) {
-        return null;
-    }
-
-    /**
-     * @param email    : The email of the user
-     * @param password : The password of the user
-     * @return
-     */
-
 }

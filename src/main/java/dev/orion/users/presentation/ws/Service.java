@@ -35,7 +35,6 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.RestForm;
-import org.jboss.resteasy.reactive.RestQuery;
 
 import dev.orion.users.validation.dto.Authentication;
 import dev.orion.users.validation.dto.UserQuery;

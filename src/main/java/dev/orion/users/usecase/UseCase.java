@@ -36,7 +36,9 @@ public interface UseCase {
      * @param password : The password of the user
      * @return A Uni<User> object
      */
-    Uni<User> createUser(String name, String email, String password);
+    default Uni<User> createUser(String name, String email, String password) {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
@@ -45,11 +47,19 @@ public interface UseCase {
      * @param password : The password of the user
      * @return A Uni<User> object
      */
-    Uni<User> authenticate(String email, String password);
+    default Uni<User> authenticate(String email, String password) {
+        throw new UnsupportedOperationException();
+    }
 
-    Uni<List<User>> listUser(UserQuery query);
+    default Uni<List<User>> listUser(UserQuery query) {
+        throw new UnsupportedOperationException();
+    }
 
-    Uni<User> removeUser();
+    default Uni<User> removeUser() {
+        throw new UnsupportedOperationException();
+    }
 
-    Uni<User> deleteUser();
+    default Uni<User> deleteUser() {
+        throw new UnsupportedOperationException();
+    }
 }
