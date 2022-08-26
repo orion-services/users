@@ -10,9 +10,7 @@ public class RemoveUser implements UseCase {
     private Repository repository = new UserRepository();
 
     @Override
-    public Uni<User> removeUser(String hash) {
-        Uni<User> user = repository.find("hash", hash).firstResult();
-        repository.delete((User) user);
-        return user;
+    public Uni<Long> removeUser(String hash) {
+        return repository.removeUser(hash);
     }
 }

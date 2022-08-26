@@ -55,7 +55,7 @@ public interface UseCase {
         throw new UnsupportedOperationException();
     }
 
-    default Uni<User> removeUser(String hash) {
+    default Uni<Long> removeUser(String hash) {
         throw new UnsupportedOperationException();
     }
 

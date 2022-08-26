@@ -31,6 +31,8 @@ import javax.ws.rs.core.Response;
 import dev.orion.users.usecase.AuthenticateUser;
 import dev.orion.users.usecase.CreateUser;
 import dev.orion.users.usecase.ListUser;
+import dev.orion.users.usecase.RemoveUser;
+
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claims;
@@ -61,6 +63,8 @@ public class Service {
 
         private UseCase listUser = new ListUser();
 
+        private UseCase removeUser = new RemoveUser();
+
         @GET
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
@@ -70,6 +74,13 @@ public class Service {
                                 .onItem()
                                 .ifNotNull()
                                 .transform(user -> user);
+        }
+
+        @DELETE
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.APPLICATION_JSON)
+        public Uni<Long> remove(@FormParam("hash") @NotEmpty final String hash) {
+                return removeUser.removeUser(hash);
         }
 
         /**

@@ -122,8 +122,9 @@ public class UserRepository implements Repository {
    * @return
    */
   @Override
-  public Uni<User> removeUser(String id) {
-    return null;
+  public Uni<Long> removeUser(String id) {
+
+    return delete("hash", id);
   }
 
 }
