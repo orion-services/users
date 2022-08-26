@@ -18,6 +18,8 @@ package dev.orion.users.infra.repository;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -106,9 +108,13 @@ public class UserRepository implements Repository {
    */
   @Override
   public Uni<List<User>> listByQuery(UserQuery query) {
-    Map<String, Object> params = Parameters.with("id", query.getUserId())
+
+    if (Stream.of(query).allMatch(Objects::isNull)) {
+      return findAll().list();
+    }
+    Map<String, Object> params = Parameters.with("hash", query.getUserId())
         .and("name", query.getUserName()).map();
-    return find("hash like id or name like :name", params).list();
+    return find("hash = :hash or name like :name", params).list();
   }
 
   /**

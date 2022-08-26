@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -29,18 +30,17 @@ public class ListUserTest {
     Repository repository;
 
     @InjectMocks
-    UseCase listUsersUC = new ListUser();
+    ListUser listUsersUC;
 
     @Test
     @DisplayName("List All Users")
     @Order(1)
     void listAllUsersTest() {
         UserQuery query = new UserQuery();
-        query.setUserId("");
-        query.setUserName("");
         Mockito.when(repository.listByQuery(query)).thenReturn(Uni.createFrom().item(new ArrayList<User>()));
-
+        Assertions.assertEquals(1, repository.count());
         Uni<List<User>> users = listUsersUC.listUser(query);
+
         assertNotNull(users);
     }
 
@@ -51,7 +51,9 @@ public class ListUserTest {
         UserQuery query = new UserQuery();
         query.setUserId("");
         query.setUserName("Teste");
+
         Mockito.when(repository.listByQuery(query)).thenReturn(Uni.createFrom().item(new ArrayList<User>()));
+        Assertions.assertEquals(1, repository.count());
 
         Uni<List<User>> users = listUsersUC.listUser(query);
         assertNotNull(users);
