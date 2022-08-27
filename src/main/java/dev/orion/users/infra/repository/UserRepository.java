@@ -23,6 +23,8 @@ import java.util.stream.Stream;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.orion.users.domain.model.User;
 import dev.orion.users.validation.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.Panache;
@@ -108,13 +110,15 @@ public class UserRepository implements Repository {
    */
   @Override
   public Uni<List<User>> listByQuery(UserQuery query) {
+    ObjectMapper mapper = new ObjectMapper();
+    Map<String, Object> params = mapper.convertValue(query, Map.class);
 
-    if (Stream.of(query).allMatch(Objects::isNull)) {
+    if (params.values().stream().allMatch(Objects::isNull)) {
       return findAll().list();
     }
-    Map<String, Object> params = Parameters.with("hash", query.getUserId())
-        .and("name", query.getUserName()).map();
-    return find("hash = :hash or name like :name", params).list();
+
+    return list("hash = :hash or name like :name", params);
+
   }
 
   /**

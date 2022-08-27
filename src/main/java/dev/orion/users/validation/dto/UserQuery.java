@@ -8,10 +8,10 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserQuery {
-    @QueryParam("userId")
-    private String userId;
+    @QueryParam("userHash")
+    private String hash;
 
     @QueryParam("userName")
-    private String userName;
+    private String name;
 
 }
