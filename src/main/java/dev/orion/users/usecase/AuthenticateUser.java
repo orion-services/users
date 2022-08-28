@@ -1,10 +1,10 @@
 package dev.orion.users.usecase;
 
-import dev.orion.users.infra.repository.Repository;
+import dev.orion.users.infra.repository.UserRepository;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.UserRepository;
+import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.smallrye.mutiny.Uni;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,7 +13,7 @@ import javax.enterprise.context.ApplicationScoped;
 public class AuthenticateUser implements UseCase {
 
     /** User repository. */
-    protected Repository repository = new UserRepository();
+    protected UserRepository repository = new UserRepositoryImpl();
 
     /**
      * Authenticates the user in the service (UC: Authenticate).

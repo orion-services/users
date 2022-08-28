@@ -18,7 +18,6 @@ package dev.orion.users.presentation.ws;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
@@ -43,6 +42,7 @@ import dev.orion.users.validation.dto.UserQuery;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.usecase.UseCase;
 import io.smallrye.jwt.build.Jwt;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -68,12 +68,9 @@ public class Service {
         @GET
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public Uni<List<User>> find(@BeanParam UserQuery query) {
+        public Multi<User> find(@BeanParam UserQuery query) {
 
-                return listUser.listUser(query)
-                                .onItem()
-                                .ifNotNull()
-                                .transform(user -> user);
+                return listUser.listUser(query);
         }
 
         @DELETE

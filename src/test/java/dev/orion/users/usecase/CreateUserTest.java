@@ -1,7 +1,7 @@
 package dev.orion.users.usecase;
 
 import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.Repository;
+import dev.orion.users.infra.repository.UserRepository;
 import io.smallrye.mutiny.Uni;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class CreateUserTest {
 
     @Mock
-    Repository repository;
+    UserRepository repository;
 
     @InjectMocks
     UseCase uc = new CreateUser();

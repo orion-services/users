@@ -18,9 +18,8 @@ package dev.orion.users.usecase;
 
 import dev.orion.users.domain.model.User;
 import dev.orion.users.validation.dto.UserQuery;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
-
-import java.util.List;
 
 /**
  * Use cases interface for User entity.
@@ -51,7 +50,7 @@ public interface UseCase {
         throw new UnsupportedOperationException();
     }
 
-    default Uni<List<User>> listUser(UserQuery query) {
+    default Multi<User> listUser(UserQuery query) {
         throw new UnsupportedOperationException();
     }
 
