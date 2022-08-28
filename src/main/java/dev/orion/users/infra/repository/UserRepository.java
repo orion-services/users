@@ -117,7 +117,7 @@ public class UserRepository implements Repository {
       return findAll().list();
     }
 
-    return list("hash = :hash or name like :name", params);
+    return list("hash = :hash or name like :name or email = :email", params);
 
   }
 

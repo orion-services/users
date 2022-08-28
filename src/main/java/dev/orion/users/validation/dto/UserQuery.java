@@ -14,4 +14,6 @@ public class UserQuery {
     @QueryParam("userName")
     private String name;
 
+    @QueryParam("userEmail")
+    private String email;
 }

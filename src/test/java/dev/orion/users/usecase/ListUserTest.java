@@ -3,14 +3,14 @@ package dev.orion.users.usecase;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.Repository;
 import dev.orion.users.validation.dto.UserQuery;
+import io.quarkus.test.junit.mockito.InjectSpy;
 import io.smallrye.mutiny.Uni;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.spy;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.*;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,22 +27,31 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ListUserTest {
 
+    @InjectSpy
     @Mock
     Repository repository;
 
+    @InjectSpy
     @InjectMocks
-    ListUser listUsersUC;
+    ListUser listUsersUC = new ListUser();
 
     @Test
     @DisplayName("List All Users")
     @Order(1)
     void listAllUsersTest() {
         UserQuery query = new UserQuery();
-        Mockito.when(repository.listByQuery(query)).thenReturn(Uni.createFrom().item(new ArrayList<User>()));
-        Assertions.assertEquals(1, repository.count());
-        Uni<List<User>> users = listUsersUC.listUser(query);
+        query.setEmail(null);
+        query.setHash(null);
+        query.setName(null);
+        Uni<User> user = Uni.createFrom().item(new User());
+        Uni<List<User>> userList = Uni.join().all(user).andCollectFailures();
 
-        assertNotNull(users);
+        Mockito.when(repository.listByQuery(query)).thenReturn(userList);
+
+        Uni<List<User>> users = listUsersUC.listUser(query);
+        Mockito.verify(repository, Mockito.times(1)).listByQuery(query);
+
+        assertEquals(userList, users);
     }
 
     @Test
@@ -49,14 +59,21 @@ public class ListUserTest {
     @Order(2)
     void listUsersByNameTest() {
         UserQuery query = new UserQuery();
-        query.setUserId("");
-        query.setUserName("Teste");
+        query.setName("Test");
 
-        Mockito.when(repository.listByQuery(query)).thenReturn(Uni.createFrom().item(new ArrayList<User>()));
-        Assertions.assertEquals(1, repository.count());
+        Uni<User> user = Uni.createFrom().item(this.createUserMock("Teste", "Teste", "teste@email.com"));
+
+        Uni<List<User>> userList = Uni.join().all(user).andCollectFailures();
+
+        Mockito.when(repository.listByQuery(query)).thenReturn(userList);
 
         Uni<List<User>> users = listUsersUC.listUser(query);
+
+        Mockito.verify(repository, Mockito.times(1)).listByQuery(query);
+
+        assertNotNull(userList);
         assertNotNull(users);
+        assertEquals(users, userList);
     }
 
     @Test
@@ -64,12 +81,28 @@ public class ListUserTest {
     @Order(3)
     void listUsersByIdTest() {
         UserQuery query = new UserQuery();
-        query.setUserId("Teste");
-        query.setUserName("");
+        query.setHash("Teste");
 
-        Mockito.when(repository.listByQuery(query)).thenReturn(Uni.createFrom().item(new ArrayList<User>()));
+        Uni<User> user = Uni.createFrom().item(this.createUserMock("Teste", "Teste", "teste@email.com"));
+
+        Uni<List<User>> userList = Uni.join().all(user).andCollectFailures();
+
+        Mockito.when(repository.listByQuery(query)).thenReturn(userList);
 
         Uni<List<User>> users = listUsersUC.listUser(query);
+
+        Mockito.verify(repository, Mockito.times(1)).listByQuery(query);
+
+        assertNotNull(userList);
         assertNotNull(users);
+        assertEquals(users, userList);
+    }
+
+    private User createUserMock(String hash, String name, String email) {
+        User user = new User();
+        user.setHash(hash);
+        user.setName(name);
+        user.setEmail(email);
+        return user;
     }
 }

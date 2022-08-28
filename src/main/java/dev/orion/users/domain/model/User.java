@@ -30,11 +30,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import lombok.Getter;
 import lombok.Setter;
+
 /**
  * User Entity.
  */
 @Entity
-@Getter @Setter
+@Getter
+@Setter
+
 public class User extends PanacheEntityBase {
 
     /** Primary key. */
@@ -43,7 +46,7 @@ public class User extends PanacheEntityBase {
     @JsonIgnore
     private Long id;
 
-    /** The hash used to identify the user.  */
+    /** The hash used to identify the user. */
     private String hash;
 
     /** The name of the user. */
@@ -55,7 +58,7 @@ public class User extends PanacheEntityBase {
     @Email(message = "The e-mail format is necessary")
     private String email;
 
-     /** The password of the user. */
+    /** The password of the user. */
     @JsonIgnore
     @Column(length = 256)
     @NotNull(message = "The password can't be null")
@@ -67,5 +70,4 @@ public class User extends PanacheEntityBase {
     public User() {
         this.hash = UUID.randomUUID().toString();
     }
-
 }

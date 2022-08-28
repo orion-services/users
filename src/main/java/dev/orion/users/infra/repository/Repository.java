@@ -23,8 +23,6 @@ import io.smallrye.mutiny.Uni;
 
 import java.util.List;
 
-import com.mysql.cj.log.Log;
-
 /**
  * User repository.
  */
