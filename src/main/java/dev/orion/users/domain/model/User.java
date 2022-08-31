@@ -64,10 +64,22 @@ public class User extends PanacheEntityBase {
     @NotNull(message = "The password can't be null")
     private String password;
 
+    @Column
+    private String status;
+
     /**
      * User constructor.
      */
     public User() {
         this.hash = UUID.randomUUID().toString();
+    }
+
+    public static User createUser(UserData userData) {
+        User user = new User();
+        user.setEmail(userData.getEmail());
+        user.setName(userData.getName());
+        user.setPassword(userData.getPassword());
+        user.setStatus(StatusEnum.ACTIVATED.name());
+        return user;
     }
 }

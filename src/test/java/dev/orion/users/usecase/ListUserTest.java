@@ -8,6 +8,9 @@ import io.smallrye.mutiny.Multi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -63,8 +66,12 @@ public class ListUserTest {
         Multi<User> users = useCase.listUser(query);
 
         Mockito.verify(repository, Mockito.times(1)).listByQuery(query);
+
         assertNotNull(userList);
         assertNotNull(users);
+
+        assertTrue(Stream.of(users));
+
         assertEquals(users, userList);
     }
 

@@ -17,6 +17,7 @@
 package dev.orion.users.infra.repository;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.model.UserData;
 import dev.orion.users.validation.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Multi;
@@ -38,7 +39,7 @@ public interface UserRepository extends PanacheRepository<User> {
      *
      * @return Returns a user asynchronously
      */
-    Uni<User> createUser(String name, String email, String password);
+    Uni<User> createUser(UserData userData);
 
     /**
      * Returns a user looking for email and password.

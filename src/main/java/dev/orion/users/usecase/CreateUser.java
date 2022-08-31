@@ -6,6 +6,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.model.UserData;
 import dev.orion.users.infra.repository.UserRepository;
 import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.smallrye.mutiny.Uni;
@@ -26,19 +27,18 @@ public class CreateUser implements UseCase {
      * @return A Uni<User> object
      */
     @Override
-    public Uni<User> createUser(final String name, final String email,
-            final String password) {
+    public Uni<User> createUser(UserData userData) {
         Uni<User> user = null;
-        if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
-                || password.isBlank()) {
+        if (userData.getEmail().isBlank() || !EmailValidator.getInstance().isValid(userData.getEmail())
+                || userData.getPassword().isBlank()) {
             throw new IllegalArgumentException("Blank arguments or invalid e-mail");
         } else {
-            if (password.length() < SIZE_PASSWORD) {
+            if (userData.getPassword().length() < SIZE_PASSWORD) {
                 throw new IllegalArgumentException(
                         "Password less than eight characters");
             } else {
-                user = repository.createUser(name, email,
-                        DigestUtils.sha256Hex(password));
+                userData.setPassword(DigestUtils.sha256Hex(userData.getPassword()));
+                user = repository.createUser(userData);
             }
         }
         return user;

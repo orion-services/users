@@ -40,6 +40,7 @@ import org.jboss.resteasy.reactive.RestForm;
 import dev.orion.users.validation.dto.Authentication;
 import dev.orion.users.validation.dto.UserQuery;
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.model.UserData;
 import dev.orion.users.usecase.UseCase;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Multi;
@@ -98,13 +99,10 @@ public class Service {
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
-        public Uni<User> create(
-                        @FormParam("name") @NotEmpty final String name,
-                        @FormParam("email") @NotEmpty @Email final String email,
-                        @FormParam("password") @NotEmpty final String password) {
+        public Uni<User> create(@BeanParam UserData userData) {
 
                 try {
-                        return createUser.createUser(name, email, password)
+                        return createUser.createUser(userData)
                                         .onItem().ifNotNull().transform(user -> user)
                                         .log()
                                         .onFailure().transform(e -> {
@@ -139,13 +137,10 @@ public class Service {
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
-        public Uni<Authentication> createAuthenticate(
-                        @FormParam("name") @NotEmpty final String name,
-                        @FormParam("email") @NotEmpty @Email final String email,
-                        @FormParam("password") @NotEmpty final String password) {
+        public Uni<Authentication> createAuthenticate(@BeanParam UserData userData) {
 
                 try {
-                        return createUser.createUser(name, email, password)
+                        return createUser.createUser(userData)
                                         .onItem().ifNotNull().transform(user -> {
                                                 String token = generateJWT(user);
                                                 Authentication auth = new Authentication();

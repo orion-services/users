@@ -17,6 +17,7 @@
 package dev.orion.users.usecase;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.model.UserData;
 import dev.orion.users.validation.dto.UserQuery;
 import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
@@ -35,7 +36,7 @@ public interface UseCase {
      * @param password : The password of the user
      * @return A Uni<User> object
      */
-    default Uni<User> createUser(String name, String email, String password) {
+    default Uni<User> createUser(UserData userData) {
         throw new UnsupportedOperationException();
     }
 

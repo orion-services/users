@@ -26,6 +26,7 @@ import javax.enterprise.context.ApplicationScoped;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.model.UserData;
 import dev.orion.users.validation.dto.UserQuery;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
@@ -48,16 +49,15 @@ public class UserRepositoryImpl implements UserRepository {
    * @return Returns a user asynchronously
    */
   @Override
-  public Uni<User> createUser(final String name, final String email,
-      final String password) {
+  public Uni<User> createUser(UserData userData) {
 
-    return checkEmail(email)
+    return checkEmail(userData.getEmail())
         .onItem()
         .ifNotNull()
         .failWith(new IllegalArgumentException("The e-mail already exists"))
         .onItem()
         .ifNull()
-        .switchTo(() -> persistUser(name, email, password));
+        .switchTo(() -> persistUser(userData));
   }
 
   /**
@@ -80,12 +80,9 @@ public class UserRepositoryImpl implements UserRepository {
    *
    * @return Returns Uni<User> object
    */
-  private Uni<User> persistUser(final String name, final String email,
-      final String password) {
-    User user = new User();
-    user.setName(name);
-    user.setEmail(email);
-    user.setPassword(password);
+  private Uni<User> persistUser(UserData userData) {
+    User user = User.createUser(userData);
+
     return Panache.<User>withTransaction(user::persist);
   }
 
