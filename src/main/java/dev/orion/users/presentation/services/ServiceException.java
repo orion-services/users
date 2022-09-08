@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation.ws;
+package dev.orion.users.presentation.services;
 
 import java.util.Map;
 

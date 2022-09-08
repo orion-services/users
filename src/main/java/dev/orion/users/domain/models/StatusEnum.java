@@ -1,4 +1,4 @@
-package dev.orion.users.domain.model;
+package dev.orion.users.domain.models;
 
 public enum StatusEnum {
     ACTIVATED,
