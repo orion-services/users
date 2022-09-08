@@ -16,7 +16,7 @@
  */
 package dev.orion.users.validation.dto;
 
-import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.models.User;
 import lombok.Getter;
 import lombok.Setter;
 
