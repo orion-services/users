@@ -4,14 +4,8 @@ import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.AuthenticateUser;
-import dev.orion.users.infra.repositories.PanacheUserRepository;
-
-
 import org.apache.commons.codec.digest.DigestUtils;
-
-
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @ApplicationScoped
 public class AuthenticateUserImpl implements AuthenticateUser {

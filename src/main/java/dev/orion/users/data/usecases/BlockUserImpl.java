@@ -10,12 +10,13 @@ public class BlockUserImpl implements BlockUser {
     public BlockUserImpl(UserRepository repository) {
         this.repository = repository;
     }
+
     /**
-     * @param hash 
+     * @param hash
      * @return
      */
     @Override
     public User block(String hash) {
-        return null;
+        return repository.blockUser(hash);
     }
 }

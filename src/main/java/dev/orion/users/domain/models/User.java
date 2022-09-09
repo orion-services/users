@@ -16,11 +16,9 @@
  */
 package dev.orion.users.domain.models;
 
-
-import dev.orion.users.domain.dto.CreateUserDto;
 import dev.orion.users.domain.vo.Email;
 
-public class User{
+public class User {
 
     /** The name of the user. */
     private String name;
@@ -48,7 +46,9 @@ public class User{
 
     public void setEmail(Email email) {
         this.email = email;
-    }public void setEmail(String address){
+    }
+
+    public void setEmail(String address) {
         this.email.setAddress(address);
     }
 
@@ -79,10 +79,12 @@ public class User{
     /**
      * User constructor.
      */
-    public User(){}
-    public User(String name,String email, String password){
+    public User() {
+    }
+
+    public User(String name, String email, String password) {
         this();
-        this.name = name;
+        this.name = this.validateName(name);
         this.email = new Email(email);
         this.password = this.validatePassword(password);
         this.status = StatusEnum.ACTIVATED.name();
@@ -98,12 +100,21 @@ public class User{
                 '}';
     }
 
-    private String validatePassword(String password){
-        if(password == null || password.isEmpty() || password.length() < 8){
-            throw new IllegalArgumentException("Password less than eight characters");
+    private String validatePassword(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new IllegalArgumentException("Password is invalid!");
+        }
+
+        if (password.length() < 8) {
+            throw new IllegalArgumentException("Password is lass than eigth caracters!");
         }
         return password;
     }
 
-
+    private String validateName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("Name is invalid!");
+        }
+        return name;
+    }
 }

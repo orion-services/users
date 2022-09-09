@@ -23,12 +23,10 @@ import java.util.Optional;
 
 import javax.annotation.security.PermitAll;
 import javax.transaction.Transactional;
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.*;
@@ -44,7 +42,6 @@ import dev.orion.users.validation.dto.Authentication;
 import io.smallrye.jwt.build.Jwt;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
-
 
 import dev.orion.users.domain.dto.CreateUserDto;
 import org.eclipse.microprofile.jwt.Claims;
@@ -112,10 +109,10 @@ public class Service {
         @Retry(maxRetries = 1, delay = 2000)
         @Transactional
         public ResponseUserDto create(@RequestBody CreateUserDto createUserDto) {
-                try{
+                try {
                         return ResponseMapper.toResponse(createUser.create(createUserDto));
-                }catch (Exception e){
-                        throw  new ServiceException(e.getMessage(),Response.Status.BAD_REQUEST);
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }
         }
 
@@ -169,9 +166,9 @@ public class Service {
         @Retry(maxRetries = 1, delay = 2000)
         public String authenticate(AuthenticateUserDto authDto) {
                 User user = authUser.authenticate(authDto);
-                if(user.equals(null)){
-                      throw   new ServiceException("User not found",
-                                Response.Status.UNAUTHORIZED);
+                if (user == null) {
+                        throw new ServiceException("User not found",
+                                        Response.Status.UNAUTHORIZED);
                 }
                 return this.generateJWT(user);
         }
