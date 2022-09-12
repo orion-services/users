@@ -8,6 +8,7 @@ import dev.orion.users.domain.models.StatusEnum;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.infra.entities.UserPanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
@@ -17,8 +18,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class PanacheUserRepository implements UserRepository {
-    public PanacheUserRepository() {
+public class UserPanacheRepository implements UserRepository {
+    public UserPanacheRepository() {
     }
 
     /**
@@ -30,6 +31,7 @@ public class PanacheUserRepository implements UserRepository {
     public User create(User user) {
         UserPanacheEntity userPanache = new UserPanacheEntity();
         userPanache.name = user.getName();
+        userPanache.hash = user.getHash();
         userPanache.status = user.getStatus();
         userPanache.password = user.getPassword();
         userPanache.email = user.getEmail().getAddress();
@@ -43,12 +45,13 @@ public class PanacheUserRepository implements UserRepository {
      * @return
      */
     @Override
+    @Transactional
     public User authenticate(AuthenticateUserDto authDto) {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> params = mapper.convertValue(authDto, Map.class);
-        PanacheQuery<UserPanacheEntity> result = UserPanacheEntity.find("email = :email and password = :password",
-                params);
-        return result.firstResult().toUser();
+        UserPanacheEntity result = UserPanacheEntity.find("email = :email and password = :password",
+                params).firstResult();
+        return result == null ? null : result.toUser();
     }
 
     /**
@@ -67,7 +70,7 @@ public class PanacheUserRepository implements UserRepository {
             return userPanache.stream().map(entity -> entity.toUser()).collect(Collectors.toList());
         }
         userPanache = UserPanacheEntity.find(
-                "id like concat(%,:hash,%) or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
+                "hash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
                 params);
         return userPanache.stream().map(entity -> entity.toUser()).collect(Collectors.toList());
     }
@@ -88,12 +91,14 @@ public class PanacheUserRepository implements UserRepository {
      * @return
      */
     @Override
-    public Boolean removeUser(String id) {
-        UserPanacheEntity userEntity = UserPanacheEntity.findById(id);
+    @Transactional
+    public Boolean removeUser(String hash) {
+        UserPanacheEntity userEntity = UserPanacheEntity.find("hash", hash).firstResult();
         if (userEntity == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("User not found or already removed");
         }
-        return UserPanacheEntity.delete("hash", id) > 0;
+        Boolean userDeleted = userEntity.deleteById(userEntity.id);
+        return userDeleted;
     }
 
     /**
@@ -101,10 +106,11 @@ public class PanacheUserRepository implements UserRepository {
      * @return
      */
     @Override
-    public User blockUser(String id) {
-        UserPanacheEntity userEntity = UserPanacheEntity.findById(id);
+    @Transactional
+    public User blockUser(String hash) {
+        UserPanacheEntity userEntity = UserPanacheEntity.find("hash", hash).firstResult();
         if (userEntity == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("User not found or already removed");
         }
         userEntity.status = StatusEnum.BLOCKED.name();
         return userEntity.toUser();

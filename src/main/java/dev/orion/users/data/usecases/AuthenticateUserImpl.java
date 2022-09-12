@@ -6,6 +6,7 @@ import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.AuthenticateUser;
 import org.apache.commons.codec.digest.DigestUtils;
 import javax.enterprise.context.ApplicationScoped;
+import javax.transaction.Transactional;
 
 @ApplicationScoped
 public class AuthenticateUserImpl implements AuthenticateUser {
@@ -23,6 +24,7 @@ public class AuthenticateUserImpl implements AuthenticateUser {
      * @return A Uni<User> object
      */
     @Override
+    @Transactional
     public User authenticate(AuthenticateUserDto userDto) {
         User user = null;
         if ((userDto.email != null) && (userDto.password != null)) {

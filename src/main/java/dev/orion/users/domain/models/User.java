@@ -16,6 +16,8 @@
  */
 package dev.orion.users.domain.models;
 
+import java.util.UUID;
+
 import dev.orion.users.domain.vo.Email;
 
 public class User {
@@ -85,6 +87,7 @@ public class User {
     public User(String name, String email, String password) {
         this();
         this.name = this.validateName(name);
+        this.hash = UUID.randomUUID().toString();
         this.email = new Email(email);
         this.password = this.validatePassword(password);
         this.status = StatusEnum.ACTIVATED.name();

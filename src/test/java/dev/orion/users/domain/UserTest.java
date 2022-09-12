@@ -1,4 +1,4 @@
-package dev.orion.users.data.domain;
+package dev.orion.users.domain;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

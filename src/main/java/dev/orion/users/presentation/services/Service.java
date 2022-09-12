@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
 import javax.transaction.Transactional;
@@ -27,15 +28,13 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.*;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.*;
-import dev.orion.users.infra.repositories.PanacheUserRepository;
-
+import dev.orion.users.infra.repositories.UserPanacheRepository;
 import dev.orion.users.presentation.dto.ResponseUserDto;
 import dev.orion.users.presentation.mappers.ResponseMapper;
 import dev.orion.users.validation.dto.Authentication;
@@ -57,7 +56,7 @@ public class Service {
         @ConfigProperty(name = "user.issuer")
         public Optional<String> issuer;
 
-        private UserRepository repository = new PanacheUserRepository();
+        private UserRepository repository = new UserPanacheRepository();
 
         private AuthenticateUser authUser = new AuthenticateUserImpl(repository);
 
@@ -72,24 +71,46 @@ public class Service {
         @GET
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public List<User> find(@BeanParam UserQueryDto query) {
+        @Transactional
+        public List<ResponseUserDto> find(@BeanParam UserQueryDto query) {
+                try {
+                        List<User> users = listUser.list(query);
 
-                return listUser.list(query);
+                        return users.stream().map(user -> ResponseMapper.toResponse(user)).collect(Collectors.toList());
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
+                }
+
         }
 
         @DELETE
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public Boolean remove(@FormParam("hash") @NotEmpty final String hash) {
-                return removeUser.removeUser(hash);
+        @Transactional
+        public Response remove(@FormParam("hash") @NotEmpty final String hash) {
+                try {
+                        return Response.status(Response.Status.ACCEPTED)
+                                        .entity(removeUser.removeUser(hash))
+                                        .build();
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
+                }
+
         }
 
         @PUT
         @Path("/block")
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
-        public User block(@FormParam("hash") @NotEmpty final String hash) {
-                return blockUser.block(hash);
+        @Transactional
+        public Response block(@FormParam("hash") @NotEmpty final String hash) {
+                try {
+                        return Response.status(Response.Status.ACCEPTED)
+                                        .entity(ResponseMapper.toResponse(blockUser.block(hash)))
+                                        .build();
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
+                }
         }
 
         /**
@@ -108,9 +129,11 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         @Transactional
-        public ResponseUserDto create(@RequestBody CreateUserDto createUserDto) {
+        public Response create(@RequestBody CreateUserDto createUserDto) {
                 try {
-                        return ResponseMapper.toResponse(createUser.create(createUserDto));
+                        return Response.status(Response.Status.CREATED)
+                                        .entity(ResponseMapper.toResponse(createUser.create(createUserDto)))
+                                        .build();
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }
@@ -128,10 +151,11 @@ public class Service {
          */
         @POST
         @Path("/createAuthenticate")
-        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Consumes(MediaType.APPLICATION_JSON)
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
-        public Authentication createAuthenticate(@BeanParam CreateUserDto createUserDto) {
+        @Transactional
+        public Authentication createAuthenticate(@RequestBody CreateUserDto createUserDto) {
 
                 try {
                         User user = createUser.create(createUserDto);
@@ -161,16 +185,22 @@ public class Service {
         @POST
         @Path("/authenticate")
         @PermitAll
-        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.TEXT_PLAIN)
+        @Consumes(MediaType.APPLICATION_JSON)
+        @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
-        public String authenticate(AuthenticateUserDto authDto) {
-                User user = authUser.authenticate(authDto);
-                if (user == null) {
-                        throw new ServiceException("User not found",
-                                        Response.Status.UNAUTHORIZED);
+        @Transactional
+        public String authenticate(@RequestBody AuthenticateUserDto authDto) {
+                try {
+                        User user = authUser.authenticate(authDto);
+                        if (user == null) {
+                                throw new ServiceException("User not found",
+                                                Response.Status.UNAUTHORIZED);
+                        }
+                        return this.generateJWT(user);
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }
-                return this.generateJWT(user);
+
         }
 
         /**

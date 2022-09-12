@@ -1,5 +1,7 @@
 package dev.orion.users.data.usecases;
 
+import javax.transaction.Transactional;
+
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.usecases.RemoveUser;
 
@@ -12,13 +14,12 @@ public class RemoveUserImpl implements RemoveUser {
     }
 
     @Override
+    @Transactional
     public Boolean removeUser(String hash) {
         try {
             return repository.removeUser(hash);
-        }catch (Exception e){
-            throw e;
+        } catch (Exception exception) {
+            throw exception;
         }
-
-
     }
 }

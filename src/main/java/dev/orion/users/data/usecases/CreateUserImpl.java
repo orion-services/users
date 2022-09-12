@@ -14,27 +14,23 @@ import org.apache.commons.codec.digest.DigestUtils;
 @ApplicationScoped
 public class CreateUserImpl implements CreateUser {
     private UserRepository repository;
+
     /** User repository. */
-    public CreateUserImpl(UserRepository repository){
+    public CreateUserImpl(UserRepository repository) {
         this.repository = repository;
     }
 
     @Override
     @Transactional
     public User create(CreateUserDto createUserDto) {
-            try {
-                User user = this.repository.findByEmail(createUserDto.email);
+        User user = this.repository.findByEmail(createUserDto.email);
 
-                if(user != null){
-                    throw new IllegalArgumentException("User already exists with this email!");
-                }
+        if (user != null) {
+            throw new IllegalArgumentException("User already exists with this email!");
+        }
 
-                User userToBeCreated =  UserMapper.toEntity(createUserDto);
-                userToBeCreated.setPassword(DigestUtils.sha256Hex(userToBeCreated.getPassword()));
+        User userToBeCreated = UserMapper.toEntity(createUserDto);
 
-                return this.repository.create(UserMapper.toEntity(createUserDto));
-            }catch (Exception exception){
-                throw  exception;
-            }
+        return this.repository.create(UserMapper.toEntity(createUserDto));
     }
 }

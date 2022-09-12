@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ListUserImplTest {
+public class ListUserTest {
 
     // @InjectSpy
     // @Mock

@@ -18,11 +18,16 @@ package dev.orion.users;
 
 import static io.restassured.RestAssured.given;
 
+import java.util.Map;
+
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.orion.users.domain.dto.CreateUserDto;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
@@ -33,23 +38,19 @@ class IntegrationIT {
   @Order(1)
   void createUser() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "orion@test.com")
-        .param("password", "12345678")
+        .body("{\"name\":\"Orion\",\"email\":\"Orion@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
-        .statusCode(200);
+        .statusCode(201);
   }
 
   @Test
   @Order(2)
   void createUserWithEmptyName() {
     given()
-        .when()
-        .param("name", "")
-        .param("email", "orion@test.com")
-        .param("password", "12345678")
+        .body("{\"name\":\"\",\"email\":\"Orion@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
         .statusCode(400);
@@ -59,10 +60,8 @@ class IntegrationIT {
   @Order(3)
   void createUserWithWrongEmail() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "orionteste.com")
-        .param("password", "12345678")
+        .body("{\"name\":\"Orion\",\"email\":\"Orionemail.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
         .statusCode(400);
@@ -72,10 +71,8 @@ class IntegrationIT {
   @Order(4)
   void createUserWithEmptyEmail() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "")
-        .param("password", "12345678")
+        .body("{\"name\":\"Orion\",\"email\":\"\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
         .statusCode(400);
@@ -85,10 +82,8 @@ class IntegrationIT {
   @Order(5)
   void createUserWithEmptyPassword() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "orion@test.com")
-        .param("password", "")
+        .body("{\"name\":\"Orion\",\"email\":\"Orion@email.com\",\"password\":\"\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
         .statusCode(400);
@@ -98,10 +93,8 @@ class IntegrationIT {
   @Order(6)
   void createDuplicateUser() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "orion@test.com")
-        .param("password", "12345678")
+        .body("{\"name\":\"Orion\",\"email\":\"Orion@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/create")
         .then()
         .statusCode(400);
@@ -111,9 +104,8 @@ class IntegrationIT {
   @Order(7)
   void authenticate() {
     given()
-        .when()
-        .param("email", "orion@test.com")
-        .param("password", "12345678")
+        .body("{\"email\":\"Orion@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
         .statusCode(200);
@@ -123,21 +115,19 @@ class IntegrationIT {
   @Order(8)
   void authenticateWithWrongEmail() {
     given()
-        .when()
-        .param("email", "orion@test")
-        .param("password", "1234")
+        .body("{\"email\":\"Orion2@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
-        .statusCode(401);
+        .statusCode(400);
   }
 
   @Test
   @Order(9)
   void authenticateWithInvalidEmail() {
     given()
-        .when()
-        .param("email", "orion#test.com")
-        .param("password", "1234")
+        .body("{\"email\":\"Orion#email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
         .statusCode(400);
@@ -147,20 +137,19 @@ class IntegrationIT {
   @Order(10)
   void authenticateWrongPassword() {
     given()
-        .when()
-        .param("email", "orion@test")
-        .param("password", "123456789")
+        .body("{\"email\":\"Orion@email.com\",\"password\":\"Orion1234\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
-        .statusCode(401);
+        .statusCode(400);
   }
 
   @Test
   @Order(11)
   void authenticateEmptyName() {
     given()
-        .when()
-        .param("password", "1234")
+        .body("{\"email\":\"\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
         .statusCode(400);
@@ -170,8 +159,8 @@ class IntegrationIT {
   @Order(12)
   void authenticateEmptyPassword() {
     given()
-        .when()
-        .param("email", "orion@test.com")
+        .body("{\"email\":\"Orion@email.com\",\"password\":\"\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/authenticate")
         .then()
         .statusCode(400);
@@ -181,10 +170,8 @@ class IntegrationIT {
   @Order(13)
   void createAuthenticate() {
     given()
-        .when()
-        .param("name", "Orion")
-        .param("email", "orionOrion@test.com")
-        .param("password", "12345678")
+        .body("{\"name\":\"OrionTest\",\"email\":\"OrionTest@email.com\",\"password\":\"Orion123\"}")
+        .header("Content-Type", "application/json")
         .post("/api/user/createAuthenticate")
         .then()
         .statusCode(200);
