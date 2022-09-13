@@ -12,6 +12,9 @@ import io.quarkus.hibernate.orm.panache.PanacheQuery;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
+
+import org.apache.commons.codec.digest.DigestUtils;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,7 +36,7 @@ public class UserPanacheRepository implements UserRepository {
         userPanache.name = user.getName();
         userPanache.hash = user.getHash();
         userPanache.status = user.getStatus();
-        userPanache.password = user.getPassword();
+        userPanache.password = DigestUtils.sha256Hex(user.getPassword());
         userPanache.email = user.getEmail().getAddress();
         userPanache.persist();
 

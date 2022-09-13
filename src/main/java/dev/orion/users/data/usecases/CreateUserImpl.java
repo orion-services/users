@@ -9,7 +9,6 @@ import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.usecases.CreateUser;
 
 import dev.orion.users.domain.dto.CreateUserDto;
-import org.apache.commons.codec.digest.DigestUtils;
 
 @ApplicationScoped
 public class CreateUserImpl implements CreateUser {
@@ -28,8 +27,6 @@ public class CreateUserImpl implements CreateUser {
         if (user != null) {
             throw new IllegalArgumentException("User already exists with this email!");
         }
-
-        User userToBeCreated = UserMapper.toEntity(createUserDto);
 
         return this.repository.create(UserMapper.toEntity(createUserDto));
     }

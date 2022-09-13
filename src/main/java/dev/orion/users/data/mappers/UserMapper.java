@@ -7,7 +7,10 @@ import dev.orion.users.domain.models.User;
 
 public class UserMapper {
     public static User toEntity(CreateUserDto createUser) {
-        User user = new User(createUser.name, createUser.email, DigestUtils.sha256Hex(createUser.password));
+        User user = new User(
+                createUser.name,
+                createUser.email,
+                createUser.password);
         return user;
     }
 

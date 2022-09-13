@@ -6,8 +6,10 @@ import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.ListUser;
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+@ApplicationScoped
 public class ListUserImpl implements ListUser {
     private UserRepository repository;
 
@@ -22,11 +24,7 @@ public class ListUserImpl implements ListUser {
     @Override
     @Transactional
     public List<User> list(UserQueryDto query) {
-        return repository.findByQuery(query);
+        List<User> users = repository.findByQuery(query);
+        return users;
     }
-
-    /**
-     * @return
-     */
-
 }
