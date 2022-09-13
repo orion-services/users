@@ -18,11 +18,11 @@ import io.quarkus.test.Mock;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class RemoveUserTest {
 
-    @Mock
-    UserRepository repository;
+    // @Mock
+    // UserRepository repository;
 
-    @InjectMocks
-    RemoveUser removeUser = new RemoveUserImpl(repository);
+    // @InjectMocks
+    // RemoveUser removeUser = new RemoveUserImpl(repository);
 
     @Test
     @DisplayName("Should remove a user")

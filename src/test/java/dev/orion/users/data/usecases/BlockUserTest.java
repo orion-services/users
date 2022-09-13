@@ -18,11 +18,11 @@ import io.quarkus.test.Mock;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class BlockUserTest {
 
-    @Mock
-    UserRepository repository;
+    // @Mock
+    // UserRepository repository;
 
-    @InjectMocks
-    BlockUser blockUser = new BlockUserImpl(repository);
+    // @InjectMocks
+    // BlockUser blockUser = new BlockUserImpl(repository);
 
     @Test
     @DisplayName("Should block a user")
