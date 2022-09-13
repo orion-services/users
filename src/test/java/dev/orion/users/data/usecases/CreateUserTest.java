@@ -1,9 +1,5 @@
-package dev.orion.users.usecase;
+package dev.orion.users.data.usecases;
 
-import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.Repository;
-import io.smallrye.mutiny.Uni;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,26 +7,44 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.orion.users.data.interfaces.UserRepository;
+import dev.orion.users.domain.dto.CreateUserDto;
+import dev.orion.users.domain.models.User;
+import dev.orion.users.domain.usecases.CreateUser;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+
+import org.apache.commons.codec.digest.DigestUtils;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CreateUserTest {
 
     @Mock
-    Repository repository;
+    UserRepository repository;
 
     @InjectMocks
-    UseCase uc = new CreateUser();
+    CreateUser createUser = new CreateUserImpl(repository);
 
     @Test
     @DisplayName("Create a user")
     @Order(1)
     void createUserTest() {
-        Mockito.when(repository.createUser("Orion", "orion@test.com", DigestUtils.sha256Hex("12345678")))
-                .thenReturn(Uni.createFrom().item(new User()));
-        Uni<User> uni = uc.createUser("Orion", "orion@test.com", "12345678");
-        assertNotNull(uni);
+        CreateUserDto createUserDto = new CreateUserDto();
+
+        createUserDto.name = "Orion";
+        createUserDto.email = "orion@test.com";
+        createUserDto.password = "12345678";
+
+        User user = new User("Orion", "orion@teste.com", "12345678");
+        Mockito.when(repository.create(any(User.class))).thenReturn(user);
+
+        User userCreated = createUser.create(createUserDto);
+
+        assertNotNull(userCreated);
+        assertEquals(user, userCreated);
     }
 
     @Test
@@ -38,7 +52,7 @@ public class CreateUserTest {
     @Order(2)
     void createUserWithBlankName() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            uc.createUser("", "orion@test.com", "12345678");
+            createUser.create(new CreateUserDto("", "orion@test.com", "12345678"));
         });
     }
 
@@ -47,7 +61,7 @@ public class CreateUserTest {
     @Order(3)
     void createUserWithBlankEmail() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            uc.createUser("Orion", "", "12345678");
+            createUser.create(new CreateUserDto("Orion", "", "12345678"));
         });
     }
 
@@ -56,7 +70,7 @@ public class CreateUserTest {
     @Order(4)
     void createUserWithBlankPassword() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            uc.createUser("Orion", "orion@test.com", "");
+            createUser.create(new CreateUserDto("Orion", "orion@test.com", ""));
         });
     }
 
@@ -65,7 +79,7 @@ public class CreateUserTest {
     @Order(5)
     void createUserWithInvalidEmail() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            uc.createUser("Orion", "orion#test.com", "12345678");
+            createUser.create(new CreateUserDto("Orion", "orion#test.com", "12345678"));
         });
     }
 
@@ -74,7 +88,7 @@ public class CreateUserTest {
     @Order(6)
     void createUserWithInvalidPasswordTest() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            uc.createUser("Orion", "orion@test.com", "12345");
+            createUser.create(new CreateUserDto("Orion", "orion@test.com", "12345"));
         });
     }
 
@@ -82,8 +96,8 @@ public class CreateUserTest {
     @DisplayName("Create a user with a null name")
     @Order(7)
     void createUserWithNullName() {
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            uc.createUser(null, "orion#test.com", "12345678");
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            createUser.create(new CreateUserDto(null, "orion#test.com", "12345678"));
         });
     }
 
