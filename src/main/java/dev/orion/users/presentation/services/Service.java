@@ -34,7 +34,7 @@ import dev.orion.users.domain.dto.AuthenticateUserDto;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.*;
-import dev.orion.users.infra.repositories.UserPanacheRepository;
+import dev.orion.users.infra.panache.repositories.UserPanacheRepository;
 import dev.orion.users.presentation.dto.ResponseUserDto;
 import dev.orion.users.presentation.mappers.ResponseMapper;
 import dev.orion.users.validation.dto.Authentication;
@@ -83,36 +83,6 @@ public class Service {
 
         }
 
-        @DELETE
-        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.APPLICATION_JSON)
-        @Transactional
-        public Response remove(@FormParam("hash") @NotEmpty final String hash) {
-                try {
-                        return Response.status(Response.Status.ACCEPTED)
-                                        .entity(removeUser.removeUser(hash))
-                                        .build();
-                } catch (Exception e) {
-                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
-                }
-
-        }
-
-        @PUT
-        @Path("/block")
-        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.APPLICATION_JSON)
-        @Transactional
-        public Response block(@FormParam("hash") @NotEmpty final String hash) {
-                try {
-                        return Response.status(Response.Status.ACCEPTED)
-                                        .entity(ResponseMapper.toResponse(blockUser.block(hash)))
-                                        .build();
-                } catch (Exception e) {
-                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
-                }
-        }
-
         /**
          * Creates a user inside the service.
          *
@@ -137,6 +107,36 @@ public class Service {
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }
+        }
+
+        @PUT
+        @Path("/block")
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.APPLICATION_JSON)
+        @Transactional
+        public Response block(@FormParam("hash") @NotEmpty final String hash) {
+                try {
+                        return Response.status(Response.Status.ACCEPTED)
+                                        .entity(ResponseMapper.toResponse(blockUser.block(hash)))
+                                        .build();
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
+                }
+        }
+
+        @DELETE
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.APPLICATION_JSON)
+        @Transactional
+        public Response remove(@FormParam("hash") @NotEmpty final String hash) {
+                try {
+                        return Response.status(Response.Status.ACCEPTED)
+                                        .entity(removeUser.removeUser(hash))
+                                        .build();
+                } catch (Exception e) {
+                        throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
+                }
+
         }
 
         /**

@@ -1,4 +1,4 @@
-package dev.orion.users.infra.repositories;
+package dev.orion.users.infra.panache.repositories;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.orion.users.data.interfaces.UserRepository;
@@ -6,7 +6,7 @@ import dev.orion.users.domain.dto.AuthenticateUserDto;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.StatusEnum;
 import dev.orion.users.domain.models.User;
-import dev.orion.users.infra.entities.UserPanacheEntity;
+import dev.orion.users.infra.panache.entities.UserPanacheEntity;
 import io.quarkus.hibernate.orm.panache.PanacheQuery;
 
 import javax.enterprise.context.ApplicationScoped;

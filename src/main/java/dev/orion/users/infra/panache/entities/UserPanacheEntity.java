@@ -1,4 +1,4 @@
-package dev.orion.users.infra.entities;
+package dev.orion.users.infra.panache.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.orion.users.domain.models.User;
