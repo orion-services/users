@@ -28,6 +28,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import dev.orion.users.data.interfaces.Encrypter;
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.*;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
@@ -38,6 +40,7 @@ import dev.orion.users.infra.panache.repositories.UserPanacheRepository;
 import dev.orion.users.presentation.dto.ResponseUserDto;
 import dev.orion.users.presentation.mappers.ResponseMapper;
 import dev.orion.users.validation.dto.Authentication;
+import dev.orion.users.infra.util.BCryptAdapter;
 import io.smallrye.jwt.build.Jwt;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -58,9 +61,11 @@ public class Service {
 
         private UserRepository repository = new UserPanacheRepository();
 
-        private AuthenticateUser authUser = new AuthenticateUserImpl(repository);
+        private Encrypter encrypter = new BCryptAdapter();
 
-        private CreateUser createUser = new CreateUserImpl(repository);
+        private AuthenticateUser authUser = new AuthenticateUserImpl(repository, encrypter);
+
+        private CreateUser createUser = new CreateUserImpl(repository, encrypter);
 
         private ListUser listUser = new ListUserImpl(repository);
 

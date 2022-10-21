@@ -1,18 +1,21 @@
 package dev.orion.users.infra.util;
 
-import dev.orion.users.data.interfaces.Encrypter;
-import jodd.crypt.BCrypt;
+import javax.enterprise.context.ApplicationScoped;
 
+import dev.orion.users.data.interfaces.Encrypter;
+import io.quarkus.elytron.security.common.BcryptUtil;
+
+@ApplicationScoped
 public class BCryptAdapter implements Encrypter {
 
     @Override
-    public String hash(String plain) {
-        return BCrypt.hashpw(plain, BCrypt.gensalt());
+    public String hash(String password) {
+        return BcryptUtil.bcryptHash(password);
     }
 
     @Override
     public boolean validate(String password) {
-        String passwordHashed = BCrypt.hashpw(password, BCrypt.gensalt());
-        return BCrypt.checkpw(password, passwordHashed);
+        String passwordHashed = BcryptUtil.bcryptHash(password);
+        return BcryptUtil.matches(password, passwordHashed);
     }
 }

@@ -7,6 +7,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.orion.users.data.interfaces.Encrypter;
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.dto.CreateUserDto;
 import dev.orion.users.domain.models.User;
@@ -25,8 +26,11 @@ public class CreateUserTest {
     @Mock
     UserRepository repository;
 
+    @Mock
+    Encrypter encrypter;
+
     @InjectMocks
-    CreateUser createUser = new CreateUserImpl(repository);
+    CreateUser createUser = new CreateUserImpl(repository, encrypter);
 
     @Test
     @DisplayName("Create a user")

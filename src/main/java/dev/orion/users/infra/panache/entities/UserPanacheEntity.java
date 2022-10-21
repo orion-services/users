@@ -6,7 +6,6 @@ import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.vo.Email;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import javax.persistence.*;
-import java.util.UUID;
 
 @Entity(name = "user")
 @Table(name = "user")

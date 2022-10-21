@@ -13,8 +13,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -22,6 +20,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserPanacheRepository implements UserRepository {
+
     public UserPanacheRepository() {
     }
 
@@ -36,7 +35,7 @@ public class UserPanacheRepository implements UserRepository {
         userPanache.name = user.getName();
         userPanache.hash = user.getHash();
         userPanache.status = user.getStatus();
-        userPanache.password = DigestUtils.sha256Hex(user.getPassword());
+        userPanache.password = user.getPassword();
         userPanache.email = user.getEmail().getAddress();
         userPanache.persist();
 
@@ -52,8 +51,10 @@ public class UserPanacheRepository implements UserRepository {
     public User authenticate(AuthenticateUserDto authDto) {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> params = mapper.convertValue(authDto, Map.class);
-        UserPanacheEntity result = UserPanacheEntity.find("email = :email and password = :password",
+
+        UserPanacheEntity result = UserPanacheEntity.find("email = :email",
                 params).firstResult();
+
         return result == null ? null : result.toUser();
     }
 
