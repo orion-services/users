@@ -46,4 +46,16 @@ public interface Repository extends PanacheRepository<User> {
      */
     Uni<User> authenticate(String email, String password);
 
+    /**
+    * Changes User password.
+    *
+    * @param password    : Actual password
+    * @param newPassword : New Password
+    * @param email       : User's email
+    *
+    * @return Returns a user asynchronously
+    */
+    Uni<User> changePassword(String password, String newPassword, String email);
+
+    Uni<String> recoverPassword(String email);
 }

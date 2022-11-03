@@ -20,6 +20,12 @@ import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.passay.CharacterData;
+import org.passay.CharacterRule;
+import org.passay.EnglishCharacterData;
+import org.passay.PasswordGenerator;
+
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
@@ -96,6 +102,83 @@ public class UserRepository implements Repository {
         .and("password", password).map();
     return find("email = :email and password = :password", params)
         .firstResult();
+  }
+
+  /**
+   * Changes User password.
+   *
+   * @param password    : Actual password
+   * @param newPassword : New Password
+   * @param email       : User's email
+   *
+   * @return Returns a user asynchronously
+   */
+  @Override
+  public Uni<User> changePassword(
+    final String password,
+    final String newPassword,
+    final String email) {
+      return checkEmail(email)
+      .onItem().ifNull()
+      .failWith(new IllegalArgumentException("User not found"))
+      .onItem().ifNotNull()
+      .transformToUni(user -> {
+        user.setPassword(password == user.getPassword()
+        ? newPassword : user.getPassword());
+        return Panache.<User>withTransaction(user::persist);
+      });
+  }
+
+
+  @Override
+  public Uni<String> recoverPassword(String email) {
+    String password = generateSecurePassword();
+    return checkEmail(email)
+    .onItem().ifNull()
+    .failWith(new IllegalArgumentException("Email not found"))
+    .onItem().ifNotNull()
+    .transformToUni(user -> changePassword(user.getPassword(), DigestUtils.sha256Hex(password), email)
+    .onItem().transform(item -> {return password;}));
+  }
+
+  private static String generateSecurePassword() {
+
+    /** Character rule for lower case characters. */
+    CharacterRule LCR = new CharacterRule(EnglishCharacterData.LowerCase);
+    /** Set the number of lower case characters. */
+    LCR.setNumberOfCharacters(2);
+
+    /** Character rule for uppercase characters. */
+    CharacterRule UCR = new CharacterRule(EnglishCharacterData.UpperCase);
+    /** Set the number of upper case characters. */
+    UCR.setNumberOfCharacters(2);
+
+    /** Character rule for digit characters. */
+    CharacterRule DR = new CharacterRule(EnglishCharacterData.Digit);
+    /** Set the number of digit characters. */
+    DR.setNumberOfCharacters(2);
+
+    /** Character rule for special characters. */
+    CharacterData special = new CharacterData() {
+
+      @Override
+      public String getErrorCode() {
+        return "Error";
+      }
+
+      @Override
+      public String getCharacters() {
+        return "!@#$%^&*()_+";
+      }
+    };
+    CharacterRule SR = new CharacterRule(special);
+    /** Set the number of special characters. */
+    SR.setNumberOfCharacters(2);
+
+    PasswordGenerator passGen = new PasswordGenerator();
+    String password = passGen.generatePassword(8, SR, LCR, UCR, DR);
+
+    return password;
   }
 
 }
