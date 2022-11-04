@@ -17,17 +17,11 @@
 package dev.orion.users;
 
 import static io.restassured.RestAssured.given;
-
-import java.util.Map;
-
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import dev.orion.users.domain.dto.CreateUserDto;
 import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest

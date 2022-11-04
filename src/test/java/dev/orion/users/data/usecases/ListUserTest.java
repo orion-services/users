@@ -35,7 +35,7 @@ public class ListUserTest {
 
     @Spy
     @InjectMocks
-    ListUser listUser = new ListUserImpl(repository);
+    ListUser listUser;
 
     public void setup() {
         // if we don't call below, we will get NullPointerException

@@ -9,13 +9,12 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+import com.google.inject.Inject;
+
 @ApplicationScoped
 public class ListUserImpl implements ListUser {
-    private UserRepository repository;
-
-    public ListUserImpl(UserRepository repository) {
-        this.repository = repository;
-    }
+    @Inject
+    protected UserRepository repository;
 
     /**
      * @param params
@@ -24,7 +23,6 @@ public class ListUserImpl implements ListUser {
     @Override
     @Transactional
     public List<User> list(UserQueryDto query) {
-        List<User> users = repository.findByQuery(query);
-        return users;
+        return repository.findByQuery(query);
     }
 }

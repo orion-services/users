@@ -20,10 +20,6 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UserPanacheRepository implements UserRepository {
-
-    public UserPanacheRepository() {
-    }
-
     /**
      * @param user
      * @return

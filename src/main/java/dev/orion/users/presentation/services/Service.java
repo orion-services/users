@@ -23,24 +23,24 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.security.PermitAll;
+import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import dev.orion.users.data.interfaces.Encrypter;
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.*;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.*;
-import dev.orion.users.infra.panache.repositories.UserPanacheRepository;
+import dev.orion.users.presentation.dto.Authentication;
 import dev.orion.users.presentation.dto.ResponseUserDto;
 import dev.orion.users.presentation.mappers.ResponseMapper;
-import dev.orion.users.validation.dto.Authentication;
-import dev.orion.users.infra.util.BCryptAdapter;
+
 import io.smallrye.jwt.build.Jwt;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -59,19 +59,20 @@ public class Service {
         @ConfigProperty(name = "user.issuer")
         public Optional<String> issuer;
 
-        private UserRepository repository = new UserPanacheRepository();
+        @Inject
+        protected AuthenticateUser authUser;
 
-        private Encrypter encrypter = new BCryptAdapter();
+        @Inject
+        protected CreateUser createUser;
 
-        private AuthenticateUser authUser = new AuthenticateUserImpl(repository, encrypter);
+        @Inject
+        protected ListUser listUser;
 
-        private CreateUser createUser = new CreateUserImpl(repository, encrypter);
+        @Inject
+        protected RemoveUser removeUser;
 
-        private ListUser listUser = new ListUserImpl(repository);
-
-        private RemoveUser removeUser = new RemoveUserImpl(repository);
-
-        private BlockUser blockUser = new BlockUserImpl(repository);
+        @Inject
+        protected BlockUser blockUser;
 
         @GET
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -194,7 +195,7 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         @Transactional
-        public String authenticate(@RequestBody AuthenticateUserDto authDto) {
+        public String authenticate(@RequestBody @Valid AuthenticateUserDto authDto) {
                 try {
                         User user = authUser.authenticate(authDto);
                         if (user == null) {

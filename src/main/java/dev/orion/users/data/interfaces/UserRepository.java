@@ -6,6 +6,8 @@ import dev.orion.users.domain.models.User;
 
 import java.util.List;
 
+import javax.enterprise.context.ApplicationScoped;
+
 public interface UserRepository {
 
     User create(User user);

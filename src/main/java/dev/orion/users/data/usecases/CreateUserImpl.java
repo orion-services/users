@@ -3,6 +3,8 @@ package dev.orion.users.data.usecases;
 import javax.enterprise.context.ApplicationScoped;
 import javax.transaction.Transactional;
 
+import javax.inject.Inject;
+
 import dev.orion.users.data.mappers.UserMapper;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.data.interfaces.Encrypter;
@@ -13,14 +15,11 @@ import dev.orion.users.domain.dto.CreateUserDto;
 
 @ApplicationScoped
 public class CreateUserImpl implements CreateUser {
-    private UserRepository repository;
-    private Encrypter encrypter;
 
-    /** User repository. */
-    public CreateUserImpl(UserRepository repository, Encrypter encrypter) {
-        this.repository = repository;
-        this.encrypter = encrypter;
-    }
+    @Inject
+    protected UserRepository repository;
+    @Inject
+    protected Encrypter encrypter;
 
     @Override
     @Transactional

@@ -1,15 +1,25 @@
 package dev.orion.users.domain.dto;
 
+import javax.validation.constraints.NotBlank;
+
 public class AuthenticateUserDto {
-    public String email;
-    public String password;
+    @NotBlank
+    public static String email;
+    @NotBlank
+    public static String password;
 
     public AuthenticateUserDto() {
     }
 
     public AuthenticateUserDto(String email, String password) {
-        this.email = email;
-        this.password = password;
+        this();
+        if (email != null && password != null && !email.isEmpty() && !password.isEmpty()) {
+            this.email = email;
+            this.password = password;
+        } else {
+            throw new IllegalArgumentException("All arguments are required");
+        }
+
     }
 
     public String getEmail() {

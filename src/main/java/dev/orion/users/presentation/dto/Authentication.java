@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.validation.dto;
+package dev.orion.users.presentation.dto;
 
 import dev.orion.users.domain.models.User;
 import lombok.Getter;
@@ -23,7 +23,8 @@ import lombok.Setter;
 /**
  * Authentication DTO.
  */
-@Getter @Setter
+@Getter
+@Setter
 public class Authentication {
 
     /** The user object. */

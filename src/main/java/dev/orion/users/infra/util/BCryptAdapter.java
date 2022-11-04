@@ -4,6 +4,7 @@ import javax.enterprise.context.ApplicationScoped;
 
 import dev.orion.users.data.interfaces.Encrypter;
 import io.quarkus.elytron.security.common.BcryptUtil;
+import lombok.val;
 
 @ApplicationScoped
 public class BCryptAdapter implements Encrypter {
@@ -14,8 +15,8 @@ public class BCryptAdapter implements Encrypter {
     }
 
     @Override
-    public boolean validate(String password) {
-        String passwordHashed = BcryptUtil.bcryptHash(password);
-        return BcryptUtil.matches(password, passwordHashed);
+    public boolean validate(String password, String passwordHashed) {
+        val passwordToBeValidated = BcryptUtil.bcryptHash(password);
+        return BcryptUtil.matches(passwordToBeValidated, passwordHashed);
     }
 }

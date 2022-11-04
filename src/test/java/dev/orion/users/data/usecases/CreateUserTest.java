@@ -17,8 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 
-import org.apache.commons.codec.digest.DigestUtils;
-
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CreateUserTest {
@@ -30,7 +28,7 @@ public class CreateUserTest {
     Encrypter encrypter;
 
     @InjectMocks
-    CreateUser createUser = new CreateUserImpl(repository, encrypter);
+    CreateUser createUser = new CreateUserImpl();
 
     @Test
     @DisplayName("Create a user")
