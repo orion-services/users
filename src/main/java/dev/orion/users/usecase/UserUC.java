@@ -84,6 +84,21 @@ public class UserUC implements UseCase {
         return user;
     }
 
+
+    @Override
+    public Uni<User> changeEmail(String email, String newEmail) {
+        Uni<User> user = null;
+            if (email.isBlank()
+            || newEmail.isBlank()) {
+                throw new IllegalArgumentException("Blank Arguments");
+            } else {
+                user = repository.changeEmail(
+                    email,
+                    newEmail);
+            }
+            return user;
+    }
+
     /**
     * Changes User password.
     *

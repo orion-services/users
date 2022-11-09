@@ -25,6 +25,7 @@ import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -179,6 +180,26 @@ public class Service {
                                                 Response.Status.UNAUTHORIZED));
         }
 
+        @PUT
+        @Path("/update/email")
+        @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+        @Produces(MediaType.TEXT_PLAIN)
+        @Retry(maxRetries = 1, delay = 2000)
+        public Uni<User> changeEmail(
+                @FormParam("email") @NotEmpty @Email final String email,
+                @FormParam("newEmail") @NotEmpty @Email final String newEmail
+        ) {
+                return uc.changeEmail(email, newEmail)
+                        .onItem().ifNotNull().transform(user -> user)
+                        .log()
+                        .onFailure().transform(e -> {
+                                String message = e.getMessage();
+                                throw new ServiceException(
+                                        message,
+                                        Response.Status.BAD_REQUEST);
+                        });
+        }
+
         /**
          * Change a password of a logged user.
          *
@@ -228,6 +249,28 @@ public class Service {
                         .send();
 
                 }).log()
+                .onFailure().transform(e -> {
+                        String message = e.getMessage();
+                        throw new ServiceException(
+                                message,
+                                Response.Status.BAD_REQUEST);
+                });
+        }
+
+        /**
+         * Deletes a User from the Service
+         *
+         * @param email : User's email
+         *
+         * @return Returns the number of deleted Users
+         */
+        @DELETE
+        @Path("/delete")
+        public Uni<Long> deleteUser(
+                @FormParam("email") @NotEmpty @Email final String email
+        ) {
+                return User.delete("email", email)
+                .log()
                 .onFailure().transform(e -> {
                         String message = e.getMessage();
                         throw new ServiceException(

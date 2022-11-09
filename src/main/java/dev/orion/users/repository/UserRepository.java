@@ -56,7 +56,15 @@ public class UserRepository implements Repository {
         .failWith(new IllegalArgumentException("The e-mail already exists"))
         .onItem()
         .ifNull()
-        .switchTo(() -> persistUser(name, email, password));
+        .switchTo(() -> {
+          return checkName(name)
+          .onItem()
+          .ifNotNull()
+          .failWith(new IllegalArgumentException("The name already existis"))
+          .onItem()
+          .ifNull()
+          .switchTo(() -> persistUser(name,email,password));
+        });
   }
 
   /**
@@ -68,6 +76,17 @@ public class UserRepository implements Repository {
    */
   private Uni<User> checkEmail(final String email) {
     return find("email", email).firstResult();
+  }
+
+  /**
+   * Verifies if the e-mail already exists in the database.
+   *
+   * @param email : An e-mail address
+   *
+   * @return Returns true if the e-mail already exists
+   */
+  private Uni<User> checkName(final String name) {
+    return find("name", name).firstResult();
   }
 
   /**
@@ -102,6 +121,34 @@ public class UserRepository implements Repository {
         .and("password", password).map();
     return find("email = :email and password = :password", params)
         .firstResult();
+  }
+
+  /**
+   * Changes User email.
+   *
+   * @param email     : User's email
+   * @param newEmail  : New User's Email
+   *
+   * @return Returns a user asynchronously
+   */
+  @Override
+  public Uni<User> changeEmail(
+    final String email,
+    final String newEmail) {
+      return checkEmail(email)
+      .onItem().ifNull()
+      .failWith(new IllegalArgumentException("User not found"))
+      .onItem().ifNotNull()
+      .transformToUni(user -> {
+        return checkEmail(newEmail)
+        .onItem().ifNotNull()
+        .failWith(new IllegalArgumentException("Email already in use"))
+        .onItem().ifNull()
+        .switchTo(() -> {
+          user.setEmail(newEmail);
+          return Panache.<User>withTransaction(user::persist);
+        });
+      });
   }
 
   /**
