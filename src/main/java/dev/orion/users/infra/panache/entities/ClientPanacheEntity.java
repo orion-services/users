@@ -1,0 +1,25 @@
+package dev.orion.users.infra.panache.entities;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import lombok.Data;
+
+@Entity(name = "clients")
+@Table(name = "clients")
+@Data
+public class ClientPanacheEntity {
+    @Id
+    @Column(name = "client_id")
+    private String clientId;
+    @Column(name = "client_secret")
+    private String clientSecret;
+    @Column(name = "redirect_uri")
+    private String redirectUri;
+    @Column(name = "scope")
+    private String scope;
+    @Column(name = "authorized_grant_types")
+    private String authorizedGrantTypes;
+}

@@ -31,6 +31,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import dev.orion.users.data.handlers.AuthorizationCodeHandler;
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.*;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
@@ -58,6 +59,9 @@ public class Service {
         /* Configure the issuer for JWT generation. */
         @ConfigProperty(name = "user.issuer")
         public Optional<String> issuer;
+
+        @Inject
+        protected AuthorizationCodeHandler authorizationCodeHandler;
 
         @Inject
         protected AuthenticateUser authUser;
@@ -165,7 +169,7 @@ public class Service {
 
                 try {
                         User user = createUser.create(createUserDto);
-                        String token = this.generateJWT(user);
+                        String token = this.authorizationCodeHandler.generateJWT(user);
                         Authentication auth = new Authentication();
                         auth.setToken(token);
                         auth.setUser(user);
@@ -195,33 +199,18 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         @Transactional
-        public String authenticate(@RequestBody @Valid AuthenticateUserDto authDto) {
+        public String authenticate(@RequestBody AuthenticateUserDto authDto) {
                 try {
                         User user = authUser.authenticate(authDto);
                         if (user == null) {
                                 throw new ServiceException("User not found",
                                                 Response.Status.UNAUTHORIZED);
                         }
-                        return this.generateJWT(user);
+                        return this.authorizationCodeHandler.generateJWT(user);
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }
 
-        }
-
-        /**
-         * Creates a JWT (JSON Web Token) to a user.
-         *
-         * @param user : The user object
-         *
-         * @return Returns the JWT
-         */
-        private String generateJWT(final User user) {
-                return Jwt.issuer(issuer.orElse("http://localhost:8080"))
-                                .upn(user.getEmail().getAddress())
-                                .groups(new HashSet<>(Arrays.asList("user")))
-                                .claim(Claims.c_hash, user.getHash())
-                                .sign();
         }
 
 }

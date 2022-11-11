@@ -28,11 +28,23 @@ public class User {
     /** The e-mail of the user. */
     private Email email;
 
-    private String hash;
+    private String user_id;
 
     private String password;
 
     private String status;
+
+    private String roles;
+
+    private String scopes;
+
+    public String getRoles() {
+        return roles;
+    }
+
+    public void setRoles(String roles) {
+        this.roles = roles;
+    }
 
     public String getName() {
         return name;
@@ -71,11 +83,11 @@ public class User {
     }
 
     public String getHash() {
-        return hash;
+        return user_id;
     }
 
     public void setHash(String hash) {
-        this.hash = hash;
+        this.user_id = hash;
     }
 
     /**
@@ -87,7 +99,7 @@ public class User {
     public User(String name, String email, String password) {
         this();
         this.name = this.validateName(name);
-        this.hash = UUID.randomUUID().toString();
+        this.user_id = UUID.randomUUID().toString();
         this.email = new Email(email);
         this.password = this.validatePassword(password);
         this.status = StatusEnum.ACTIVATED.name();
@@ -98,7 +110,7 @@ public class User {
         return "User{" +
                 "name:'" + name + '\'' +
                 ", email:'" + email + '\'' +
-                ", hash:'" + hash + '\'' +
+                ", hash:'" + user_id + '\'' +
                 ", status:'" + status + '\'' +
                 '}';
     }

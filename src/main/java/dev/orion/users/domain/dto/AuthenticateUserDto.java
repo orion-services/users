@@ -1,12 +1,12 @@
 package dev.orion.users.domain.dto;
 
-import javax.validation.constraints.NotBlank;
+import javax.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 public class AuthenticateUserDto {
-    @NotBlank
-    public static String email;
-    @NotBlank
-    public static String password;
+    public String email;
+
+    public String password;
 
     public AuthenticateUserDto() {
     }
