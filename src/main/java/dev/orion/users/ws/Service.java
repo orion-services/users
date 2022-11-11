@@ -183,7 +183,7 @@ public class Service {
         @PUT
         @Path("/update/email")
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<User> changeEmail(
                 @FormParam("email") @NotEmpty @Email final String email,
@@ -212,7 +212,7 @@ public class Service {
         @PUT
         @Path("/update/password")
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-        @Produces(MediaType.TEXT_PLAIN)
+        @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<User> changePassword(
                 @FormParam("email") @NotEmpty @Email final String email,

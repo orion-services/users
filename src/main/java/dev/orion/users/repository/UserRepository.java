@@ -170,8 +170,11 @@ public class UserRepository implements Repository {
       .failWith(new IllegalArgumentException("User not found"))
       .onItem().ifNotNull()
       .transformToUni(user -> {
-        user.setPassword(password == user.getPassword()
-        ? newPassword : user.getPassword());
+        if (password.equals(user.getPassword())) {
+          user.setPassword(newPassword);
+        } else {
+          throw new IllegalArgumentException("Passwords don't match");
+        }
         return Panache.<User>withTransaction(user::persist);
       });
   }
