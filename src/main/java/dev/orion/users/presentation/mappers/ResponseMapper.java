@@ -5,11 +5,11 @@ import dev.orion.users.presentation.dto.ResponseUserDto;
 
 public class ResponseMapper {
 
-    public static ResponseUserDto toResponse(User user){
+    public static ResponseUserDto toResponse(User user) {
         ResponseUserDto response = new ResponseUserDto();
-        response.hash = user.getHash();
+        response.hash = user.getUserId();
         response.name = user.getName();
-        response.email= user.getEmail().getAddress();
+        response.email = user.getEmail().getAddress();
         response.status = user.getStatus();
         return response;
     }

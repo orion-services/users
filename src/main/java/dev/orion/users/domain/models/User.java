@@ -82,12 +82,12 @@ public class User {
         this.status = status;
     }
 
-    public String getHash() {
+    public String getUserId() {
         return user_id;
     }
 
-    public void setHash(String hash) {
-        this.user_id = hash;
+    public void setUserId(String user_id) {
+        this.user_id = user_id;
     }
 
     /**

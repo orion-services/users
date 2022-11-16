@@ -29,7 +29,7 @@ public class UserPanacheRepository implements UserRepository {
     public User create(User user) {
         UserPanacheEntity userPanache = new UserPanacheEntity();
         userPanache.name = user.getName();
-        userPanache.hash = user.getHash();
+        userPanache.hash = user.getUserId();
         userPanache.status = user.getStatus();
         userPanache.password = user.getPassword();
         userPanache.email = user.getEmail().getAddress();

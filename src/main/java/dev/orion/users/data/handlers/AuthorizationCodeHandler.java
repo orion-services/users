@@ -1,6 +1,9 @@
 package dev.orion.users.data.handlers;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -17,6 +20,8 @@ public class AuthorizationCodeHandler {
     @ConfigProperty(name = "AuthCodeHandler.issuer")
     public Optional<String> issuer;
 
+    protected Long expiresInMin = 30L;
+
     /**
      * Creates a JWT (JSON Web Token) to a user.
      *
@@ -24,11 +29,27 @@ public class AuthorizationCodeHandler {
      *
      * @return Returns the JWT
      */
-    protected String generateJWT(final User user) {
+    protected String generateJWT(User user) {
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
                 .upn(user.getEmail().getAddress())
+                .claim("user_id", user.getUserId())
+                .claim("roles", user.getRoles())
+                .expiresIn(expiresInMin) // expires in 30 minutes
                 .groups(new HashSet<>(Arrays.asList("user")))
-                .claim(Claims.c_hash, user.getHash())
+                .claim(Claims.c_hash, user.getUserId())
+                .sign();
+    }
+
+    protected String getAccessToken() {
+        return null;
+    }
+
+    protected String getRefreshToken(User user) {
+        Instant now = Instant.now();
+        return Jwt.issuer(issuer.orElse(
+                "http://localhost:8080"))
+                .claim("user_id", user.getUserId())
+                .expiresIn(Date.from(now.plus(1, ChronoUnit.DAYS)).getTime())// refresh token for 1 day.
                 .sign();
     }
 }

@@ -96,7 +96,7 @@ public class ListUserTest {
 
         Mockito.verify(repository, Mockito.times(1)).findByQuery(query);
 
-        assertEquals(users.get(0).getHash(), query.hash);
+        assertEquals(users.get(0).getUserId(), query.hash);
     }
 
     @Test
