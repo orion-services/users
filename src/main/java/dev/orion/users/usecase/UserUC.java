@@ -84,4 +84,56 @@ public class UserUC implements UseCase {
         return user;
     }
 
+
+    @Override
+    public Uni<User> changeEmail(String email, String newEmail) {
+        Uni<User> user = null;
+            if (email.isBlank()
+            || newEmail.isBlank()) {
+                throw new IllegalArgumentException("Blank Arguments");
+            } else {
+                user = repository.changeEmail(
+                    email,
+                    newEmail);
+            }
+            return user;
+    }
+
+    /**
+    * Changes User password.
+    *
+    * @param password    : Actual password
+    * @param newPassword : New Password
+    * @param email       : User's email
+    *
+    * @return Returns a user asynchronously
+    */
+    public Uni<User> changePassword(
+        final String password,
+        final String newPassword,
+        final String email) {
+            Uni<User> user = null;
+            if (password.isBlank()
+            || newPassword.isBlank()
+            || email.isBlank()) {
+                throw new IllegalArgumentException("Blank Arguments");
+            } else {
+                user = repository.changePassword(
+                    DigestUtils.sha256Hex(password),
+                    DigestUtils.sha256Hex(newPassword),
+                    email);
+            }
+            return user;
+    }
+
+
+    public Uni<String> recoverPassword(final String email) {
+        Uni<String> response = null;
+        if (email.isBlank()){
+            throw new IllegalArgumentException("Blank Arguments");
+        } else {
+            response = repository.recoverPassword(email);
+        }
+        return response;
+    }
 }

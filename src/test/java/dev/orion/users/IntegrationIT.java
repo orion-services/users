@@ -182,7 +182,7 @@ class IntegrationIT {
   void createAuthenticate() {
     given()
         .when()
-        .param("name", "Orion")
+        .param("name", "OrionOrion")
         .param("email", "orionOrion@test.com")
         .param("password", "12345678")
         .post("/api/user/createAuthenticate")
