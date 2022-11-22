@@ -110,4 +110,52 @@ class UnitTest {
     });
   }
 
+  @Test
+  @DisplayName("Change email")
+  @Order(8)
+  void changeEmail() {
+    Mockito.when(repository.changeEmail("orion@test.com", "newOrion@test.com"))
+      .thenReturn(Uni.createFrom().item(new User()));
+    Uni<User> uni = uc.changeEmail("orion@test.com", "newOrion@test.com");
+    assertNotNull(uni);
+  }
+
+  @Test
+  @DisplayName("Change email")
+  @Order(9)
+  void changeEmailWithBlankArguments() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      uc.changeEmail("", "orion@test.com");
+    });
+  }
+
+  @Test
+  @DisplayName("Change password with blank arguments")
+  @Order(12)
+  void changePasswordWithBlankArguments() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      uc.changePassword("1234", "12345678","");
+    });
+  }
+
+  @Test
+  @DisplayName("Recover password")
+  @Order(13)
+  void recoverPassword() {
+    Mockito.when(repository.recoverPassword("orion@test.com"))
+      .thenReturn(Uni.createFrom().item("ok"));
+    Uni<String> uni = uc.recoverPassword("orion@test.com");
+    assertNotNull(uni);
+  }
+
+  @Test
+  @DisplayName("Recover password with blank arguments")
+  @Order(14)
+  void recoverPasswordWithBlankArguments() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      uc.recoverPassword("");
+    });
+  }
+
+
 }
