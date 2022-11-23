@@ -17,6 +17,7 @@
 package dev.orion.users.ws;
 
 import javax.annotation.security.RolesAllowed;
+import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -29,20 +30,27 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.eclipse.microprofile.faulttolerance.Retry;
+import org.eclipse.microprofile.jwt.Claim;
+import org.eclipse.microprofile.jwt.Claims;
 
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
+import dev.orion.users.ws.expections.UserWSException;
 import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
 import io.quarkus.qute.CheckedTemplate;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
-//@RolesAllowed("user")
+@RolesAllowed("user")
 public class UpdateWS {
 
     /** Business logic of the system. */
     private UseCase uc = new UserUC();
+
+    @Inject
+    @Claim(standard = Claims.email)
+    String jwtEmail;
 
     @PUT
     @Path("/update/email")
@@ -52,12 +60,18 @@ public class UpdateWS {
     public Uni<User> changeEmail(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
-        return uc.changeEmail(email, newEmail)
+
+                if (!jwtEmail.equals(email)){
+                    System.out.println(jwtEmail);
+                    throw new UserWSException("token errado", Response.Status.BAD_REQUEST);
+                }
+
+                return uc.changeEmail(email, newEmail)
                 .onItem().ifNotNull().transform(user -> user)
                 .log()
                 .onFailure().transform(e -> {
                     String message = e.getMessage();
-                    throw new WSException(
+                    throw new UserWSException(
                             message,
                             Response.Status.BAD_REQUEST);
                 });
@@ -86,7 +100,7 @@ public class UpdateWS {
                 .log()
                 .onFailure().transform(e -> {
                     String message = e.getMessage();
-                    throw new WSException(
+                    throw new UserWSException(
                             message,
                             Response.Status.BAD_REQUEST);
                 });
@@ -99,7 +113,7 @@ public class UpdateWS {
 
     @POST
     @Path("/recoverPassword")
-    public Uni<Void> sendEmailUsingReactiveMaiwler(
+    public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
         return uc.recoverPassword(email)
                 .onItem().ifNotNull()
@@ -112,12 +126,10 @@ public class UpdateWS {
                 }).log()
                 .onFailure().transform(e -> {
                     String message = e.getMessage();
-                    throw new WSException(
+                    throw new UserWSException(
                             message,
                             Response.Status.BAD_REQUEST);
                 });
     }
-
-
 
 }

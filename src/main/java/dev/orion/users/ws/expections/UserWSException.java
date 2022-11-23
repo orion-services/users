@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.ws;
+package dev.orion.users.ws.expections;
 
 import java.util.Map;
 
@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response.Status;
 /**
  * Service exception.
  */
-public class WSException extends WebApplicationException {
+public class UserWSException extends WebApplicationException {
 
     /**
      * Service Exception constructor.
@@ -33,7 +33,7 @@ public class WSException extends WebApplicationException {
      * @param message : The message of the exception
      * @param status  : The HTTP error code
      */
-    public WSException(final String message, final Status status) {
+    public UserWSException(final String message, final Status status) {
         super(init(message, status));
     }
 

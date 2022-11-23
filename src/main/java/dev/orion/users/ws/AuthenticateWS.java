@@ -41,6 +41,7 @@ import dev.orion.users.dto.Authentication;
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
+import dev.orion.users.ws.expections.UserWSException;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.smallrye.jwt.build.Jwt;
@@ -63,7 +64,7 @@ public class AuthenticateWS {
 
         /* Configure the issuer for JWT generation. */
         @ConfigProperty(name = "user.issuer")
-        private Optional<String> issuer;
+        protected Optional<String> issuer;
 
         /** Business logic of the system. */
         private UseCase uc = new UserUC();
@@ -75,11 +76,12 @@ public class AuthenticateWS {
          * @param password : The password of the user
          *
          * @return A JWT (JSON Web Token)
-         * @throws WSException Returns a HTTP 401 if the services is not
+         * @throws UserWSException Returns a HTTP 401 if the services is not
          *                     able to find the user in the database
          */
         @POST
         @Path("/authenticate")
+        @Produces(MediaType.TEXT_PLAIN)
         @Retry(maxRetries = 1, delay = 2000)
         public Uni<String> authenticate(
                         @RestForm @NotEmpty @Email final String email,
@@ -91,7 +93,7 @@ public class AuthenticateWS {
                                 .transform(this::generateJWT)
                                 .onItem()
                                 .ifNull()
-                                .failWith(new WSException("User not found",
+                                .failWith(new UserWSException("User not found",
                                                 Response.Status.UNAUTHORIZED));
         }
 
@@ -104,10 +106,11 @@ public class AuthenticateWS {
          */
         private String generateJWT(final User user) {
                 return Jwt.issuer(issuer.orElse("http://localhost:8080"))
-                                .upn(user.getEmail())
-                                .groups(new HashSet<>(Arrays.asList("user")))
-                                .claim(Claims.c_hash, user.getHash())
-                                .sign();
+                        .upn(user.getEmail())
+                        .groups(new HashSet<>(Arrays.asList("user")))
+                        .claim(Claims.c_hash, user.getHash())
+                        .claim(Claims.email, user.getEmail())
+                        .sign();
         }
 
         /**
@@ -118,10 +121,9 @@ public class AuthenticateWS {
          * @param password : The password of the user
          *
          * @return The user object in JSON format
-         * @throws WSException Returns a HTTP 409 if the e-mail already
-         *                     exists in the database or if the password is lower than
-         *                     eight
-         *                     characters
+         * @throws UserWSException Returns a HTTP 409 if the e-mail already
+         *  exists in the database or if the password is lower than
+         *  eight characters
          */
         @POST
         @Path("/create")
@@ -133,19 +135,17 @@ public class AuthenticateWS {
 
                 try {
                         return uc.createUser(name, email, password)
-                                        .onItem().ifNotNull().transform(user -> user)
+                                .onItem().ifNotNull().transform(user -> user)
                                         .log()
                                         .onFailure().transform(e -> {
                                                 String message = e.getMessage();
-                                                throw new WSException(
+                                                throw new UserWSException(
                                                                 message,
                                                                 Response.Status.BAD_REQUEST);
                                         });
                 } catch (Exception e) {
                         String message = e.getMessage();
-                        throw new WSException(
-                                        message,
-                                        Response.Status.BAD_REQUEST);
+                        throw new UserWSException(message, Response.Status.BAD_REQUEST);
                 }
         }
 
@@ -157,7 +157,7 @@ public class AuthenticateWS {
          * @param password : The password of the user
          *
          * @return The Authentication DTO
-         * @throws WSException Returns a HTTP 409 if the e-mail already
+         * @throws UserWSException Returns a HTTP 409 if the e-mail already
          *                     exists in the database or if the password is lower than
          *                     eight
          *                     characters
@@ -172,19 +172,17 @@ public class AuthenticateWS {
 
                 try {
                         return uc.createUser(name, email, password)
-                                        .onItem().ifNotNull().transform(user -> {
-                                                String token = generateJWT(user);
-                                                Authentication auth = new Authentication();
-                                                auth.setToken(token);
-                                                auth.setUser(user);
-                                                return auth;
-                                        })
-                                        .log();
+                                .onItem().ifNotNull().transform(user -> {
+                                        String token = generateJWT(user);
+                                        Authentication auth = new Authentication();
+                                        auth.setToken(token);
+                                        auth.setUser(user);
+                                        return auth;
+                                })
+                                .log();
                 } catch (Exception e) {
                         String message = e.getMessage();
-                        throw new WSException(
-                                        message,
-                                        Response.Status.BAD_REQUEST);
+                        throw new UserWSException(message, Response.Status.BAD_REQUEST);
                 }
         }
 

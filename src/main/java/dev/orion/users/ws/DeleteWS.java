@@ -16,6 +16,7 @@
  */
 package dev.orion.users.ws;
 
+import javax.annotation.security.RolesAllowed;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.DELETE;
@@ -26,10 +27,11 @@ import javax.ws.rs.core.Response;
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
+import dev.orion.users.ws.expections.UserWSException;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
-//@RolesAllowed("user")
+@RolesAllowed("user")
 public class DeleteWS {
 
     /** Business logic of the system. */
@@ -50,7 +52,7 @@ public class DeleteWS {
                 .log()
                 .onFailure().transform(e -> {
                     String message = e.getMessage();
-                    throw new WSException(
+                    throw new UserWSException(
                             message,
                             Response.Status.BAD_REQUEST);
                 });

@@ -279,5 +279,5 @@ class IntegrationIT {
         .then()
         .statusCode(200);
   }
-  
+
 }

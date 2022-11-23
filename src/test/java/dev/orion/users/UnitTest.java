@@ -131,7 +131,7 @@ class UnitTest {
 
   @Test
   @DisplayName("Change password with blank arguments")
-  @Order(12)
+  @Order(10)
   void changePasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.changePassword("1234", "12345678","");
@@ -140,7 +140,7 @@ class UnitTest {
 
   @Test
   @DisplayName("Recover password")
-  @Order(13)
+  @Order(11)
   void recoverPassword() {
     Mockito.when(repository.recoverPassword("orion@test.com"))
       .thenReturn(Uni.createFrom().item("ok"));
@@ -150,7 +150,7 @@ class UnitTest {
 
   @Test
   @DisplayName("Recover password with blank arguments")
-  @Order(14)
+  @Order(12)
   void recoverPasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.recoverPassword("");
