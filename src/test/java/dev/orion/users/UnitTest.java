@@ -114,9 +114,9 @@ class UnitTest {
   @DisplayName("Change email")
   @Order(8)
   void changeEmail() {
-    Mockito.when(repository.changeEmail("orion@test.com", "newOrion@test.com"))
+    Mockito.when(repository.updateEmail("orion@test.com", "newOrion@test.com"))
       .thenReturn(Uni.createFrom().item(new User()));
-    Uni<User> uni = uc.changeEmail("orion@test.com", "newOrion@test.com");
+    Uni<User> uni = uc.updateEmail("orion@test.com", "newOrion@test.com");
     assertNotNull(uni);
   }
 
@@ -125,7 +125,7 @@ class UnitTest {
   @Order(9)
   void changeEmailWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      uc.changeEmail("", "orion@test.com");
+      uc.updateEmail("", "orion@test.com");
     });
   }
 
@@ -156,6 +156,5 @@ class UnitTest {
       uc.recoverPassword("");
     });
   }
-
 
 }

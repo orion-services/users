@@ -24,9 +24,11 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
+@TestSecurity(authorizationEnabled = false)
 class IntegrationIT {
 
   @Test

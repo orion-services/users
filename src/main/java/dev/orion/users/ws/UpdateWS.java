@@ -43,7 +43,7 @@ import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
 @RolesAllowed("user")
-public class UpdateWS {
+public class UpdateWS extends BaseWS {
 
     /** Business logic of the system. */
     private UseCase uc = new UserUC();
@@ -52,28 +52,33 @@ public class UpdateWS {
     @Claim(standard = Claims.email)
     String jwtEmail;
 
+    /**
+     * Updates the e-nail of the user.
+     *
+     * @param email    : Current e-mail
+     * @param newEmail : New e-mail
+     * @return A JWT (JSON Web Token)
+     * @throws UserWSException Returns a HTTP 400 if the current jwt is
+     * outdated or or if there are other problems such as username not found
+     * or email already used
+     */
     @PUT
     @Path("/update/email")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Retry(maxRetries = 1, delay = 2000)
-    public Uni<User> changeEmail(
+    @Produces(MediaType.TEXT_PLAIN)
+    @Retry(maxRetries = 0, delay = 2000)
+    public Uni<String> updateEmail(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
 
-                if (!jwtEmail.equals(email)){
-                    System.out.println(jwtEmail);
-                    throw new UserWSException("token errado", Response.Status.BAD_REQUEST);
-                }
+            // Checks the e-mail of the token
+            checkTokenEmail(email, jwtEmail);
 
-                return uc.changeEmail(email, newEmail)
-                .onItem().ifNotNull().transform(user -> user)
+            return uc.updateEmail(email, newEmail)
                 .log()
+                .onItem().ifNotNull().transform(this::generateJWT)
                 .onFailure().transform(e -> {
-                    String message = e.getMessage();
-                    throw new UserWSException(
-                            message,
-                            Response.Status.BAD_REQUEST);
+                    throw new UserWSException(e.getMessage(), Response.Status.BAD_REQUEST);
                 });
     }
 
@@ -95,26 +100,22 @@ public class UpdateWS {
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password,
             @FormParam("newPassword") @NotEmpty final String newPassword) {
+
         return uc.changePassword(password, newPassword, email)
                 .onItem().ifNotNull().transform(user -> user)
                 .log()
                 .onFailure().transform(e -> {
-                    String message = e.getMessage();
                     throw new UserWSException(
-                            message,
+                        e.getMessage(),
                             Response.Status.BAD_REQUEST);
                 });
-    }
-
-    @CheckedTemplate
-    public static class Templates {
-        public static native MailTemplateInstance recoverPassword(String password);
     }
 
     @POST
     @Path("/recoverPassword")
     public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
+
         return uc.recoverPassword(email)
                 .onItem().ifNotNull()
                 .transformToUni(password -> {
@@ -130,6 +131,11 @@ public class UpdateWS {
                             message,
                             Response.Status.BAD_REQUEST);
                 });
+    }
+
+    @CheckedTemplate
+    public static class Templates {
+        public static native MailTemplateInstance recoverPassword(String password);
     }
 
 }

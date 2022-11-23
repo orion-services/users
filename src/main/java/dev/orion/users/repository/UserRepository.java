@@ -124,15 +124,15 @@ public class UserRepository implements Repository {
   }
 
   /**
-   * Changes User email.
+   * Updates the user's e-mail.
    *
    * @param email     : User's email
    * @param newEmail  : New User's Email
    *
-   * @return Returns a user asynchronously
+   * @return Uni<User> object
    */
   @Override
-  public Uni<User> changeEmail(
+  public Uni<User> updateEmail(
     final String email,
     final String newEmail) {
       return checkEmail(email)

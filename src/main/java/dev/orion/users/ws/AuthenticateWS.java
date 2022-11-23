@@ -16,10 +16,6 @@
  */
 package dev.orion.users.ws;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-
 import javax.annotation.security.PermitAll;
 import javax.inject.Inject;
 import javax.validation.constraints.Email;
@@ -32,9 +28,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
-import org.eclipse.microprofile.jwt.Claims;
 import org.jboss.resteasy.reactive.RestForm;
 
 import dev.orion.users.dto.Authentication;
@@ -44,7 +38,6 @@ import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.expections.UserWSException;
 import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.reactive.ReactiveMailer;
-import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -54,17 +47,13 @@ import io.smallrye.mutiny.Uni;
 @PermitAll
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
-public class AuthenticateWS {
+public class AuthenticateWS extends BaseWS {
 
         @Inject
         Mailer mailer;
 
         @Inject
         ReactiveMailer reactiveMailer;
-
-        /* Configure the issuer for JWT generation. */
-        @ConfigProperty(name = "user.issuer")
-        protected Optional<String> issuer;
 
         /** Business logic of the system. */
         private UseCase uc = new UserUC();
@@ -77,7 +66,7 @@ public class AuthenticateWS {
          *
          * @return A JWT (JSON Web Token)
          * @throws UserWSException Returns a HTTP 401 if the services is not
-         *                     able to find the user in the database
+         *                         able to find the user in the database
          */
         @POST
         @Path("/authenticate")
@@ -90,27 +79,11 @@ public class AuthenticateWS {
                 return uc.authenticate(email, password)
                                 .onItem()
                                 .ifNotNull()
-                                .transform(this::generateJWT)
+                                .transform(super::generateJWT)
                                 .onItem()
                                 .ifNull()
                                 .failWith(new UserWSException("User not found",
                                                 Response.Status.UNAUTHORIZED));
-        }
-
-        /**
-         * Creates a JWT (JSON Web Token) to a user.
-         *
-         * @param user : The user object
-         *
-         * @return Returns the JWT
-         */
-        private String generateJWT(final User user) {
-                return Jwt.issuer(issuer.orElse("http://localhost:8080"))
-                        .upn(user.getEmail())
-                        .groups(new HashSet<>(Arrays.asList("user")))
-                        .claim(Claims.c_hash, user.getHash())
-                        .claim(Claims.email, user.getEmail())
-                        .sign();
         }
 
         /**
@@ -122,8 +95,9 @@ public class AuthenticateWS {
          *
          * @return The user object in JSON format
          * @throws UserWSException Returns a HTTP 409 if the e-mail already
-         *  exists in the database or if the password is lower than
-         *  eight characters
+         *                         exists in the database or if the password is lower
+         *                         than
+         *                         eight characters
          */
         @POST
         @Path("/create")
@@ -135,7 +109,7 @@ public class AuthenticateWS {
 
                 try {
                         return uc.createUser(name, email, password)
-                                .onItem().ifNotNull().transform(user -> user)
+                                        .onItem().ifNotNull().transform(user -> user)
                                         .log()
                                         .onFailure().transform(e -> {
                                                 String message = e.getMessage();
@@ -158,9 +132,10 @@ public class AuthenticateWS {
          *
          * @return The Authentication DTO
          * @throws UserWSException Returns a HTTP 409 if the e-mail already
-         *                     exists in the database or if the password is lower than
-         *                     eight
-         *                     characters
+         *                         exists in the database or if the password is lower
+         *                         than
+         *                         eight
+         *                         characters
          */
         @POST
         @Path("/createAuthenticate")

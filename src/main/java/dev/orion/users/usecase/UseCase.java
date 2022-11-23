@@ -37,23 +37,31 @@ public interface UseCase {
     /**
      * Authenticates the user in the service (UC: Authenticate).
      *
-     * @param email  : The email of the user
+     * @param email    : The email of the user
      * @param password : The password of the user
-     * @return A Uni<User> object
+     * @return An Uni<User> object
      */
-     Uni<User> authenticate(String email, String password);
+    Uni<User> authenticate(String email, String password);
 
-    Uni<User> changeEmail(String email, String newEmail);
+    /**
+     * Updates the e-mail of the user.
+     *
+     * @param email    : Current user's e-mail
+     * @param newEmail : New e-mail
+     *
+     * @return An Uni<User> object
+     */
+    Uni<User> updateEmail(String email, String newEmail);
 
-     /**
-    * Changes User password.
-    *
-    * @param password    : Actual password
-    * @param newPassword : New Password
-    * @param email       : User's email
-    *
-    * @return Returns a user asynchronously
-    */
+    /**
+     * Changes User password.
+     *
+     * @param password    : Current password
+     * @param newPassword : New Password
+     * @param email       : User's email
+     *
+     * @return An Uni<User> object
+     */
     Uni<User> changePassword(String password, String newPassword, String email);
 
     Uni<String> recoverPassword(String email);
