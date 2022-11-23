@@ -190,4 +190,93 @@ class IntegrationIT {
         .statusCode(200);
   }
 
+  @Test
+  @Order(14)
+  void changeEmail() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orion@test.com")
+        .formParam("newEmail", "newOrion@test.com")
+        .when()
+        .put("/api/user/update/email")
+        .then()
+        .statusCode(200);
+  }
+
+  @Test
+  @Order(15)
+  void changeEmailFromNonExistingUser() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orionnnn@test.com")
+        .formParam("newEmail", "newOrion@test.com")
+        .when()
+        .put("/api/user/update/email")
+        .then()
+        .statusCode(400);
+  }
+
+  @Test
+  @Order(16)
+  void changePassword() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orionOrion@test.com")
+        .formParam("password", "12345678")
+        .formParam("newPassword", "87654321")
+        .when()
+        .put("/api/user/update/password")
+        .then()
+        .statusCode(200);
+  }
+
+  @Test
+  @Order(17)
+  void changePasswordWithWrongPassword() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orionOrion@test.com")
+        .formParam("password", "12345678")
+        .formParam("newPassword", "87654321")
+        .when()
+        .put("/api/user/update/password")
+        .then()
+        .statusCode(400);
+  }
+
+  @Test
+  @Order(18)
+  void recoverPassword() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orionOrion@test.com")
+        .when()
+        .post("/api/user/recoverPassword")
+        .then()
+        .statusCode(204);
+  }
+
+  @Test
+  @Order(19)
+  void recoverPasswordFromNonExistingUser() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "notExist@test.com")
+        .when()
+        .post("/api/user/recoverPassword")
+        .then()
+        .statusCode(400);
+  }
+
+  @Test
+  @Order(20)
+  void deleteUser() {
+    given()
+        .contentType("application/x-www-form-urlencoded; charset=utf-8")
+        .formParam("email", "orionOrion@test.com")
+        .when()
+        .delete("/api/user/delete")
+        .then()
+        .statusCode(200);
+  }
 }
