@@ -25,7 +25,7 @@ import javax.ws.rs.core.Response.Status;
 /**
  * Service exception.
  */
-public class ServiceException extends WebApplicationException {
+public class WSException extends WebApplicationException {
 
     /**
      * Service Exception constructor.
@@ -33,7 +33,7 @@ public class ServiceException extends WebApplicationException {
      * @param message : The message of the exception
      * @param status  : The HTTP error code
      */
-    public ServiceException(final String message, final Status status) {
+    public WSException(final String message, final Status status) {
         super(init(message, status));
     }
 
