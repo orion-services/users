@@ -158,7 +158,7 @@ public class UpdateWS extends BaseWS {
      */
     @CheckedTemplate
     public static class Templates {
-        public static native MailTemplateInstance recoverPassword(String pwd);
+        public static native MailTemplateInstance recoverPassword(String password);
     }
 
 }
