@@ -29,26 +29,21 @@ public class AuthorizationCodeHandler {
      *
      * @return Returns the JWT
      */
-    protected String generateJWT(User user) {
+    public String getAccessToken(User user) {
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
                 .upn(user.getEmail().getAddress())
-                .claim("user_id", user.getUserId())
-                .claim("roles", user.getRoles())
+                .claim("userId", user.getUserId())
                 .expiresIn(expiresInMin) // expires in 30 minutes
                 .groups(new HashSet<>(Arrays.asList("user")))
                 .claim(Claims.c_hash, user.getUserId())
                 .sign();
     }
 
-    protected String getAccessToken() {
-        return null;
-    }
-
-    protected String getRefreshToken(User user) {
+    public String getRefreshToken(User user) {
         Instant now = Instant.now();
         return Jwt.issuer(issuer.orElse(
                 "http://localhost:8080"))
-                .claim("user_id", user.getUserId())
+                .claim("userId", user.getUserId())
                 .expiresIn(Date.from(now.plus(1, ChronoUnit.DAYS)).getTime())// refresh token for 1 day.
                 .sign();
     }

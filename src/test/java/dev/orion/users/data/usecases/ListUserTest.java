@@ -121,7 +121,7 @@ public class ListUserTest {
 
     private User createUserMock(String hash, String name, String email) {
         User user = new User();
-        user.setHash(hash);
+        user.setUserId(hash);
         user.setName(name);
         user.setEmail(new Email(email));
         return user;

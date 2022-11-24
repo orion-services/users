@@ -33,4 +33,5 @@ public class Authentication {
     /** The authentication token (jwt). */
     private String token;
 
+    private String refreshToken;
 }

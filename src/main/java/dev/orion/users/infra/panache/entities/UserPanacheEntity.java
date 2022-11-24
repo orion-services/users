@@ -17,7 +17,7 @@ public class UserPanacheEntity extends PanacheEntityBase {
     public Long id;
 
     @Column(name = "hash")
-    public String hash;
+    public String userId;
 
     @Column(name = "name")
     public String name;
@@ -37,7 +37,8 @@ public class UserPanacheEntity extends PanacheEntityBase {
         user.setName(this.name);
         user.setEmail(new Email(this.email));
         user.setStatus(this.status);
-        user.setHash(this.hash);
+        user.setUserId(this.userId);
+        user.setPassword(this.password);
         return user;
     }
 }

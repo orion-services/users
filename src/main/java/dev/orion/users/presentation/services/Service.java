@@ -49,7 +49,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import dev.orion.users.domain.dto.CreateUserDto;
 import org.eclipse.microprofile.jwt.Claims;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
-
+import lombok.val;
 /**
  * User API.
  */
@@ -169,9 +169,11 @@ public class Service {
 
                 try {
                         User user = createUser.create(createUserDto);
-                        String token = this.authorizationCodeHandler.generateJWT(user);
+                        String token = this.authorizationCodeHandler.getAccessToken(user);
+                        String refreshToken = this.authorizationCodeHandler.getRefreshToken(user);
                         Authentication auth = new Authentication();
                         auth.setToken(token);
+                        auth.setRefreshToken(refreshToken);
                         auth.setUser(user);
                         return auth;
                 } catch (Exception e) {
@@ -199,14 +201,15 @@ public class Service {
         @Produces(MediaType.APPLICATION_JSON)
         @Retry(maxRetries = 1, delay = 2000)
         @Transactional
-        public String authenticate(@RequestBody AuthenticateUserDto authDto) {
+        public Authentication authenticate(@RequestBody AuthenticateUserDto authDto) {
                 try {
                         User user = authUser.authenticate(authDto);
-                        if (user == null) {
-                                throw new ServiceException("User not found",
-                                                Response.Status.UNAUTHORIZED);
-                        }
-                        return this.authorizationCodeHandler.generateJWT(user);
+                        String token = this.authorizationCodeHandler.getAccessToken(user);
+                        String refreshToken = this.authorizationCodeHandler.getRefreshToken(user);
+                        Authentication auth = new Authentication();
+                        auth.setToken(token);
+                        auth.setRefreshToken(refreshToken);
+                        return auth;
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }

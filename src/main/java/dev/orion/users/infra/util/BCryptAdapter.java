@@ -17,6 +17,6 @@ public class BCryptAdapter implements Encrypter {
     @Override
     public boolean validate(String password, String passwordHashed) {
         val passwordToBeValidated = BcryptUtil.bcryptHash(password);
-        return BcryptUtil.matches(passwordToBeValidated, passwordHashed);
+        return BcryptUtil.matches(password, passwordHashed);
     }
 }
