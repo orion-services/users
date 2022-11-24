@@ -141,4 +141,22 @@ public class UserUC implements UseCase {
         }
         return response;
     }
+
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    @Override
+    public Uni<Long> deleteUser(final String email) {
+        Uni<Long> response = null;
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be blank");
+        } else {
+            response = repository.deleteUser(email);
+        }
+        return response;
+    }
 }

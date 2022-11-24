@@ -72,4 +72,13 @@ public interface UseCase {
      * @throws IllegalArgumentException if the user informs a blank e-mail
      */
     Uni<String> recoverPassword(String email);
+
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    Uni<Long> deleteUser(final String email);
 }

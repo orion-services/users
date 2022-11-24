@@ -198,6 +198,24 @@ public class UserRepository implements Repository {
     .onItem().transform(item -> {return password;}));
   }
 
+  /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+  @Override
+  public Uni<Long> deleteUser(final String email) {
+    return checkEmail(email)
+    .onItem().ifNull()
+    .failWith(new IllegalArgumentException("User not found"))
+    .onItem().ifNotNull()
+    .transformToUni(user -> {
+      return User.delete("email",email);
+    });
+  }
+
   // TODO: @ricardowaldow add javadoc
   // TODO: @ricardowaldow can we break this method in two?
   private static String generateSecurePassword() {

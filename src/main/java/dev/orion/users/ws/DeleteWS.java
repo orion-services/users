@@ -25,7 +25,8 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 
-import dev.orion.users.model.User;
+import dev.orion.users.usecase.UseCase;
+import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.expections.UserWSException;
 import io.smallrye.mutiny.Uni;
 
@@ -33,6 +34,10 @@ import io.smallrye.mutiny.Uni;
 @RolesAllowed("user")
 @RequestScoped
 public class DeleteWS {
+
+
+        /** Business logic. */
+        private UseCase uc = new UserUC();
 
     /**
      * Deletes a User from the Service
@@ -46,8 +51,7 @@ public class DeleteWS {
     public Uni<Long> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-            //TODO: @ricardowaldow #27
-            return User.delete("email", email)
+            return uc.deleteUser(email)
                 .log()
                 .onFailure().transform(e -> {
                     throw new UserWSException(e.getMessage(),
