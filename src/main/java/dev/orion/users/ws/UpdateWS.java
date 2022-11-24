@@ -17,6 +17,7 @@
 package dev.orion.users.ws;
 
 import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
@@ -43,6 +44,7 @@ import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
 @RolesAllowed("user")
+@RequestScoped
 public class UpdateWS extends BaseWS {
 
     /** Business logic of the system. */
@@ -53,13 +55,15 @@ public class UpdateWS extends BaseWS {
     String jwtEmail;
 
     /**
-     * Updates the e-nail of the user.
+     * Updates the e-mail of a user. A JWT with role user is mandatory to
+     * execute this method. Returns a new JWT to replace the old one because
+     * the e-mail is a JWT claim.
      *
      * @param email    : Current e-mail
      * @param newEmail : New e-mail
-     * @return A JWT (JSON Web Token)
+     * @return A new JWT
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or or if there are other problems such as username not found
+     * outdated or if there are other problems such as username not found
      * or email already used
      */
     @PUT
@@ -78,18 +82,21 @@ public class UpdateWS extends BaseWS {
                 .log()
                 .onItem().ifNotNull().transform(this::generateJWT)
                 .onFailure().transform(e -> {
-                    throw new UserWSException(e.getMessage(), Response.Status.BAD_REQUEST);
+                    throw new UserWSException(e.getMessage(),
+                        Response.Status.BAD_REQUEST);
                 });
     }
 
     /**
-     * Change a password of a logged user.
+     * Change a password of a user. A JWT with role user is mandatory to
+     * execute this method.
      *
      * @param email       : User's Email
      * @param password    : Actual User password
      * @param newPassword : New User password
-     *
      * @return Returns the User who have his password change in JSON format
+     * @throws UserWSException Returns a HTTP 400 if the current jwt is
+     * outdated or if there are other problems such as e-mail not found
      */
     @PUT
     @Path("/update/password")
@@ -101,7 +108,10 @@ public class UpdateWS extends BaseWS {
             @FormParam("password") @NotEmpty final String password,
             @FormParam("newPassword") @NotEmpty final String newPassword) {
 
-        return uc.changePassword(password, newPassword, email)
+        // Checks the e-mail of the token
+        checkTokenEmail(email, jwtEmail);
+
+        return uc.updatePassword(email, password, newPassword)
                 .onItem().ifNotNull().transform(user -> user)
                 .log()
                 .onFailure().transform(e -> {
@@ -111,31 +121,44 @@ public class UpdateWS extends BaseWS {
                 });
     }
 
+    /**
+     * Recoveries the user password. A JWT with role user is mandatory to
+     * execute this method.
+     *
+     * @param email : The current e-mail of the user
+     * @return Returns the User who have his password change in JSON format
+     * @throws UserWSException Returns a HTTP 400 if the current jwt is
+     * outdated or if there are other problems such as e-mail not found
+     */
     @POST
     @Path("/recoverPassword")
     public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-        return uc.recoverPassword(email)
-                .onItem().ifNotNull()
-                .transformToUni(password -> {
-                    return Templates.recoverPassword(password)
-                            .to(email)
-                            .subject("Recuperação de senha")
-                            .send();
+         // Checks the e-mail of the token
+         checkTokenEmail(email, jwtEmail);
 
-                }).log()
+         return uc.recoverPassword(email)
+                .onItem().ifNotNull().transformToUni(password -> {
+                    return Templates.recoverPassword(password)
+                        .to(email)
+                        .subject("Recuperação de senha")
+                        .send();
+                })
+                .log()
                 .onFailure().transform(e -> {
-                    String message = e.getMessage();
                     throw new UserWSException(
-                            message,
+                        e.getMessage(),
                             Response.Status.BAD_REQUEST);
                 });
     }
 
+    /**
+     * Class to load mail templates.
+     */
     @CheckedTemplate
     public static class Templates {
-        public static native MailTemplateInstance recoverPassword(String password);
+        public static native MailTemplateInstance recoverPassword(String pwd);
     }
 
 }

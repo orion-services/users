@@ -137,17 +137,17 @@ public class UserRepository implements Repository {
     final String newEmail) {
       return checkEmail(email)
       .onItem().ifNull()
-      .failWith(new IllegalArgumentException("User not found"))
+        .failWith(new IllegalArgumentException("User not found"))
       .onItem().ifNotNull()
-      .transformToUni(user -> {
-        return checkEmail(newEmail)
-        .onItem().ifNotNull()
-        .failWith(new IllegalArgumentException("Email already in use"))
-        .onItem().ifNull()
-        .switchTo(() -> {
-          user.setEmail(newEmail);
-          return Panache.<User>withTransaction(user::persist);
-        });
+        .transformToUni(user -> {
+          return checkEmail(newEmail)
+          .onItem().ifNotNull()
+            .failWith(new IllegalArgumentException("Email already in use"))
+          .onItem().ifNull()
+            .switchTo(() -> {
+              user.setEmail(newEmail);
+              return Panache.<User>withTransaction(user::persist);
+            });
       });
   }
 
@@ -179,20 +179,28 @@ public class UserRepository implements Repository {
       });
   }
 
-
+  /**
+   * Generates a new password of a user.
+   *
+   * @param email : The e-mail of the user
+   * @return A new password
+   * @throws IllegalArgumentException if the user informs a wrong e-mail
+   */
   @Override
   public Uni<String> recoverPassword(String email) {
     String password = generateSecurePassword();
     return checkEmail(email)
     .onItem().ifNull()
-    .failWith(new IllegalArgumentException("Email not found"))
+      .failWith(new IllegalArgumentException("Email not found"))
     .onItem().ifNotNull()
-    .transformToUni(user -> changePassword(user.getPassword(), DigestUtils.sha256Hex(password), email)
+      .transformToUni(user -> changePassword(user.getPassword(),
+        DigestUtils.sha256Hex(password), email)
     .onItem().transform(item -> {return password;}));
   }
 
+  // TODO: @ricardowaldow add javadoc
+  // TODO: @ricardowaldow can we break this method in two?
   private static String generateSecurePassword() {
-
     /** Character rule for lower case characters. */
     CharacterRule LCR = new CharacterRule(EnglishCharacterData.LowerCase);
     /** Set the number of lower case characters. */

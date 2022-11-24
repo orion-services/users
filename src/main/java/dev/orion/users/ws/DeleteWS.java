@@ -17,6 +17,7 @@
 package dev.orion.users.ws;
 
 import javax.annotation.security.RolesAllowed;
+import javax.enterprise.context.RequestScoped;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.DELETE;
@@ -30,6 +31,7 @@ import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
 @RolesAllowed("user")
+@RequestScoped
 public class DeleteWS {
 
     /**
@@ -44,12 +46,12 @@ public class DeleteWS {
     public Uni<Long> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-            //TODO @ricardowaldow #27
+            //TODO: @ricardowaldow #27
             return User.delete("email", email)
                 .log()
                 .onFailure().transform(e -> {
-                    String message = e.getMessage();
-                    throw new UserWSException(message, Response.Status.BAD_REQUEST);
+                    throw new UserWSException(e.getMessage(),
+                        Response.Status.BAD_REQUEST);
                 });
     }
 

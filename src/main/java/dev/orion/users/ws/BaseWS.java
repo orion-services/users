@@ -12,7 +12,9 @@ import dev.orion.users.ws.expections.UserWSException;
 import io.smallrye.jwt.build.Jwt;
 
 import javax.ws.rs.core.Response;
-
+/**
+ * Common Web Service code.
+ */
 public class BaseWS {
 
     /* Configure the issuer for JWT generation. */
@@ -28,16 +30,26 @@ public class BaseWS {
      */
     protected String generateJWT(final User user) {
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
-                .upn(user.getEmail())
-                .groups(new HashSet<>(Arrays.asList("user")))
-                .claim(Claims.c_hash, user.getHash())
-                .claim(Claims.email, user.getEmail())
-                .sign();
+            .upn(user.getEmail())
+            .groups(new HashSet<>(Arrays.asList("user")))
+            .claim(Claims.c_hash, user.getHash())
+            .claim(Claims.email, user.getEmail())
+            .sign();
     }
 
-    protected boolean checkTokenEmail(String email, String jwtEmail){
+    /**
+     * Verifies if the e-mail from the jwt is the same from request.
+     *
+     * @param email     : Request e-mail
+     * @param jwtEmail  : JWT e-mail
+     * @return true if the e-mails are the same
+     * @throws UserWSException Throw an exception (HTTP 400) if the e-mails are
+     * different, indicating that possibly the JWT is outdated.
+     */
+    protected boolean checkTokenEmail(String email, String jwtEmail) {
         if (!email.equals(jwtEmail)) {
-            throw new UserWSException("JWT outdated", Response.Status.BAD_REQUEST);
+            throw new UserWSException("JWT outdated",
+                Response.Status.BAD_REQUEST);
         }
         return true;
     }

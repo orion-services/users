@@ -89,7 +89,6 @@ public class UserUC implements UseCase {
      *
      * @param email    : Current user's e-mail
      * @param newEmail : New e-mail
-     *
      * @return An Uni<User> object
      */
     @Override
@@ -110,28 +109,28 @@ public class UserUC implements UseCase {
      * @param password    : Actual password
      * @param newPassword : New Password
      * @param email       : User's email
-     *
      * @return Returns a user asynchronously
      */
     @Override
-    public Uni<User> changePassword(
-            final String password,
-            final String newPassword,
-            final String email) {
+    public Uni<User> updatePassword(final String email, final String password,
+            final String newPassword) {
         Uni<User> user = null;
-        if (password.isBlank()
-                || newPassword.isBlank()
-                || email.isBlank()) {
+        if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
             throw new IllegalArgumentException("Blank Arguments");
         } else {
-            user = repository.changePassword(
-                    DigestUtils.sha256Hex(password),
-                    DigestUtils.sha256Hex(newPassword),
-                    email);
+            user = repository.changePassword(DigestUtils.sha256Hex(password),
+                    DigestUtils.sha256Hex(newPassword), email);
         }
         return user;
     }
 
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a blank e-mail
+     */
     @Override
     public Uni<String> recoverPassword(final String email) {
         Uni<String> response = null;

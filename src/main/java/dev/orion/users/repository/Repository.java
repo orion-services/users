@@ -21,7 +21,7 @@ import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 
 /**
- * User repository.
+ * User repository interface.
  */
 public interface Repository extends PanacheRepository<User> {
 
@@ -67,5 +67,12 @@ public interface Repository extends PanacheRepository<User> {
      */
     Uni<User> changePassword(String password, String newPassword, String email);
 
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a wrong e-mail
+     */
     Uni<String> recoverPassword(String email);
 }

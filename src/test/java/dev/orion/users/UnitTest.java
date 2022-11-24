@@ -134,7 +134,7 @@ class UnitTest {
   @Order(10)
   void changePasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      uc.changePassword("1234", "12345678","");
+      uc.updatePassword("", "1234", "12345678");
     });
   }
 

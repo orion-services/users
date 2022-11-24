@@ -54,15 +54,22 @@ public interface UseCase {
     Uni<User> updateEmail(String email, String newEmail);
 
     /**
-     * Changes User password.
+     * Updates the user's password.
      *
+     * @param email       : User's email
      * @param password    : Current password
      * @param newPassword : New Password
-     * @param email       : User's email
      *
      * @return An Uni<User> object
      */
-    Uni<User> changePassword(String password, String newPassword, String email);
+    Uni<User> updatePassword(String email, String password, String newPassword);
 
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a blank e-mail
+     */
     Uni<String> recoverPassword(String email);
 }
