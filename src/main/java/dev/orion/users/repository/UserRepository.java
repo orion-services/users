@@ -216,14 +216,15 @@ public class UserRepository implements Repository {
     });
   }
 
-  // TODO: @ricardowaldow add javadoc
-  // TODO: @ricardowaldow can we break this method in two?
+  /**
+   * Generates a new Secure Password String.
+   * @return
+   */
   private static String generateSecurePassword() {
     /** Character rule for lower case characters. */
     CharacterRule LCR = new CharacterRule(EnglishCharacterData.LowerCase);
     /** Set the number of lower case characters. */
     LCR.setNumberOfCharacters(2);
-
     /** Character rule for uppercase characters. */
     CharacterRule UCR = new CharacterRule(EnglishCharacterData.UpperCase);
     /** Set the number of upper case characters. */
@@ -235,18 +236,7 @@ public class UserRepository implements Repository {
     DR.setNumberOfCharacters(2);
 
     /** Character rule for special characters. */
-    CharacterData special = new CharacterData() {
-
-      @Override
-      public String getErrorCode() {
-        return "Error";
-      }
-
-      @Override
-      public String getCharacters() {
-        return "!@#$%^&*()_+";
-      }
-    };
+    CharacterData special = defineSpecialCharacters("!@#$%^&*()_+");
     CharacterRule SR = new CharacterRule(special);
     /** Set the number of special characters. */
     SR.setNumberOfCharacters(2);
@@ -255,6 +245,27 @@ public class UserRepository implements Repository {
     String password = passGen.generatePassword(8, SR, LCR, UCR, DR);
 
     return password;
+  }
+
+  /**
+   * Define the Special Characters of the password.
+   *
+   * @param character : Special Characters String
+   * @return CharacterData class of the Characters
+   */
+  private static CharacterData defineSpecialCharacters(final String character) {
+    return new CharacterData() {
+
+      @Override
+      public String getErrorCode() {
+        return "Error";
+      }
+
+      @Override
+      public String getCharacters() {
+        return character;
+      }
+    };
   }
 
 }
