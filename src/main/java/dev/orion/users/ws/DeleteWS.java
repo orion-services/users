@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
-import dev.orion.users.ws.expections.UserWSException;
+import dev.orion.users.ws.exceptions.UserWSException;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/user")
@@ -35,12 +35,11 @@ import io.smallrye.mutiny.Uni;
 @RequestScoped
 public class DeleteWS {
 
-
-        /** Business logic. */
-        private UseCase uc = new UserUC();
+    /** Business logic. */
+    private UseCase uc = new UserUC();
 
     /**
-     * Deletes a User from the Service
+     * Deletes a User from the Service.
      *
      * @param email : User's email
      *

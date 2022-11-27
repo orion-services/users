@@ -2,7 +2,7 @@
 // README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
 	"name": "Java",
-	"image": "mcr.microsoft.com/devcontainers/java:19",
+	"image": "mcr.microsoft.com/devcontainers/java:17",
 	"features": {
 		"ghcr.io/devcontainers/features/java:1": {
 			"version": "none",
@@ -11,6 +11,7 @@
 		},
 		"ghcr.io/devcontainers/features/docker-from-docker:1": {},
 		"ghcr.io/devcontainers/features/docker-in-docker:1": {},
+		"ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2": {},
 		"ghcr.io/guiyomh/features/vim:0": {}
 	}
 

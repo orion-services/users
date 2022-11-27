@@ -17,7 +17,6 @@
 package dev.orion.users.ws;
 
 import javax.annotation.security.PermitAll;
-import javax.inject.Inject;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
@@ -35,9 +34,7 @@ import dev.orion.users.dto.Authentication;
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
-import dev.orion.users.ws.expections.UserWSException;
-import io.quarkus.mailer.Mailer;
-import io.quarkus.mailer.reactive.ReactiveMailer;
+import dev.orion.users.ws.exceptions.UserWSException;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -49,105 +46,99 @@ import io.smallrye.mutiny.Uni;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuthenticateWS extends BaseWS {
 
-        @Inject
-        Mailer mailer;
+    /** Business logic. */
+    private UseCase uc = new UserUC();
 
-        @Inject
-        ReactiveMailer reactiveMailer;
+    /**
+     * Authenticates the user.
+     *
+     * @param email    : The e-mail of the user
+     * @param password : The password of the user
+     * @return A JWT (JSON Web Token)
+     * @throws UserWSException Returns a HTTP 401 if the services is not
+     * able to find the user in the database
+     */
+    @POST
+    @Path("/authenticate")
+    @Produces(MediaType.TEXT_PLAIN)
+    @Retry(maxRetries = 1, delay = 2000)
+    public Uni<String> authenticate(
+        @RestForm @NotEmpty @Email final String email,
+        @RestForm @NotEmpty final String password) {
 
-        /** Business logic. */
-        private UseCase uc = new UserUC();
+        return uc.authenticate(email, password)
+            .onItem().ifNotNull()
+                .transform(super::generateJWT)
+            .onItem().ifNull()
+                .failWith(new UserWSException("User not found",
+                        Response.Status.UNAUTHORIZED));
+    }
 
-        /**
-         * Authenticates the user.
-         *
-         * @param email    : The e-mail of the user
-         * @param password : The password of the user
-         * @return A JWT (JSON Web Token)
-         * @throws UserWSException Returns a HTTP 401 if the services is not
-         * able to find the user in the database
-         */
-        @POST
-        @Path("/authenticate")
-        @Produces(MediaType.TEXT_PLAIN)
-        @Retry(maxRetries = 1, delay = 2000)
-        public Uni<String> authenticate(
-                        @RestForm @NotEmpty @Email final String email,
-                        @RestForm @NotEmpty final String password) {
+    /**
+     * Creates a user inside the service.
+     *
+     * @param name     : The name of the user
+     * @param email    : The email of the user
+     * @param password : The password of the user
+     * @return The user object in JSON format
+     * @throws UserWSException Returns a HTTP 409 if the e-mail already exists
+     * in the database or if the password is lower than eight characters
+     */
+    @POST
+    @Path("/create")
+    @Retry(maxRetries = 1, delay = 2000)
+    public Uni<User> create(
+        @FormParam("name") @NotEmpty final String name,
+        @FormParam("email") @NotEmpty @Email final String email,
+        @FormParam("password") @NotEmpty final String password) {
 
-                return uc.authenticate(email, password)
-                        .onItem().ifNotNull()
-                        .transform(super::generateJWT)
-                        .onItem().ifNull()
-                        .failWith(new UserWSException("User not found",
-                                        Response.Status.UNAUTHORIZED));
+        try {
+            return uc.createUser(name, email, password)
+                .log()
+                .onItem().ifNotNull()
+                    .transform(user -> user)
+                .onFailure().transform(e -> {
+                    throw new UserWSException(e.getMessage(),
+                            Response.Status.BAD_REQUEST);
+                    });
+        } catch (Exception e) {
+            throw new UserWSException(e.getMessage(),
+                Response.Status.BAD_REQUEST);
         }
+    }
 
-        /**
-         * Creates a user inside the service.
-         *
-         * @param name     : The name of the user
-         * @param email    : The email of the user
-         * @param password : The password of the user
-         * @return The user object in JSON format
-         * @throws UserWSException Returns a HTTP 409 if the e-mail already
-         * exists in the database or if the password is lower than eight
-         * characters
-         */
-        @POST
-        @Path("/create")
-        @Retry(maxRetries = 1, delay = 2000)
-        public Uni<User> create(
-                        @FormParam("name") @NotEmpty final String name,
-                        @FormParam("email") @NotEmpty @Email final String email,
-                        @FormParam("password") @NotEmpty final String password) {
+    /**
+     * Creates a user and authenticate.
+     *
+     * @param name     : The name of the user
+     * @param email    : The email of the user
+     * @param password : The password of the user
+     * @return The Authentication DTO
+     * @throws UserWSException Returns a HTTP 409 if the e-mail already exists
+     * in the database or if the password is lower than eight characters
+     */
+    @POST
+    @Path("/createAuthenticate")
+    @Retry(maxRetries = 1, delay = 2000)
+    public Uni<Authentication> createAuthenticate(
+        @FormParam("name") @NotEmpty final String name,
+        @FormParam("email") @NotEmpty @Email final String email,
+        @FormParam("password") @NotEmpty final String password) {
 
-                try {
-                        return uc.createUser(name, email, password)
-                                .log()
-                                .onItem().ifNotNull().transform(user -> user)
-                                .onFailure().transform(e -> {
-                                        throw new UserWSException(e.getMessage(),
-                                                Response.Status.BAD_REQUEST);
-                                        });
-                } catch (Exception e) {
-                        throw new UserWSException(e.getMessage(),
-                                Response.Status.BAD_REQUEST);
-                }
+        try {
+            return uc.createUser(name, email, password)
+                .onItem().ifNotNull()
+                    .transform(user -> {
+                        String token = generateJWT(user);
+                        Authentication auth = new Authentication();
+                        auth.setToken(token);
+                        auth.setUser(user);
+                        return auth;
+                    })
+                .log();
+        } catch (Exception e) {
+            throw new UserWSException(e.getMessage(),
+                    Response.Status.BAD_REQUEST);
         }
-
-        /**
-         * Creates a user and authenticate.
-         *
-         * @param name     : The name of the user
-         * @param email    : The email of the user
-         * @param password : The password of the user
-         * @return The Authentication DTO
-         * @throws UserWSException Returns a HTTP 409 if the e-mail already
-         * exists in the database or if the password is lower than eight
-         * characters
-         */
-        @POST
-        @Path("/createAuthenticate")
-        @Retry(maxRetries = 1, delay = 2000)
-        public Uni<Authentication> createAuthenticate(
-                @FormParam("name") @NotEmpty final String name,
-                @FormParam("email") @NotEmpty @Email final String email,
-                @FormParam("password") @NotEmpty final String password) {
-
-                try {
-                        return uc.createUser(name, email, password)
-                                .onItem().ifNotNull().transform(user -> {
-                                        String token = generateJWT(user);
-                                        Authentication auth = new Authentication();
-                                        auth.setToken(token);
-                                        auth.setUser(user);
-                                        return auth;
-                                })
-                                .log();
-                } catch (Exception e) {
-                        throw new UserWSException(e.getMessage(),
-                                Response.Status.BAD_REQUEST);
-                }
-        }
+    }
 }

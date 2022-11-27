@@ -37,8 +37,10 @@ import org.eclipse.microprofile.jwt.Claims;
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
-import dev.orion.users.ws.expections.UserWSException;
+import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
+import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.quarkus.qute.CheckedTemplate;
 import io.smallrye.mutiny.Uni;
 
@@ -47,12 +49,20 @@ import io.smallrye.mutiny.Uni;
 @RequestScoped
 public class UpdateWS extends BaseWS {
 
+    @Inject
+    private Mailer mailer;
+
+    @Inject
+    private ReactiveMailer reactiveMailer;
+
+
     /** Business logic of the system. */
     private UseCase uc = new UserUC();
 
+    /** Retrieve the e-mail from jwt. */
     @Inject
     @Claim(standard = Claims.email)
-    String jwtEmail;
+    private String jwtEmail;
 
     /**
      * Updates the e-mail of a user. A JWT with role user is mandatory to
@@ -72,16 +82,18 @@ public class UpdateWS extends BaseWS {
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 0, delay = 2000)
     public Uni<String> updateEmail(
-            @FormParam("email") @NotEmpty @Email final String email,
-            @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
+        @FormParam("email") @NotEmpty @Email final String email,
+        @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
 
-            // Checks the e-mail of the token
-            checkTokenEmail(email, jwtEmail);
+        // Checks the e-mail of the token
+        checkTokenEmail(email, jwtEmail);
 
-            return uc.updateEmail(email, newEmail)
-                .log()
-                .onItem().ifNotNull().transform(this::generateJWT)
-                .onFailure().transform(e -> {
+        return uc.updateEmail(email, newEmail)
+            .log()
+            .onItem().ifNotNull()
+                .transform(this::generateJWT)
+            .onFailure()
+                .transform(e -> {
                     throw new UserWSException(e.getMessage(),
                         Response.Status.BAD_REQUEST);
                 });
@@ -104,20 +116,21 @@ public class UpdateWS extends BaseWS {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     public Uni<User> changePassword(
-            @FormParam("email") @NotEmpty @Email final String email,
-            @FormParam("password") @NotEmpty final String password,
-            @FormParam("newPassword") @NotEmpty final String newPassword) {
+        @FormParam("email") @NotEmpty @Email final String email,
+        @FormParam("password") @NotEmpty final String password,
+        @FormParam("newPassword") @NotEmpty final String newPassword) {
 
         // Checks the e-mail of the token
         checkTokenEmail(email, jwtEmail);
 
         return uc.updatePassword(email, password, newPassword)
-                .onItem().ifNotNull().transform(user -> user)
-                .log()
-                .onFailure().transform(e -> {
-                    throw new UserWSException(
-                        e.getMessage(),
-                            Response.Status.BAD_REQUEST);
+            .onItem().ifNotNull()
+                .transform(user -> user)
+            .log()
+            .onFailure()
+                .transform(e -> {
+                    throw new UserWSException(e.getMessage(),
+                        Response.Status.BAD_REQUEST);
                 });
     }
 
@@ -152,13 +165,20 @@ public class UpdateWS extends BaseWS {
                             Response.Status.BAD_REQUEST);
                 });
     }
-
-    /**
+     /**
      * Class to load mail templates.
      */
     @CheckedTemplate
     public static class Templates {
-        public static native MailTemplateInstance recoverPassword(String password);
+
+        /**
+         * Generates a mail template object.
+         *
+         * @param password : The new password of the user
+         * @return A MailTemplateInstance object
+         */
+        public static native MailTemplateInstance recoverPassword(
+            String password);
     }
 
 }

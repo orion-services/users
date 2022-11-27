@@ -80,5 +80,5 @@ public interface UseCase {
      *
      * @return Return 1 if user was deleted
      */
-    Uni<Long> deleteUser(final String email);
+    Uni<Long> deleteUser(String email);
 }

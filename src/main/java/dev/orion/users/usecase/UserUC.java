@@ -52,7 +52,8 @@ public class UserUC implements UseCase {
         Uni<User> user = null;
         if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
                 || password.isBlank()) {
-            throw new IllegalArgumentException("Blank arguments or invalid e-mail");
+            throw new IllegalArgumentException(
+                "Blank arguments or invalid e-mail");
         } else {
             if (password.length() < SIZE_PASSWORD) {
                 throw new IllegalArgumentException(
@@ -92,10 +93,9 @@ public class UserUC implements UseCase {
      * @return An Uni<User> object
      */
     @Override
-    public Uni<User> updateEmail(String email, String newEmail) {
+    public Uni<User> updateEmail(final String email, final String newEmail) {
         Uni<User> user = null;
-        if (email.isBlank()
-                || newEmail.isBlank()) {
+        if (email.isBlank() || newEmail.isBlank()) {
             throw new IllegalArgumentException("Blank Arguments");
         } else {
             user = repository.updateEmail(email, newEmail);
