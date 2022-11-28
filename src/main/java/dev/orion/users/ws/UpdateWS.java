@@ -145,6 +145,7 @@ public class UpdateWS extends BaseWS {
      */
     @POST
     @Path("/recoverPassword")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
 

@@ -20,9 +20,12 @@ import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import dev.orion.users.usecase.UseCase;
@@ -47,6 +50,8 @@ public class DeleteWS {
      */
     @DELETE
     @Path("/delete")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_PLAIN)
     public Uni<Long> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
