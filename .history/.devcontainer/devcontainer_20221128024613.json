@@ -13,7 +13,7 @@
 		"ghcr.io/devcontainers/features/docker-in-docker:1": {},
 		"ghcr.io/meaningful-ooo/devcontainer-features/homebrew:2": {},
 		"ghcr.io/guiyomh/features/vim:0": {}
-	},
+	}
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
