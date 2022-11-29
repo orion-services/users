@@ -114,9 +114,9 @@ class UnitTest {
   @DisplayName("Change email")
   @Order(8)
   void changeEmail() {
-    Mockito.when(repository.changeEmail("orion@test.com", "newOrion@test.com"))
+    Mockito.when(repository.updateEmail("orion@test.com", "newOrion@test.com"))
       .thenReturn(Uni.createFrom().item(new User()));
-    Uni<User> uni = uc.changeEmail("orion@test.com", "newOrion@test.com");
+    Uni<User> uni = uc.updateEmail("orion@test.com", "newOrion@test.com");
     assertNotNull(uni);
   }
 
@@ -125,22 +125,22 @@ class UnitTest {
   @Order(9)
   void changeEmailWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      uc.changeEmail("", "orion@test.com");
+      uc.updateEmail("", "orion@test.com");
     });
   }
 
   @Test
   @DisplayName("Change password with blank arguments")
-  @Order(12)
+  @Order(10)
   void changePasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
-      uc.changePassword("1234", "12345678","");
+      uc.updatePassword("", "1234", "12345678");
     });
   }
 
   @Test
   @DisplayName("Recover password")
-  @Order(13)
+  @Order(11)
   void recoverPassword() {
     Mockito.when(repository.recoverPassword("orion@test.com"))
       .thenReturn(Uni.createFrom().item("ok"));
@@ -150,12 +150,11 @@ class UnitTest {
 
   @Test
   @DisplayName("Recover password with blank arguments")
-  @Order(14)
+  @Order(12)
   void recoverPasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class, () -> {
       uc.recoverPassword("");
     });
   }
-
 
 }

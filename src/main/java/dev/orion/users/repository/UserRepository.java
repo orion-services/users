@@ -37,198 +37,237 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class UserRepository implements Repository {
 
-  /**
-   * Creates a user in the service.
-   *
-   * @param name     : A name of the user
-   * @param email    : A valid e-mail
-   * @param password : A password of the user
-   *
-   * @return Returns a user asynchronously
-   */
-  @Override
-  public Uni<User> createUser(final String name, final String email,
-      final String password) {
+    /**
+     * Creates a user in the service.
+     *
+     * @param name     : A name of the user
+     * @param email    : A valid e-mail
+     * @param password : A password of the user
+     *
+     * @return Returns a user asynchronously
+     */
+    @Override
+    public Uni<User> createUser(final String name, final String email,
+            final String password) {
+        return checkEmail(email)
+                .onItem().ifNotNull()
+                    .failWith(new IllegalArgumentException(
+                        "The e-mail already exists"))
+                .onItem().ifNull()
+                .switchTo(() -> {
+                    return checkName(name)
+                            .onItem().ifNotNull()
+                                .failWith(new IllegalArgumentException(
+                                    "The name already existis"))
+                            .onItem().ifNull()
+                                .switchTo(() -> persistUser(
+                                    name, email, password));
+                });
+    }
 
-      return checkEmail(email)
-        .onItem()
-        .ifNotNull()
-        .failWith(new IllegalArgumentException("The e-mail already exists"))
-        .onItem()
-        .ifNull()
-        .switchTo(() -> {
-          return checkName(name)
-          .onItem()
-          .ifNotNull()
-          .failWith(new IllegalArgumentException("The name already existis"))
-          .onItem()
-          .ifNull()
-          .switchTo(() -> persistUser(name,email,password));
-        });
-  }
+    /**
+     * Verifies if the e-mail already exists in the database.
+     *
+     * @param email : An e-mail address
+     *
+     * @return Returns true if the e-mail already exists
+     */
+    private Uni<User> checkEmail(final String email) {
+        return find("email", email).firstResult();
+    }
 
-  /**
-   * Verifies if the e-mail already exists in the database.
-   *
-   * @param email : An e-mail address
-   *
-   * @return Returns true if the e-mail already exists
-   */
-  private Uni<User> checkEmail(final String email) {
-    return find("email", email).firstResult();
-  }
+    /**
+     * Verifies if the e-mail already exists in the database.
+     *
+     * @param email : An e-mail address
+     *
+     * @return Returns true if the e-mail already exists
+     */
+    private Uni<User> checkName(final String email) {
+        return find("name", email).firstResult();
+    }
 
-  /**
-   * Verifies if the e-mail already exists in the database.
-   *
-   * @param email : An e-mail address
-   *
-   * @return Returns true if the e-mail already exists
-   */
-  private Uni<User> checkName(final String name) {
-    return find("name", name).firstResult();
-  }
-
-  /**
-   * Persists a user in the service.
-   *
-   * @param name  : The name of the user
-   * @param email : An e-mail address of the a user
-   * @param password : The password of the user
-   *
-   * @return Returns Uni<User> object
-   */
-  private Uni<User> persistUser(final String name, final String email,
-    final String password) {
-      User user = new User();
-      user.setName(name);
-      user.setEmail(email);
-      user.setPassword(password);
-      return Panache.<User>withTransaction(user::persist);
-  }
-
-  /**
-   * Returns a user looking for email and password.
-   *
-   * @param email    : An e-mail of the user
-   * @param password : A password
-   *
-   * @return Returns a user asynchronously
-   */
-  @Override
-  public Uni<User> authenticate(final String email, final String password) {
-      Map<String, Object> params = Parameters.with("email", email)
-        .and("password", password).map();
-    return find("email = :email and password = :password", params)
-        .firstResult();
-  }
-
-  /**
-   * Changes User email.
-   *
-   * @param email     : User's email
-   * @param newEmail  : New User's Email
-   *
-   * @return Returns a user asynchronously
-   */
-  @Override
-  public Uni<User> changeEmail(
-    final String email,
-    final String newEmail) {
-      return checkEmail(email)
-      .onItem().ifNull()
-      .failWith(new IllegalArgumentException("User not found"))
-      .onItem().ifNotNull()
-      .transformToUni(user -> {
-        return checkEmail(newEmail)
-        .onItem().ifNotNull()
-        .failWith(new IllegalArgumentException("Email already in use"))
-        .onItem().ifNull()
-        .switchTo(() -> {
-          user.setEmail(newEmail);
-          return Panache.<User>withTransaction(user::persist);
-        });
-      });
-  }
-
-  /**
-   * Changes User password.
-   *
-   * @param password    : Actual password
-   * @param newPassword : New Password
-   * @param email       : User's email
-   *
-   * @return Returns a user asynchronously
-   */
-  @Override
-  public Uni<User> changePassword(
-    final String password,
-    final String newPassword,
-    final String email) {
-      return checkEmail(email)
-      .onItem().ifNull()
-      .failWith(new IllegalArgumentException("User not found"))
-      .onItem().ifNotNull()
-      .transformToUni(user -> {
-        if (password.equals(user.getPassword())) {
-          user.setPassword(newPassword);
-        } else {
-          throw new IllegalArgumentException("Passwords don't match");
-        }
+    /**
+     * Persists a user in the service.
+     *
+     * @param name     : The name of the user
+     * @param email    : An e-mail address of the a user
+     * @param password : The password of the user
+     *
+     * @return Returns Uni<User> object
+     */
+    private Uni<User> persistUser(final String name, final String email,
+            final String password) {
+        User user = new User();
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(password);
         return Panache.<User>withTransaction(user::persist);
-      });
-  }
+    }
 
+    /**
+     * Returns a user looking for email and password.
+     *
+     * @param email    : An e-mail of the user
+     * @param password : A password
+     *
+     * @return Returns a user asynchronously
+     */
+    @Override
+    public Uni<User> authenticate(final String email, final String password) {
+        Map<String, Object> params = Parameters.with("email", email)
+                .and("password", password).map();
+        return find("email = :email and password = :password", params)
+                .firstResult();
+    }
 
-  @Override
-  public Uni<String> recoverPassword(String email) {
-    String password = generateSecurePassword();
-    return checkEmail(email)
-    .onItem().ifNull()
-    .failWith(new IllegalArgumentException("Email not found"))
-    .onItem().ifNotNull()
-    .transformToUni(user -> changePassword(user.getPassword(), DigestUtils.sha256Hex(password), email)
-    .onItem().transform(item -> {return password;}));
-  }
+    /**
+     * Updates the user's e-mail.
+     *
+     * @param email    : User's email
+     * @param newEmail : New User's Email
+     *
+     * @return Uni<User> object
+     */
+    @Override
+    public Uni<User> updateEmail(
+            final String email,
+            final String newEmail) {
+        return checkEmail(email)
+            .onItem().ifNull()
+                .failWith(new IllegalArgumentException("User not found"))
+            .onItem().ifNotNull()
+                .transformToUni(user -> {
+                    return checkEmail(newEmail)
+                        .onItem().ifNotNull()
+                            .failWith(new IllegalArgumentException(
+                                "Email already in use"))
+                        .onItem().ifNull()
+                            .switchTo(() -> {
+                                user.setEmail(newEmail);
+                                return Panache.<User>withTransaction(
+                                    user::persist);
+                            });
+                });
+    }
 
-  private static String generateSecurePassword() {
+    /**
+     * Changes User password.
+     *
+     * @param password    : Actual password
+     * @param newPassword : New Password
+     * @param email       : User's email
+     *
+     * @return Returns a user asynchronously
+     */
+    @Override
+    public Uni<User> changePassword(
+            final String password,
+            final String newPassword,
+            final String email) {
+        return checkEmail(email)
+            .onItem().ifNull()
+                .failWith(new IllegalArgumentException("User not found"))
+            .onItem().ifNotNull()
+                .transformToUni(user -> {
+                    if (password.equals(user.getPassword())) {
+                        user.setPassword(newPassword);
+                    } else {
+                        throw new IllegalArgumentException(
+                            "Passwords don't match");
+                    }
+                    return Panache.<User>withTransaction(user::persist);
+                });
+    }
 
-    /** Character rule for lower case characters. */
-    CharacterRule LCR = new CharacterRule(EnglishCharacterData.LowerCase);
-    /** Set the number of lower case characters. */
-    LCR.setNumberOfCharacters(2);
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a wrong e-mail
+     */
+    @Override
+    public Uni<String> recoverPassword(final String email) {
+        String password = generateSecurePassword();
+        return checkEmail(email)
+            .onItem().ifNull()
+                .failWith(new IllegalArgumentException("Email not found"))
+            .onItem().ifNotNull()
+            .transformToUni(user -> changePassword(user.getPassword(),
+                DigestUtils.sha256Hex(password), email)
+                .onItem().transform(item -> {
+                    return password;
+                }));
+    }
 
-    /** Character rule for uppercase characters. */
-    CharacterRule UCR = new CharacterRule(EnglishCharacterData.UpperCase);
-    /** Set the number of upper case characters. */
-    UCR.setNumberOfCharacters(2);
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    @Override
+    public Uni<Long> deleteUser(final String email) {
+        return checkEmail(email)
+            .onItem().ifNull()
+                .failWith(new IllegalArgumentException("User not found"))
+            .onItem().ifNotNull()
+            .transformToUni(user -> {
+                return User.delete("email", email);
+            });
+    }
 
-    /** Character rule for digit characters. */
-    CharacterRule DR = new CharacterRule(EnglishCharacterData.Digit);
-    /** Set the number of digit characters. */
-    DR.setNumberOfCharacters(2);
+    /**
+     * Generates a new Secure Password String.
+     *
+     * @return A new password
+     */
+    private static String generateSecurePassword() {
+        // Character rule for lower case characters
+        CharacterRule lcr = new CharacterRule(EnglishCharacterData.LowerCase);
+        // Set the number of lower case characters
+        lcr.setNumberOfCharacters(2);
+        // Character rule for uppercase characters.
+        CharacterRule ucr = new CharacterRule(EnglishCharacterData.UpperCase);
+        // Set the number of upper case characters
+        ucr.setNumberOfCharacters(2);
 
-    /** Character rule for special characters. */
-    CharacterData special = new CharacterData() {
+        // Character rule for digit characters
+        CharacterRule dr = new CharacterRule(EnglishCharacterData.Digit);
+        // Set the number of digit characters.
+        dr.setNumberOfCharacters(2);
 
-      @Override
-      public String getErrorCode() {
-        return "Error";
-      }
+        // Character rule for special characters
+        CharacterData special = defineSpecialChar("!@#$%^&*()_+");
+        CharacterRule sr = new CharacterRule(special);
+        // Set the number of special characters
+        sr.setNumberOfCharacters(2);
 
-      @Override
-      public String getCharacters() {
-        return "!@#$%^&*()_+";
-      }
-    };
-    CharacterRule SR = new CharacterRule(special);
-    /** Set the number of special characters. */
-    SR.setNumberOfCharacters(2);
+        PasswordGenerator passGen = new PasswordGenerator();
+        return passGen.generatePassword(8, sr, lcr, ucr, dr);
+    }
 
-    PasswordGenerator passGen = new PasswordGenerator();
-    String password = passGen.generatePassword(8, SR, LCR, UCR, DR);
+    /**
+     * Define the Special Characters of the password.
+     *
+     * @param character : Special Characters String
+     * @return CharacterData class of the Characters
+     */
+    private static CharacterData defineSpecialChar(final String character) {
+        return new CharacterData() {
 
-    return password;
-  }
+            @Override
+            public String getErrorCode() {
+                return "Error";
+            }
+
+            @Override
+            public String getCharacters() {
+                return character;
+            }
+        };
+    }
 
 }

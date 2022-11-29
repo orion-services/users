@@ -21,7 +21,7 @@ import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 
 /**
- * User repository.
+ * User repository interface.
  */
 public interface Repository extends PanacheRepository<User> {
 
@@ -32,7 +32,7 @@ public interface Repository extends PanacheRepository<User> {
      * @param email    : A valid e-mail
      * @param password : A password of the user
      *
-     * @return Returns a user asynchronously
+     * @return A Uni<User> object
      */
     Uni<User> createUser(String name, String email, String password);
 
@@ -42,22 +42,46 @@ public interface Repository extends PanacheRepository<User> {
      * @param email    : An e-mail of the user
      * @param password : A password
      *
-     * @return Returns a user asynchronously
+     * @return A Uni<User> object
      */
     Uni<User> authenticate(String email, String password);
 
-    Uni<User> changeEmail(String email, String newEmail);
+    /**
+     * Updates the e-mail of the user.
+     *
+     * @param email    : Current user's e-mail
+     * @param newEmail : New e-mail
+     *
+     * @return A Uni<User> object
+     */
+    Uni<User> updateEmail(String email, String newEmail);
 
     /**
-    * Changes User password.
-    *
-    * @param password    : Actual password
-    * @param newPassword : New Password
-    * @param email       : User's email
-    *
-    * @return Returns a user asynchronously
-    */
+     * Changes User password.
+     *
+     * @param password    : Actual password
+     * @param newPassword : New Password
+     * @param email       : User's email
+     *
+     * @return A Uni<User> object
+     */
     Uni<User> changePassword(String password, String newPassword, String email);
 
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a wrong e-mail
+     */
     Uni<String> recoverPassword(String email);
+
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    Uni<Long> deleteUser(String email);
 }

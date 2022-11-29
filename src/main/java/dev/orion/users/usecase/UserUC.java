@@ -44,15 +44,16 @@ public class UserUC implements UseCase {
      * @param name     : The name of the user
      * @param email    : The e-mail of the user
      * @param password : The password of the user
-     * @return A Uni<User> object
+     * @return An Uni<User> object
      */
     @Override
     public Uni<User> createUser(final String name, final String email,
             final String password) {
         Uni<User> user = null;
         if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
-            || password.isBlank()) {
-            throw new IllegalArgumentException("Blank arguments or invalid e-mail");
+                || password.isBlank()) {
+            throw new IllegalArgumentException(
+                "Blank arguments or invalid e-mail");
         } else {
             if (password.length() < SIZE_PASSWORD) {
                 throw new IllegalArgumentException(
@@ -70,7 +71,7 @@ public class UserUC implements UseCase {
      *
      * @param email    : The email of the user
      * @param password : The password of the user
-     * @return A Uni<User> object
+     * @return An Uni<User> object
      */
     @Override
     public Uni<User> authenticate(final String email, final String password) {
@@ -84,55 +85,77 @@ public class UserUC implements UseCase {
         return user;
     }
 
-
+    /**
+     * Updates the e-mail of the user.
+     *
+     * @param email    : Current user's e-mail
+     * @param newEmail : New e-mail
+     * @return An Uni<User> object
+     */
     @Override
-    public Uni<User> changeEmail(String email, String newEmail) {
+    public Uni<User> updateEmail(final String email, final String newEmail) {
         Uni<User> user = null;
-            if (email.isBlank()
-            || newEmail.isBlank()) {
-                throw new IllegalArgumentException("Blank Arguments");
-            } else {
-                user = repository.changeEmail(
-                    email,
-                    newEmail);
-            }
-            return user;
+        if (email.isBlank() || newEmail.isBlank()) {
+            throw new IllegalArgumentException("Blank Arguments");
+        } else {
+            user = repository.updateEmail(email, newEmail);
+        }
+        return user;
     }
 
     /**
-    * Changes User password.
-    *
-    * @param password    : Actual password
-    * @param newPassword : New Password
-    * @param email       : User's email
-    *
-    * @return Returns a user asynchronously
-    */
-    public Uni<User> changePassword(
-        final String password,
-        final String newPassword,
-        final String email) {
-            Uni<User> user = null;
-            if (password.isBlank()
-            || newPassword.isBlank()
-            || email.isBlank()) {
-                throw new IllegalArgumentException("Blank Arguments");
-            } else {
-                user = repository.changePassword(
-                    DigestUtils.sha256Hex(password),
-                    DigestUtils.sha256Hex(newPassword),
-                    email);
-            }
-            return user;
+     * Changes User password.
+     *
+     * @param password    : Actual password
+     * @param newPassword : New Password
+     * @param email       : User's email
+     * @return Returns a user asynchronously
+     */
+    @Override
+    public Uni<User> updatePassword(final String email, final String password,
+            final String newPassword) {
+        Uni<User> user = null;
+        if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
+            throw new IllegalArgumentException("Blank Arguments");
+        } else {
+            user = repository.changePassword(DigestUtils.sha256Hex(password),
+                    DigestUtils.sha256Hex(newPassword), email);
+        }
+        return user;
     }
 
-
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a blank e-mail
+     */
+    @Override
     public Uni<String> recoverPassword(final String email) {
         Uni<String> response = null;
-        if (email.isBlank()){
+        if (email.isBlank()) {
             throw new IllegalArgumentException("Blank Arguments");
         } else {
             response = repository.recoverPassword(email);
+        }
+        return response;
+    }
+
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    @Override
+    public Uni<Long> deleteUser(final String email) {
+        Uni<Long> response = null;
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("Email cannot be blank");
+        } else {
+            response = repository.deleteUser(email);
         }
         return response;
     }

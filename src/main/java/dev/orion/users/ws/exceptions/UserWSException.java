@@ -14,18 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.ws;
+package dev.orion.users.ws.exceptions;
 
 import java.util.Map;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
-
 /**
  * Service exception.
  */
-public class ServiceException extends WebApplicationException {
+public class UserWSException extends WebApplicationException {
 
     /**
      * Service Exception constructor.
@@ -33,7 +32,7 @@ public class ServiceException extends WebApplicationException {
      * @param message : The message of the exception
      * @param status  : The HTTP error code
      */
-    public ServiceException(final String message, final Status status) {
+    public UserWSException(final String message, final Status status) {
         super(init(message, status));
     }
 
@@ -41,15 +40,13 @@ public class ServiceException extends WebApplicationException {
      * A static method to init the message.
      *
      * @param message : An error message
-     * @param status : A HTTP error code
+     * @param status  : A HTTP error code
      *
      * @return A Response object
      */
     private static Response init(final String message, final Status status) {
-        return Response
-        .status(status)
-        .entity(Map.of("message", message))
-        .build();
+        return Response.status(status).entity(Map.of("message", message))
+            .build();
     }
 
 }

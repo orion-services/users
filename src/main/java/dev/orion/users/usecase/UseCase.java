@@ -37,24 +37,48 @@ public interface UseCase {
     /**
      * Authenticates the user in the service (UC: Authenticate).
      *
-     * @param email  : The email of the user
+     * @param email    : The email of the user
      * @param password : The password of the user
-     * @return A Uni<User> object
+     * @return An Uni<User> object
      */
-     Uni<User> authenticate(String email, String password);
+    Uni<User> authenticate(String email, String password);
 
-    Uni<User> changeEmail(String email, String newEmail);
+    /**
+     * Updates the e-mail of the user.
+     *
+     * @param email    : Current user's e-mail
+     * @param newEmail : New e-mail
+     *
+     * @return An Uni<User> object
+     */
+    Uni<User> updateEmail(String email, String newEmail);
 
-     /**
-    * Changes User password.
-    *
-    * @param password    : Actual password
-    * @param newPassword : New Password
-    * @param email       : User's email
-    *
-    * @return Returns a user asynchronously
-    */
-    Uni<User> changePassword(String password, String newPassword, String email);
+    /**
+     * Updates the user's password.
+     *
+     * @param email       : User's email
+     * @param password    : Current password
+     * @param newPassword : New Password
+     *
+     * @return An Uni<User> object
+     */
+    Uni<User> updatePassword(String email, String password, String newPassword);
 
+    /**
+     * Generates a new password of a user.
+     *
+     * @param email : The e-mail of the user
+     * @return A new password
+     * @throws IllegalArgumentException if the user informs a blank e-mail
+     */
     Uni<String> recoverPassword(String email);
+
+    /**
+     * Deletes a User from the service.
+     *
+     * @param email : User email
+     *
+     * @return Return 1 if user was deleted
+     */
+    Uni<Long> deleteUser(String email);
 }
