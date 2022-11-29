@@ -32,10 +32,10 @@ public class AuthorizationCodeHandler {
     public String getAccessToken(User user) {
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
                 .upn(user.getEmail().getAddress())
-                .claim("userId", user.getUserId())
+                .claim("userId", user.getUserHash())
                 .expiresIn(expiresInMin) // expires in 30 minutes
                 .groups(new HashSet<>(Arrays.asList("user")))
-                .claim(Claims.c_hash, user.getUserId())
+                .claim(Claims.c_hash, user.getUserHash())
                 .sign();
     }
 
@@ -43,7 +43,7 @@ public class AuthorizationCodeHandler {
         Instant now = Instant.now();
         return Jwt.issuer(issuer.orElse(
                 "http://localhost:8080"))
-                .claim("userId", user.getUserId())
+                .claim("userId", user.getUserHash())
                 .expiresIn(Date.from(now.plus(1, ChronoUnit.DAYS)).getTime())// refresh token for 1 day.
                 .sign();
     }

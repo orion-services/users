@@ -7,7 +7,7 @@ public class ResponseMapper {
 
     public static ResponseUserDto toResponse(User user) {
         ResponseUserDto response = new ResponseUserDto();
-        response.hash = user.getUserId();
+        response.hash = user.getUserHash();
         response.name = user.getName();
         response.email = user.getEmail().getAddress();
         response.status = user.getStatus();

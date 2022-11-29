@@ -5,7 +5,7 @@ import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.ListUser;
 import dev.orion.users.domain.vo.Email;
-import io.quarkus.test.junit.mockito.InjectSpy;
+
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -96,7 +96,7 @@ public class ListUserTest {
 
         Mockito.verify(repository, Mockito.times(1)).findByQuery(query);
 
-        assertEquals(users.get(0).getUserId(), query.hash);
+        assertEquals(users.get(0).getUserHash(), query.hash);
     }
 
     @Test
@@ -121,7 +121,7 @@ public class ListUserTest {
 
     private User createUserMock(String hash, String name, String email) {
         User user = new User();
-        user.setUserId(hash);
+        user.setUserHash(hash);
         user.setName(name);
         user.setEmail(new Email(email));
         return user;

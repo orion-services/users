@@ -28,7 +28,7 @@ public class User {
     /** The e-mail of the user. */
     private Email email;
 
-    private String userId;
+    private String userHash;
 
     private String password;
 
@@ -82,12 +82,12 @@ public class User {
         this.status = status;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getUserHash() {
+        return userHash;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setUserHash(String userHash) {
+        this.userHash = userHash;
     }
 
     /**
@@ -99,7 +99,7 @@ public class User {
     public User(String name, String email, String password) {
         this();
         this.name = this.validateName(name);
-        this.userId = UUID.randomUUID().toString();
+        this.userHash = UUID.randomUUID().toString();
         this.email = new Email(email);
         this.password = this.validatePassword(password);
         this.status = StatusEnum.ACTIVATED.name();
@@ -110,7 +110,7 @@ public class User {
         return "User{" +
                 "name:'" + name + '\'' +
                 ", email:'" + email + '\'' +
-                ", hash:'" + userId + '\'' +
+                ", hash:'" + userHash + '\'' +
                 ", password:'" + password + '\'' +
                 ", status:'" + status + '\'' +
                 '}';
