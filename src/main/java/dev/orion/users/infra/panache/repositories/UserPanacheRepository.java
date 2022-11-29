@@ -110,7 +110,7 @@ public class UserPanacheRepository implements UserRepository {
     public User blockUser(String hash) {
         UserPanacheEntity userEntity = UserPanacheEntity.find("hash", hash).firstResult();
         if (userEntity == null) {
-            throw new NotFoundException("User not found or already removed");
+            throw new NotFoundException("User not found or already blocked");
         }
         userEntity.status = StatusEnum.BLOCKED.name();
         return userEntity.toUser();

@@ -3,6 +3,7 @@ package dev.orion.users.data.usecases;
 import dev.orion.users.data.interfaces.Encrypter;
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.dto.AuthenticateUserDto;
+import dev.orion.users.domain.models.StatusEnum;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.AuthenticateUser;
 import dev.orion.users.presentation.services.ServiceException;
@@ -35,6 +36,13 @@ public class AuthenticateUserImpl implements AuthenticateUser {
         if(user == null){
             throw new ServiceException("User not found",
                     Response.Status.UNAUTHORIZED);
+        }
+
+        if(user.getStatus().equals(StatusEnum.BLOCKED.name())
+                || user.getStatus().equals(StatusEnum.DISABLED.name())
+        ) {
+            throw new ServiceException("User is blocked or disabled",
+                    Response.Status.BAD_REQUEST);
         }
 
         boolean userValidated = this.encrypter.validate(userDto.password, user.getPassword());

@@ -28,7 +28,7 @@ import lombok.Setter;
 public class Authentication {
 
     /** The user object. */
-    private User user;
+    private ResponseUserDto user;
 
     /** The authentication token (jwt). */
     private String token;

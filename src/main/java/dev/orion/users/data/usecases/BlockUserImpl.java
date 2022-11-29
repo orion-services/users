@@ -21,6 +21,8 @@ public class BlockUserImpl implements BlockUser {
     @Override
     @Transactional
     public User block(String hash) {
+
+
         return repository.blockUser(hash);
     }
 }

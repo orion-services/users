@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users;
+package dev.orion.users.presentation;
 
 import static io.restassured.RestAssured.given;
 import org.junit.jupiter.api.Order;

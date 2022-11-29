@@ -174,7 +174,7 @@ public class Service {
                         Authentication auth = new Authentication();
                         auth.setToken(token);
                         auth.setRefreshToken(refreshToken);
-                        auth.setUser(user);
+                        auth.setUser(ResponseMapper.toResponse(user));
                         return auth;
                 } catch (Exception e) {
                         String message = e.getMessage();
@@ -207,6 +207,7 @@ public class Service {
                         String token = this.authorizationCodeHandler.getAccessToken(user);
                         String refreshToken = this.authorizationCodeHandler.getRefreshToken(user);
                         Authentication auth = new Authentication();
+                        auth.setUser(ResponseMapper.toResponse(user));
                         auth.setToken(token);
                         auth.setRefreshToken(refreshToken);
                         return auth;
