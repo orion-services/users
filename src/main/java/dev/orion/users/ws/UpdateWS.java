@@ -16,6 +16,7 @@
  */
 package dev.orion.users.ws;
 
+import javax.annotation.security.PermitAll;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -38,9 +39,7 @@ import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
-import io.quarkus.mailer.Mailer;
 import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
-import io.quarkus.mailer.reactive.ReactiveMailer;
 import io.quarkus.qute.CheckedTemplate;
 import io.smallrye.mutiny.Uni;
 
@@ -48,13 +47,6 @@ import io.smallrye.mutiny.Uni;
 @RolesAllowed("user")
 @RequestScoped
 public class UpdateWS extends BaseWS {
-
-    @Inject
-    private Mailer mailer;
-
-    @Inject
-    private ReactiveMailer reactiveMailer;
-
 
     /** Business logic of the system. */
     private UseCase uc = new UserUC();
@@ -135,29 +127,24 @@ public class UpdateWS extends BaseWS {
     }
 
     /**
-     * Recoveries the user password. A JWT with role user is mandatory to
-     * execute this method.
+     * Recoveries the user password.
      *
      * @param email : The current e-mail of the user
-     * @return Returns the User who have his password change in JSON format
+     * @return Returns HTTP 204 (No Content) if the method executed with success
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
      * outdated or if there are other problems such as e-mail not found
      */
     @POST
+    @PermitAll
     @Path("/recoverPassword")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-         // Checks the e-mail of the token
-         checkTokenEmail(email, jwtEmail);
-
          return uc.recoverPassword(email)
                 .onItem().ifNotNull().transformToUni(password -> {
-                    return Templates.recoverPassword(password)
-                        .to(email)
-                        .subject("Recuperação de senha")
-                        .send();
+                    return Templates.recoverPassword(password).to(email)
+                        .subject("Recover Password").send();
                 })
                 .log()
                 .onFailure().transform(e -> {
