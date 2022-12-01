@@ -70,7 +70,7 @@ public class UserPanacheRepository implements UserRepository {
             return userPanache.stream().map(entity -> entity.toUser()).collect(Collectors.toList());
         }
         userPanache = UserPanacheEntity.find(
-                "hash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
+                "userHash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
                 params);
         return userPanache.stream().map(entity -> entity.toUser()).collect(Collectors.toList());
     }

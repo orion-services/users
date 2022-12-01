@@ -27,7 +27,6 @@ import javax.ws.rs.core.Response;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.*;
-import dev.orion.users.presentation.dto.ResponseUserDto;
 import dev.orion.users.presentation.mappers.ResponseMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -62,10 +61,13 @@ public class UserService {
         @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
         @Produces(MediaType.APPLICATION_JSON)
         @Transactional
-        public List<ResponseUserDto> find(@BeanParam UserQueryDto query) {
+        public Response find(@BeanParam UserQueryDto query) {
                 try {
                         List<User> users = listUser.list(query);
-                        return users.stream().map(ResponseMapper::toResponse).collect(Collectors.toList());
+                        return Response
+                                .status(Response.Status.OK)
+                                .entity(users.stream().map(ResponseMapper::toResponse).collect(Collectors.toList()))
+                                .build();
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
                 }

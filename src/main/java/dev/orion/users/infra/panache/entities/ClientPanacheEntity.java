@@ -18,8 +18,8 @@ public class ClientPanacheEntity {
     private String clientSecret;
     @Column(name = "redirect_uri")
     private String redirectUri;
-    @Column(name = "scope")
-    private String scope;
-    @Column(name = "authorized_grant_types")
-    private String authorizedGrantTypes;
+//    @Column(name = "scope")
+//    private String scope;
+//    @Column(name = "authorized_grant_types")
+//    private String authorizedGrantTypes;
 }

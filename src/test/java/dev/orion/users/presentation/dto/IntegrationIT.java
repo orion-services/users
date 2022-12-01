@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation;
+package dev.orion.users.presentation.dto;
 
 import static io.restassured.RestAssured.given;
 import org.junit.jupiter.api.Order;
@@ -94,13 +94,14 @@ class IntegrationIT {
         .statusCode(400);
   }
 
+
   @Test
   @Order(7)
   void authenticate() {
     given()
         .body("{\"email\":\"Orion@email.com\",\"password\":\"Orion123\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(200);
   }
@@ -111,7 +112,7 @@ class IntegrationIT {
     given()
         .body("{\"email\":\"Orion2@email.com\",\"password\":\"Orion123\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(400);
   }
@@ -122,7 +123,7 @@ class IntegrationIT {
     given()
         .body("{\"email\":\"Orion#email.com\",\"password\":\"Orion123\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(400);
   }
@@ -133,7 +134,7 @@ class IntegrationIT {
     given()
         .body("{\"email\":\"Orion@email.com\",\"password\":\"Orion1234\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(400);
   }
@@ -144,7 +145,7 @@ class IntegrationIT {
     given()
         .body("{\"email\":\"\",\"password\":\"Orion123\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(400);
   }
@@ -155,7 +156,7 @@ class IntegrationIT {
     given()
         .body("{\"email\":\"Orion@email.com\",\"password\":\"\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/authenticate")
+        .post("/api/auth/authenticate")
         .then()
         .statusCode(400);
   }
@@ -166,7 +167,7 @@ class IntegrationIT {
     given()
         .body("{\"name\":\"OrionTest\",\"email\":\"OrionTest@email.com\",\"password\":\"Orion123\"}")
         .header("Content-Type", "application/json")
-        .post("/api/user/createAuthenticate")
+        .post("/api/auth/createAuthenticate")
         .then()
         .statusCode(200);
   }

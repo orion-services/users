@@ -21,8 +21,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("/api/user")
-public class AuthenticantionService {
+@Path("/api/auth")
+public class AuthenticationService {
     @Inject
     protected AuthorizationCodeHandler authorizationCodeHandler;
 
@@ -47,7 +47,7 @@ public class AuthenticantionService {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     @Transactional
-    public Authentication createAuthenticate(@RequestBody CreateUserDto createUserDto) {
+    public Response createAuthenticate(@RequestBody CreateUserDto createUserDto) {
 
         try {
             User user = createUser.create(createUserDto);
@@ -57,7 +57,7 @@ public class AuthenticantionService {
             auth.setToken(token);
             auth.setRefreshToken(refreshToken);
             auth.setUser(ResponseMapper.toResponse(user));
-            return auth;
+            return Response.ok(auth).build();
         } catch (Exception e) {
             String message = e.getMessage();
             throw new ServiceException(
@@ -83,7 +83,7 @@ public class AuthenticantionService {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     @Transactional
-    public Authentication authenticate(@RequestBody AuthenticateUserDto authDto) {
+    public Response authenticate(@RequestBody AuthenticateUserDto authDto) {
         try {
             User user = authUser.authenticate(authDto);
             String token = this.authorizationCodeHandler.getAccessToken(user);
@@ -92,7 +92,7 @@ public class AuthenticantionService {
             auth.setUser(ResponseMapper.toResponse(user));
             auth.setToken(token);
             auth.setRefreshToken(refreshToken);
-            return auth;
+            return Response.ok(auth).build();
         } catch (Exception e) {
             throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
         }
