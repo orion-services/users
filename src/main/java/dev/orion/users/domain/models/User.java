@@ -16,6 +16,7 @@
  */
 package dev.orion.users.domain.models;
 
+import java.util.List;
 import java.util.UUID;
 
 import dev.orion.users.domain.vo.Email;
@@ -34,15 +35,14 @@ public class User {
 
     private String status;
 
-    private String roles;
+    private List<RoleEnum> roles;
 
-    private String scopes;
 
-    public String getRoles() {
+    public List<RoleEnum> getRoles() {
         return roles;
     }
 
-    public void setRoles(String roles) {
+    public void setRoles(List<RoleEnum> roles) {
         this.roles = roles;
     }
 

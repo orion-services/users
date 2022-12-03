@@ -27,7 +27,7 @@ import javax.ws.rs.core.Response;
 import dev.orion.users.domain.dto.UserQueryDto;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.*;
-import dev.orion.users.presentation.mappers.ResponseMapper;
+import dev.orion.users.presentation.mappers.UserResponseMapper;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -41,9 +41,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 @Path("/api/user")
 public class UserService {
 
-        /* Configure the issuer for JWT generation. */
-        @ConfigProperty(name = "user.issuer")
-        public Optional<String> issuer;
+
 
         @Inject
         protected CreateUser createUser;
@@ -66,7 +64,7 @@ public class UserService {
                         List<User> users = listUser.list(query);
                         return Response
                                 .status(Response.Status.OK)
-                                .entity(users.stream().map(ResponseMapper::toResponse).collect(Collectors.toList()))
+                                .entity(users.stream().map(UserResponseMapper::toResponse).collect(Collectors.toList()))
                                 .build();
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
@@ -92,7 +90,7 @@ public class UserService {
         public Response create(@RequestBody CreateUserDto createUserDto) {
                 try {
                         return Response.status(Response.Status.CREATED)
-                                        .entity(ResponseMapper.toResponse(createUser.create(createUserDto)))
+                                        .entity(UserResponseMapper.toResponse(createUser.create(createUserDto)))
                                         .build();
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);
@@ -107,7 +105,7 @@ public class UserService {
         public Response block(@FormParam("hash") @NotEmpty final String hash) {
                 try {
                         return Response.status(Response.Status.ACCEPTED)
-                                        .entity(ResponseMapper.toResponse(blockUser.block(hash)))
+                                        .entity(UserResponseMapper.toResponse(blockUser.block(hash)))
                                         .build();
                 } catch (Exception e) {
                         throw new ServiceException(e.getMessage(), Response.Status.BAD_REQUEST);

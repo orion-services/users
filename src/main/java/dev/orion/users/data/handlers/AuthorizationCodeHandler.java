@@ -32,8 +32,7 @@ public class AuthorizationCodeHandler {
     public String getAccessToken(User user) {
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
                 .upn(user.getEmail().getAddress())
-                .claim("userId", user.getUserHash())
-
+                .claim(user.getUserHash(), user.getUserHash())
                 .expiresIn(expiresInMin) // expires in 30 minutes
                 .groups(new HashSet<>(Arrays.asList("user")))
                 .claim(Claims.c_hash, user.getUserHash())

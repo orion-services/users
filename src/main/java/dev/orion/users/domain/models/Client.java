@@ -1,10 +1,24 @@
 package dev.orion.users.domain.models;
 
+import jdk.incubator.foreign.CLinker;
+
 public class Client {
     private String clientId;
+
+    private String  name;
+
+    private String uri;
     private String clientSecret;
     private String scope;
     private String authorizedGrantTypes;
+
+    public Client(){}
+
+    public Client(String name, String uri){
+        this();
+        this.name = name;
+        this.uri = uri;
+    }
 
     public String getClientId() {
         return clientId;
@@ -38,4 +52,19 @@ public class Client {
         this.authorizedGrantTypes = authorizedGrantTypes;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUri() {
+        return uri;
+    }
+
+    public void setUri(String uri) {
+        this.uri = uri;
+    }
 }

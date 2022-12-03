@@ -5,21 +5,37 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import lombok.Data;
+import dev.orion.users.domain.models.Client;
+import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
+import lombok.*;
 
-@Entity(name = "clients")
-@Table(name = "clients")
-@Data
-public class ClientPanacheEntity {
+@Entity(name = "client")
+@Table(name = "client")
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class ClientPanacheEntity extends PanacheEntityBase {
     @Id
-    @Column(name = "client_id")
-    private String clientId;
-    @Column(name = "client_secret")
-    private String clientSecret;
-    @Column(name = "redirect_uri")
-    private String redirectUri;
-//    @Column(name = "scope")
-//    private String scope;
-//    @Column(name = "authorized_grant_types")
-//    private String authorizedGrantTypes;
+    @Column
+    public String clientId;
+    @Column
+    public String name;
+    @Column
+    public String clientSecret;
+    @Column
+    public String redirectUri;
+    @Column
+    public String scope;
+    @Column
+    public String authorizedGrantTypes;
+
+
+    public Client toClient(){
+        Client client = new Client();
+        client.setClientId(this.clientId);
+        client.setName(this.name);
+        client.setUri(this.redirectUri);
+        return client;
+    }
 }

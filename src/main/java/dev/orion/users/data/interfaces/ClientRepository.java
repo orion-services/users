@@ -8,4 +8,6 @@ public interface ClientRepository {
 
     Client findById (String id);
 
+    Client update (Client client);
+
 }

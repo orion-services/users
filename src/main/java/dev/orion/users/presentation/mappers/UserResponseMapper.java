@@ -3,7 +3,7 @@ package dev.orion.users.presentation.mappers;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.presentation.dto.ResponseUserDto;
 
-public class ResponseMapper {
+public class UserResponseMapper {
 
     public static ResponseUserDto toResponse(User user) {
         ResponseUserDto response = new ResponseUserDto();

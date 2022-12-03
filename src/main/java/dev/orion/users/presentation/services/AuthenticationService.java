@@ -7,7 +7,7 @@ import dev.orion.users.domain.models.User;
 import dev.orion.users.domain.usecases.AuthenticateUser;
 import dev.orion.users.domain.usecases.CreateUser;
 import dev.orion.users.presentation.dto.Authentication;
-import dev.orion.users.presentation.mappers.ResponseMapper;
+import dev.orion.users.presentation.mappers.UserResponseMapper;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 
@@ -56,7 +56,7 @@ public class AuthenticationService {
             Authentication auth = new Authentication();
             auth.setToken(token);
             auth.setRefreshToken(refreshToken);
-            auth.setUser(ResponseMapper.toResponse(user));
+            auth.setUser(UserResponseMapper.toResponse(user));
             return Response.ok(auth).build();
         } catch (Exception e) {
             String message = e.getMessage();
@@ -89,7 +89,7 @@ public class AuthenticationService {
             String token = this.authorizationCodeHandler.getAccessToken(user);
             String refreshToken = this.authorizationCodeHandler.getRefreshToken(user);
             Authentication auth = new Authentication();
-            auth.setUser(ResponseMapper.toResponse(user));
+            auth.setUser(UserResponseMapper.toResponse(user));
             auth.setToken(token);
             auth.setRefreshToken(refreshToken);
             return Response.ok(auth).build();

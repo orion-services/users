@@ -29,4 +29,6 @@ public class AuthorizationCodePanacheEntity {
     private String redirectUri;
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
+    @Column(name = "active")
+    private boolean active;
 }
