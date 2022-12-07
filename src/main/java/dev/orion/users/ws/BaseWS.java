@@ -1,6 +1,21 @@
+/**
+ * @License
+ * Copyright 2022 Orion Services @ https://github.com/orion-services
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.orion.users.ws;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -18,8 +33,8 @@ import io.smallrye.jwt.build.Jwt;
 public class BaseWS {
 
     /** Configure the issuer for JWT generation. */
-    @ConfigProperty(name = "user.issuer")
-    private Optional<String> issuer;
+    @ConfigProperty(name = "users.issuer")
+    Optional<String> issuer;
 
     /**
      * Creates a JWT (JSON Web Token) to a user.
@@ -29,9 +44,9 @@ public class BaseWS {
      * @return Returns the JWT
      */
     public String generateJWT(final User user) {
-        return Jwt.issuer(issuer.orElse("http://localhost:8080"))
+        return Jwt.issuer(issuer.orElse("orion-users"))
             .upn(user.getEmail())
-            .groups(new HashSet<>(Arrays.asList("user")))
+            .groups(new HashSet<>(user.getRoleList()))
             .claim(Claims.c_hash, user.getHash())
             .claim(Claims.email, user.getEmail())
             .sign();
@@ -48,7 +63,6 @@ public class BaseWS {
      */
     protected boolean checkTokenEmail(final String email,
         final String jwtEmail) {
-
         if (!email.equals(jwtEmail)) {
             throw new UserWSException("JWT outdated",
                 Response.Status.BAD_REQUEST);

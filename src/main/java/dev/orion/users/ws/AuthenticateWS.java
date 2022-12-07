@@ -30,7 +30,7 @@ import javax.ws.rs.core.Response;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.resteasy.reactive.RestForm;
 
-import dev.orion.users.dto.Authentication;
+import dev.orion.users.dto.AuthenticationDTO;
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
@@ -40,7 +40,7 @@ import io.smallrye.mutiny.Uni;
 /**
  * User API.
  */
-@Path("/api/user")
+@Path("/api/users")
 @PermitAll
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
@@ -120,7 +120,7 @@ public class AuthenticateWS extends BaseWS {
     @POST
     @Path("/createAuthenticate")
     @Retry(maxRetries = 1, delay = 2000)
-    public Uni<Authentication> createAuthenticate(
+    public Uni<AuthenticationDTO> createAuthenticate(
         @FormParam("name") @NotEmpty final String name,
         @FormParam("email") @NotEmpty @Email final String email,
         @FormParam("password") @NotEmpty final String password) {
@@ -130,7 +130,7 @@ public class AuthenticateWS extends BaseWS {
                 .onItem().ifNotNull()
                     .transform(user -> {
                         String token = generateJWT(user);
-                        Authentication auth = new Authentication();
+                        AuthenticationDTO auth = new AuthenticationDTO();
                         auth.setToken(token);
                         auth.setUser(user);
                         return auth;

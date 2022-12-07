@@ -16,6 +16,7 @@
  */
 package dev.orion.users.repository;
 
+import java.io.IOException;
 import java.util.Map;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -26,6 +27,7 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 
+import dev.orion.users.model.Role;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
@@ -37,86 +39,49 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class UserRepository implements Repository {
 
+    /** Setting the default role name. */
+    private static final String DEFAULT_ROLE_NAME = "user";
+
     /**
      * Creates a user in the service.
      *
-     * @param name     : A name of the user
-     * @param email    : A valid e-mail
-     * @param password : A password of the user
-     *
+     * @param u : A user object
      * @return Returns a user asynchronously
      */
     @Override
-    public Uni<User> createUser(final String name, final String email,
-            final String password) {
-        return checkEmail(email)
-                .onItem().ifNotNull()
-                    .failWith(new IllegalArgumentException(
-                        "The e-mail already exists"))
-                .onItem().ifNull()
-                .switchTo(() -> {
-                    return checkName(name)
-                            .onItem().ifNotNull()
-                                .failWith(new IllegalArgumentException(
-                                    "The name already existis"))
-                            .onItem().ifNull()
-                                .switchTo(() -> persistUser(
-                                    name, email, password));
-                });
+    public Uni<User> createUser(final User u) {
+        return checkEmail(u.getEmail())
+            .onItem().ifNotNull().transform(user -> user)
+            .onItem().ifNull().switchTo(() -> {
+                return checkName(u.getName())
+                    .onItem().ifNotNull()
+                        .failWith(new IllegalArgumentException(
+                            "The name already existis"))
+                    .onItem().ifNull().switchTo(() -> {
+                            return checkHash(u.getHash())
+                                .onItem().ifNotNull()
+                                    .failWith(new IllegalArgumentException(
+                                        "The hash already existis"))
+                                .onItem().ifNull().switchTo(() -> {
+                                    if (u.getPassword().isBlank()) {
+                                        u.setPassword(generateSecurePassword());
+                                    }
+                                    return persistUser(u);
+                                });
+                    });
+            });
     }
 
     /**
-     * Verifies if the e-mail already exists in the database.
+     * Returns a user searching for e-mail and password.
      *
-     * @param email : An e-mail address
-     *
-     * @return Returns true if the e-mail already exists
-     */
-    private Uni<User> checkEmail(final String email) {
-        return find("email", email).firstResult();
-    }
-
-    /**
-     * Verifies if the e-mail already exists in the database.
-     *
-     * @param email : An e-mail address
-     *
-     * @return Returns true if the e-mail already exists
-     */
-    private Uni<User> checkName(final String email) {
-        return find("name", email).firstResult();
-    }
-
-    /**
-     * Persists a user in the service.
-     *
-     * @param name     : The name of the user
-     * @param email    : An e-mail address of the a user
-     * @param password : The password of the user
-     *
-     * @return Returns Uni<User> object
-     */
-    private Uni<User> persistUser(final String name, final String email,
-            final String password) {
-        User user = new User();
-        user.setName(name);
-        user.setEmail(email);
-        user.setPassword(password);
-        return Panache.<User>withTransaction(user::persist);
-    }
-
-    /**
-     * Returns a user looking for email and password.
-     *
-     * @param email    : An e-mail of the user
-     * @param password : A password
-     *
-     * @return Returns a user asynchronously
+     * @param user : A user object
+     * @return Uni<User> object
      */
     @Override
-    public Uni<User> authenticate(final String email, final String password) {
-        Map<String, Object> params = Parameters.with("email", email)
-                .and("password", password).map();
+    public Uni<User> authenticate(final User user) {
+        Map<String, Object> params = Parameters.with("email",
+            user.getEmail()).and("password", user.getPassword()).map();
         return find("email = :email and password = :password", params)
                 .firstResult();
     }
@@ -126,7 +91,6 @@ public class UserRepository implements Repository {
      *
      * @param email    : User's email
      * @param newEmail : New User's Email
-     *
      * @return Uni<User> object
      */
     @Override
@@ -144,11 +108,37 @@ public class UserRepository implements Repository {
                                 "Email already in use"))
                         .onItem().ifNull()
                             .switchTo(() -> {
+                                user.setEmailValidationCode();
+                                user.setEmailValid(false);
                                 user.setEmail(newEmail);
                                 return Panache.<User>withTransaction(
                                     user::persist);
                             });
                 });
+    }
+
+     /**
+     * Validates the user's e-mail, change the emailValid property to true
+     * if the code is correct.
+     *
+     * @param email  : User's email
+     * @param code   : The validation code
+     * @return Uni<User> object
+     */
+    @Override
+    public Uni<User> validateEmail(final String email, final String code) {
+        Map<String, Object> params = Parameters.with("email",
+        email).and("code", code).map();
+        return find("email = :email and emailValidationCode = :code",
+            params)
+                .firstResult()
+                    .onItem().ifNotNull().transformToUni(user -> {
+                        user.setEmailValid(true);
+                        return Panache.<User>withTransaction(user::persist);
+                    })
+                    .onItem().ifNull()
+                        .failWith(new IllegalArgumentException(
+                            "Invalid e-mail or code"));
     }
 
     /**
@@ -157,8 +147,7 @@ public class UserRepository implements Repository {
      * @param password    : Actual password
      * @param newPassword : New Password
      * @param email       : User's email
-     *
-     * @return Returns a user asynchronously
+     * @return Uni<User> object
      */
     @Override
     public Uni<User> changePassword(
@@ -205,7 +194,6 @@ public class UserRepository implements Repository {
      * Deletes a User from the service.
      *
      * @param email : User email
-     *
      * @return Return 1 if user was deleted
      */
     @Override
@@ -217,6 +205,63 @@ public class UserRepository implements Repository {
             .transformToUni(user -> {
                 return User.delete("email", email);
             });
+    }
+
+    /**
+     * Verifies if the e-mail already exists in the database.
+     *
+     * @param email : An e-mail address
+     *
+     * @return Returns true if the e-mail already exists
+     */
+    private Uni<User> checkEmail(final String email) {
+        return find("email", email).firstResult();
+    }
+
+    /**
+     * Verifies if the e-mail already exists in the database.
+     *
+     * @param email : An e-mail address
+     * @return Returns true if the e-mail already exists
+     */
+    private Uni<User> checkName(final String email) {
+        return find("name", email).firstResult();
+    }
+
+    /**
+     * Verifies if the hash already exists in the database.
+     *
+     * @param hash : A hash to identify an user
+     * @return Returns true if the hash already exists
+     */
+    private Uni<User> checkHash(final String hash) {
+        return find("hash", hash).firstResult();
+    }
+
+    /**
+     * Persists a user in the service with a default role (user).
+     *
+     * @param user     : The user object
+     * @return Uni<User> object
+     */
+    private Uni<User> persistUser(final User user) {
+        return getDefaultRole()
+            .onItem().ifNull()
+                .failWith(new IOException("Role not found"))
+            .onItem().ifNotNull()
+                .transformToUni((role) -> {
+                    user.addRole(role);
+                    return Panache.<User>withTransaction(user::persist);
+                });
+    }
+
+    /**
+     * Gets the default role "user" from the database.
+     *
+     * @return The Uni<Role> object of "user" role.
+     */
+    private Uni<Role> getDefaultRole() {
+        return Role.find("name", DEFAULT_ROLE_NAME).firstResult();
     }
 
     /**
@@ -269,5 +314,4 @@ public class UserRepository implements Repository {
             }
         };
     }
-
 }

@@ -24,7 +24,7 @@ import lombok.Setter;
  * Authentication DTO.
  */
 @Getter @Setter
-public class Authentication {
+public class AuthenticationDTO {
 
     /** The user object. */
     private User user;

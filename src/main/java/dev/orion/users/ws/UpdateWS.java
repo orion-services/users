@@ -43,7 +43,7 @@ import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
 import io.quarkus.qute.CheckedTemplate;
 import io.smallrye.mutiny.Uni;
 
-@Path("/api/user")
+@Path("/api/users")
 @RolesAllowed("user")
 @RequestScoped
 public class UpdateWS extends BaseWS {
@@ -54,7 +54,7 @@ public class UpdateWS extends BaseWS {
     /** Retrieve the e-mail from jwt. */
     @Inject
     @Claim(standard = Claims.email)
-    private String jwtEmail;
+    String jwtEmail;
 
     /**
      * Updates the e-mail of a user. A JWT with role user is mandatory to

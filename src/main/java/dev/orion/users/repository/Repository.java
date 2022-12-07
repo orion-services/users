@@ -28,23 +28,18 @@ public interface Repository extends PanacheRepository<User> {
     /**
      * Creates a user in the service.
      *
-     * @param name     : A name of the user
-     * @param email    : A valid e-mail
-     * @param password : A password of the user
-     *
+     * @param user  : An user object
      * @return A Uni<User> object
      */
-    Uni<User> createUser(String name, String email, String password);
+    Uni<User> createUser(User user);
 
     /**
-     * Returns a user looking for email and password.
+     * Returns a user searching for email and password.
      *
-     * @param email    : An e-mail of the user
-     * @param password : A password
-     *
+     * @param user  : The user object
      * @return A Uni<User> object
      */
-    Uni<User> authenticate(String email, String password);
+    Uni<User> authenticate(User user);
 
     /**
      * Updates the e-mail of the user.
@@ -57,12 +52,20 @@ public interface Repository extends PanacheRepository<User> {
     Uni<User> updateEmail(String email, String newEmail);
 
     /**
+     * Validates an e-mail of a user.
+     *
+     * @param email : The e-mail of a user
+     * @param code  : The validation code
+     * @return true if the validation code is correct for the respective e-mail
+     */
+    Uni<User> validateEmail(String email, String code);
+
+    /**
      * Changes User password.
      *
      * @param password    : Actual password
      * @param newPassword : New Password
      * @param email       : User's email
-     *
      * @return A Uni<User> object
      */
     Uni<User> changePassword(String password, String newPassword, String email);
@@ -79,9 +82,9 @@ public interface Repository extends PanacheRepository<User> {
     /**
      * Deletes a User from the service.
      *
-     * @param email : User email
-     *
-     * @return Return 1 if user was deleted
+     * @param email : User e-mail
+     * @return Returns a Long 1 if user was deleted
      */
     Uni<Long> deleteUser(String email);
+
 }

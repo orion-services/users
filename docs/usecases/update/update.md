@@ -17,7 +17,7 @@ nav_order: 3
 
 ## HTTP endpoints
 
-* /api/user/update/email
+* /api/users/update/email
     * Method: PUT
     * Consume: application/x-www-form-urlencoded
     * Produce: application/json
@@ -26,7 +26,7 @@ nav_order: 3
         * Request:
         ```shell
             curl -X PUT \
-            'http://localhost:8080/api/user/update/email' \
+            'http://localhost:8080/api/users/update/email' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -58,7 +58,7 @@ In the use case layer, exceptions related with arguments will be IllegalArgument
 
 ## HTTP endpoints
 
-* /api/user/update/password
+* /api/users/update/password
     * Method: PUT
     * Consume: application/x-www-form-urlencoded
     * Produce: application/json
@@ -67,7 +67,7 @@ In the use case layer, exceptions related with arguments will be IllegalArgument
         * Request:
         ```shell
             curl -X PUT \
-            'http://localhost:8080/api/user/update/password' \
+            'http://localhost:8080/api/users/update/password' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -100,7 +100,7 @@ In the use case layer, exceptions related with arguments will be IllegalArgument
 
 ## HTTP endpoints
 
-* /api/user/recoverPassword
+* /api/users/recoverPassword
     * Method: POST
     * Consume: application/x-www-form-urlencoded
     * Examples:
@@ -108,7 +108,7 @@ In the use case layer, exceptions related with arguments will be IllegalArgument
         * Request:
         ```shell
             curl -X POST \
-            'http://localhost:8080/api/user/update/recoverPassword' \
+            'http://localhost:8080/api/users/update/recoverPassword' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

@@ -17,7 +17,7 @@ nav_order: 2
 
 ## HTTP endpoints
 
-* /api/user/delete
+* /api/users/delete
     * Method: DELETE
     * Consume: application/x-www-form-urlencoded
     * Produces: application/json
@@ -26,7 +26,7 @@ nav_order: 2
         * Request:
         ```shell
             curl -X DELETE \
-            'http://localhost:8080/api/user/authenticate' \
+            'http://localhost:8080/api/users/authenticate' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

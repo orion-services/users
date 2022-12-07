@@ -33,7 +33,7 @@ import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
 import io.smallrye.mutiny.Uni;
 
-@Path("/api/user")
+@Path("/api/users")
 @RolesAllowed("user")
 @RequestScoped
 public class DeleteWS {

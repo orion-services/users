@@ -42,7 +42,7 @@ class IntegrationIT {
                 .param("name", "Orion")
                 .param("email", "orion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(200)
                     .body("name", is("Orion"),
@@ -57,7 +57,7 @@ class IntegrationIT {
                 .param("name", "")
                 .param("email", "orion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(400);
     }
@@ -70,7 +70,7 @@ class IntegrationIT {
                 .param("name", "Orion")
                 .param("email", "orionteste.com")
                 .param("password", "12345678")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(400);
     }
@@ -83,7 +83,7 @@ class IntegrationIT {
                 .param("name", "Orion")
                 .param("email", "")
                 .param("password", "12345678")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(400);
     }
@@ -96,7 +96,7 @@ class IntegrationIT {
                 .param("name", "Orion")
                 .param("email", "orion@test.com")
                 .param("password", "")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(400);
     }
@@ -109,7 +109,7 @@ class IntegrationIT {
                 .param("name", "Orion")
                 .param("email", "orion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/create")
+                .post("/api/users/create")
                 .then()
                 .statusCode(400);
     }
@@ -121,7 +121,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(200);
     }
@@ -133,7 +133,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orion@test")
                 .param("password", "1234")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(401);
     }
@@ -145,7 +145,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orion#test.com")
                 .param("password", "1234")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(400);
     }
@@ -157,7 +157,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orion@test")
                 .param("password", "123456789")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(401);
     }
@@ -168,7 +168,7 @@ class IntegrationIT {
         given()
                 .when()
                 .param("password", "1234")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(400);
     }
@@ -179,7 +179,7 @@ class IntegrationIT {
         given()
                 .when()
                 .param("email", "orion@test.com")
-                .post("/api/user/authenticate")
+                .post("/api/users/authenticate")
                 .then()
                 .statusCode(400);
     }
@@ -192,7 +192,7 @@ class IntegrationIT {
                 .param("name", "OrionOrion")
                 .param("email", "orionOrion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/createAuthenticate")
+                .post("/api/users/createAuthenticate")
                 .then()
                 .statusCode(200);
     }
@@ -206,7 +206,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/authenticate");
+                .post("/api/users/authenticate");
 
         String jwt = response.getBody().asString();
 
@@ -216,7 +216,7 @@ class IntegrationIT {
                 .formParam("email", "orion@test.com")
                 .formParam("newEmail", "newOrion@test.com")
                 .when()
-                .put("/api/user/update/email")
+                .put("/api/users/update/email")
                 .then()
                 .statusCode(200);
     }
@@ -229,7 +229,7 @@ class IntegrationIT {
                 .formParam("email", "orionnnn@test.com")
                 .formParam("newEmail", "newOrion@test.com")
                 .when()
-                .put("/api/user/update/email")
+                .put("/api/users/update/email")
                 .then()
                 .statusCode(400);
     }
@@ -242,7 +242,7 @@ class IntegrationIT {
                 .when()
                 .param("email", "orionOrion@test.com")
                 .param("password", "12345678")
-                .post("/api/user/authenticate");
+                .post("/api/users/authenticate");
         String jwt = response.getBody().asString();
 
         given()
@@ -252,7 +252,7 @@ class IntegrationIT {
                 .formParam("password", "12345678")
                 .formParam("newPassword", "87654321")
                 .when()
-                .put("/api/user/update/password")
+                .put("/api/users/update/password")
                 .then()
                 .statusCode(200);
     }
@@ -266,7 +266,7 @@ class IntegrationIT {
                 .formParam("password", "12345678")
                 .formParam("newPassword", "87654321")
                 .when()
-                .put("/api/user/update/password")
+                .put("/api/users/update/password")
                 .then()
                 .statusCode(400);
     }
@@ -278,7 +278,7 @@ class IntegrationIT {
                 .contentType("application/x-www-form-urlencoded; charset=utf-8")
                 .formParam("email", "orionOrion@test.com")
                 .when()
-                .post("/api/user/recoverPassword")
+                .post("/api/users/recoverPassword")
                 .then()
                 .statusCode(204);
     }
@@ -290,7 +290,7 @@ class IntegrationIT {
                 .contentType("application/x-www-form-urlencoded; charset=utf-8")
                 .formParam("email", "notExist@test.com")
                 .when()
-                .post("/api/user/recoverPassword")
+                .post("/api/users/recoverPassword")
                 .then()
                 .statusCode(400);
     }
@@ -302,7 +302,7 @@ class IntegrationIT {
                 .contentType("application/x-www-form-urlencoded; charset=utf-8")
                 .formParam("email", "orionOrion@test.com")
                 .when()
-                .delete("/api/user/delete")
+                .delete("/api/users/delete")
                 .then()
                 .statusCode(200);
     }

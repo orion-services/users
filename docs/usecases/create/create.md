@@ -33,7 +33,7 @@ nav_order: 1
 
 ## HTTP endpoints
 
-* /api/user/create
+* /api/users/create
 * Method: POST
 * Consume: application/x-www-form-urlencoded
 * Produce: application/json
@@ -42,7 +42,7 @@ nav_order: 1
     * Request:
     ```shell
             curl -X 'POST' \
-            'http://localhost:8080/api/user/create' \
+            'http://localhost:8080/api/users/create' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'
