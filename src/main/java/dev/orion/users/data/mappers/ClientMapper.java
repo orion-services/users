@@ -1,6 +1,6 @@
 package dev.orion.users.data.mappers;
 
-import dev.orion.users.domain.dto.CreateClientDto;
+import dev.orion.users.domain.dto.client.CreateClientDto;
 import dev.orion.users.domain.models.Client;
 
 public class ClientMapper {

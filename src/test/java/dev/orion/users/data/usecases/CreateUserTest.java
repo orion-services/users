@@ -1,59 +1,75 @@
 package dev.orion.users.data.usecases;
 
+import dev.orion.users.data.usecases.user.CreateUserImpl;
+import dev.orion.users.infra.panache.entities.UserPanacheEntity;
+import dev.orion.users.infra.panache.repositories.UserPanacheRepository;
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.orion.users.data.interfaces.Encrypter;
 import dev.orion.users.data.interfaces.UserRepository;
-import dev.orion.users.domain.dto.CreateUserDto;
+import dev.orion.users.domain.dto.user.CreateUserDto;
 import dev.orion.users.domain.models.User;
-import dev.orion.users.domain.usecases.CreateUser;
+import dev.orion.users.domain.usecases.user.CreateUser;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import java.util.UUID;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 
-@ExtendWith(MockitoExtension.class)
+@QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Transactional
 public class CreateUserTest {
 
-    @Mock
-    UserRepository repository;
+    @InjectMock
+    private UserRepository repository;
 
     @Mock
     Encrypter encrypter;
 
-    @InjectMocks
-    CreateUser createUser = new CreateUserImpl();
+    @Inject
+    CreateUser createUser;
+
 
     @Test
     @DisplayName("Create a user")
     @Order(1)
     void createUserTest() {
         CreateUserDto createUserDto = new CreateUserDto();
-
+        String userHash = UUID.randomUUID().toString();
         createUserDto.name = "Orion";
         createUserDto.email = "orion@test.com";
         createUserDto.password = "12345678";
 
         User user = new User("Orion", "orion@teste.com", "12345678");
-        Mockito.when(repository.create(any(User.class))).thenReturn(user);
-
-        User userCreated = createUser.create(createUserDto);
+        Mockito.when(repository.create(user)).thenReturn(user);
+        user.setUserHash(userHash);
+        User userCreated = new User("Orion", "orion@teste.com", "12345678");
+        Mockito.when(createUser.create(createUserDto)).thenReturn(user);
+        userCreated.setUserHash(userHash);
 
         assertNotNull(userCreated);
-        assertEquals(user, userCreated);
+        assertEquals(user.getEmail().getAddress(), userCreated.getEmail().getAddress());
     }
 
     @Test
     @DisplayName("Create a user with a blank name")
     @Order(2)
     void createUserWithBlankName() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto("", "orion@test.com", "12345678"));
         });
     }
@@ -62,16 +78,18 @@ public class CreateUserTest {
     @DisplayName("Create a user with a blank name")
     @Order(3)
     void createUserWithBlankEmail() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto("Orion", "", "12345678"));
         });
+
+        assertNotNull(exception);
     }
 
     @Test
     @DisplayName("Create a user with a blank password")
     @Order(4)
     void createUserWithBlankPassword() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto("Orion", "orion@test.com", ""));
         });
     }
@@ -80,7 +98,7 @@ public class CreateUserTest {
     @DisplayName("Create a user with an invalid e-mail")
     @Order(5)
     void createUserWithInvalidEmail() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto("Orion", "orion#test.com", "12345678"));
         });
     }
@@ -89,7 +107,7 @@ public class CreateUserTest {
     @DisplayName("Create a user with invalid password")
     @Order(6)
     void createUserWithInvalidPasswordTest() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto("Orion", "orion@test.com", "12345"));
         });
     }
@@ -98,7 +116,7 @@ public class CreateUserTest {
     @DisplayName("Create a user with a null name")
     @Order(7)
     void createUserWithNullName() {
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        assertThrows(IllegalArgumentException.class, () -> {
             createUser.create(new CreateUserDto(null, "orion#test.com", "12345678"));
         });
     }

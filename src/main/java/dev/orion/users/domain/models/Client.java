@@ -1,6 +1,5 @@
 package dev.orion.users.domain.models;
 
-import jdk.incubator.foreign.CLinker;
 
 public class Client {
     private String clientId;

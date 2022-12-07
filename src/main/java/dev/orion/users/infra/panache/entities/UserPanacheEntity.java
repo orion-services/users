@@ -1,11 +1,13 @@
 package dev.orion.users.infra.panache.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.orion.users.domain.models.RoleEnum;
 import dev.orion.users.domain.models.User;
 
 import dev.orion.users.domain.vo.Email;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import javax.persistence.*;
+import java.util.Set;
 
 @Entity(name = "user")
 @Table(name = "user")
@@ -32,6 +34,13 @@ public class UserPanacheEntity extends PanacheEntityBase {
     @Column(name = "status")
     public String status;
 
+    @Column(name = "type")
+    public String type;
+
+    @Column(name = "roles")
+    @ElementCollection
+    public Set<RoleEnum> roles;
+
     public User toUser() {
         User user = new User();
         user.setName(this.name);
@@ -39,6 +48,8 @@ public class UserPanacheEntity extends PanacheEntityBase {
         user.setStatus(this.status);
         user.setUserHash(this.userHash);
         user.setPassword(this.password);
+        user.setType(this.type);
+        user.setRoles(roles);
         return user;
     }
 }

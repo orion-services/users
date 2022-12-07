@@ -2,8 +2,8 @@ package dev.orion.users.infra.panache.repositories;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.orion.users.data.interfaces.UserRepository;
-import dev.orion.users.domain.dto.AuthenticateUserDto;
-import dev.orion.users.domain.dto.UserQueryDto;
+import dev.orion.users.domain.dto.user.AuthenticateUserDto;
+import dev.orion.users.domain.dto.user.UserQueryDto;
 import dev.orion.users.domain.models.StatusEnum;
 import dev.orion.users.domain.models.User;
 import dev.orion.users.infra.panache.entities.UserPanacheEntity;
@@ -33,6 +33,8 @@ public class UserPanacheRepository implements UserRepository {
         userPanache.status = user.getStatus();
         userPanache.password = user.getPassword();
         userPanache.email = user.getEmail().getAddress();
+        userPanache.type = user.getType();
+        userPanache.roles = user.getRoles();
         userPanache.persist();
 
         return userPanache.toUser();
@@ -114,5 +116,24 @@ public class UserPanacheRepository implements UserRepository {
         }
         userEntity.status = StatusEnum.BLOCKED.name();
         return userEntity.toUser();
+    }
+
+    @Override
+    @Transactional
+    public User update(User user) {
+        UserPanacheEntity userEntity = UserPanacheEntity.find("hash", user.getUserHash()).firstResult();
+        if (userEntity == null) {
+            throw new NotFoundException("User not found or already blocked");
+        }
+        if(user.getName() != null || !user.getName().isEmpty()){
+            userEntity.name = user.getName();
+        }
+        if(user.getPassword() != null || !user.getPassword().isEmpty()){
+            userEntity.password = user.getPassword();
+        }
+        if(user.getRoles() != null || !user.getRoles().isEmpty()){
+            userEntity.roles = user.getRoles();
+        }
+        return null;
     }
 }

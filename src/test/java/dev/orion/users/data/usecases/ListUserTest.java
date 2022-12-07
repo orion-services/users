@@ -1,9 +1,10 @@
 package dev.orion.users.data.usecases;
 
 import dev.orion.users.data.interfaces.UserRepository;
-import dev.orion.users.domain.dto.UserQueryDto;
+import dev.orion.users.data.usecases.user.ListUserImpl;
+import dev.orion.users.domain.dto.user.UserQueryDto;
 import dev.orion.users.domain.models.User;
-import dev.orion.users.domain.usecases.ListUser;
+import dev.orion.users.domain.usecases.user.ListUser;
 import dev.orion.users.domain.vo.Email;
 
 import java.util.List;
@@ -14,6 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 
+import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.junit.mockito.InjectMock;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
@@ -27,20 +30,18 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+@QuarkusTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@Transactional
 public class ListUserTest {
-    @Mock
+    @InjectMock
     UserRepository repository;
 
-    @Spy
-    @InjectMocks
-    ListUser listUser = new ListUserImpl();
-
-    public void setup() {
-        // if we don't call below, we will get NullPointerException
-        MockitoAnnotations.openMocks(this);
-    }
+   @Inject
+    ListUser listUser;
 
     @Test
     @DisplayName("List All Users")
@@ -54,12 +55,10 @@ public class ListUserTest {
                 createUserMock("123", "Orion2",
                         "Orion2@email.com"));
 
-        Mockito.when(repository.findByQuery(any(UserQueryDto.class))).thenReturn(userList);
+        Mockito.when(repository.findByQuery(query)).thenReturn(userList);
+        Mockito.when(listUser.list(query)).thenReturn(userList);
 
         List<User> users = listUser.list(query);
-
-        Mockito.verify(repository, Mockito.times(1)).findByQuery(query);
-        Mockito.verify(listUser, Mockito.atLeast(1)).list(query);
 
         assertNotNull(users);
         assertEquals(users.size() == 2, true);
@@ -112,9 +111,6 @@ public class ListUserTest {
         Mockito.when(repository.findByQuery(query)).thenReturn(userList);
 
         List<User> users = listUser.list(query);
-
-        Mockito.verify(listUser, Mockito.times(1)).list(query);
-        Mockito.verify(repository, Mockito.times(1)).findByQuery(query);
 
         assertEquals(users.get(0).getEmail().getAddress(), query.email);
     }

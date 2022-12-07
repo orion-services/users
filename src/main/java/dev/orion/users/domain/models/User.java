@@ -17,6 +17,7 @@
 package dev.orion.users.domain.models;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import dev.orion.users.domain.vo.Email;
@@ -35,15 +36,24 @@ public class User {
 
     private String status;
 
-    private List<RoleEnum> roles;
+    private Set<RoleEnum> roles;
 
+    private String type;
 
-    public List<RoleEnum> getRoles() {
+    public Set<RoleEnum> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<RoleEnum> roles) {
+    public void setRoles(Set<RoleEnum> roles) {
         this.roles = roles;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     public String getName() {
@@ -103,6 +113,17 @@ public class User {
         this.email = new Email(email);
         this.password = this.validatePassword(password);
         this.status = StatusEnum.ACTIVATED.name();
+    }
+
+    public User(String name, String email, String password,String type, Set<RoleEnum> roles) {
+        this();
+        this.name = this.validateName(name);
+        this.userHash = UUID.randomUUID().toString();
+        this.email = new Email(email);
+        this.password = this.validatePassword(password);
+        this.status = StatusEnum.ACTIVATED.name();
+        this.roles = roles;
+        this.type = type;
     }
 
     @Override

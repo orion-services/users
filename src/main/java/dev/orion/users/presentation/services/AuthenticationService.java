@@ -1,11 +1,11 @@
 package dev.orion.users.presentation.services;
 
 import dev.orion.users.data.handlers.AuthorizationCodeHandler;
-import dev.orion.users.domain.dto.AuthenticateUserDto;
-import dev.orion.users.domain.dto.CreateUserDto;
+import dev.orion.users.domain.dto.user.AuthenticateUserDto;
+import dev.orion.users.domain.dto.user.CreateUserDto;
 import dev.orion.users.domain.models.User;
-import dev.orion.users.domain.usecases.AuthenticateUser;
-import dev.orion.users.domain.usecases.CreateUser;
+import dev.orion.users.domain.usecases.user.AuthenticateUser;
+import dev.orion.users.domain.usecases.user.CreateUser;
 import dev.orion.users.presentation.dto.Authentication;
 import dev.orion.users.presentation.mappers.UserResponseMapper;
 import org.eclipse.microprofile.faulttolerance.Retry;

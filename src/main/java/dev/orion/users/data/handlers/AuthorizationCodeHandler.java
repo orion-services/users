@@ -2,12 +2,12 @@ package dev.orion.users.data.handlers;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
+
+import dev.orion.users.domain.models.RoleEnum;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
 
@@ -30,11 +30,14 @@ public class AuthorizationCodeHandler {
      * @return Returns the JWT
      */
     public String getAccessToken(User user) {
+        Set<String> groups = new HashSet<>();
+        for (RoleEnum role : user.getRoles()) groups.add(role.name());
+
         return Jwt.issuer(issuer.orElse("http://localhost:8080"))
                 .upn(user.getEmail().getAddress())
                 .claim(user.getUserHash(), user.getUserHash())
                 .expiresIn(expiresInMin) // expires in 30 minutes
-                .groups(new HashSet<>(Arrays.asList("user")))
+                .groups(groups)
                 .claim(Claims.c_hash, user.getUserHash())
                 .sign();
     }

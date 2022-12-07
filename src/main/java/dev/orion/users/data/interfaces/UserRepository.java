@@ -1,7 +1,7 @@
 package dev.orion.users.data.interfaces;
 
-import dev.orion.users.domain.dto.AuthenticateUserDto;
-import dev.orion.users.domain.dto.UserQueryDto;
+import dev.orion.users.domain.dto.user.AuthenticateUserDto;
+import dev.orion.users.domain.dto.user.UserQueryDto;
 import dev.orion.users.domain.models.User;
 
 import java.util.List;
@@ -19,4 +19,6 @@ public interface UserRepository {
     Boolean removeUser(String id);
 
     User blockUser(String id);
+
+    User update(User user);
 }

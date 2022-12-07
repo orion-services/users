@@ -2,6 +2,7 @@ package dev.orion.users.domain;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -13,8 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.orion.users.domain.vo.Email;
 
-@ExtendWith(MockitoExtension.class)
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@QuarkusTest
 class EmailTest {
 
     @Test
