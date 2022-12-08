@@ -83,7 +83,7 @@ public class BaseWS {
      * @param user : A user object
      * @return Return a Uni<User> after to send an e-mail.
      */
-    protected Uni<User> sendValidationEmail(User user) {
+    protected Uni<User> sendValidationEmail(final User user) {
         StringBuilder url = new StringBuilder();
         url.append(validateURL);
         url.append("?code=" + user.getEmailValidationCode());

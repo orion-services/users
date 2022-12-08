@@ -24,12 +24,10 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -82,10 +80,9 @@ public class UpdateWS extends BaseWS {
         checkTokenEmail(email, jwtEmail);
 
         Uni<User> uni = uc.updateEmail(email, newEmail)
-            //    .transform(this::generateJWT)
             .log()
             .onItem().ifNotNull()
-                .call(this::myTest)
+                .call(this::sendEmail)
             .onFailure()
                 .transform(e -> {
                     throw new UserWSException(e.getMessage(),
@@ -94,7 +91,13 @@ public class UpdateWS extends BaseWS {
         return uni.onItem().transform(this::generateJWT);
     }
 
-    private Uni<User> myTest(User user){
+    /**
+     * Helper method to send an email confirmation message to users.
+     *
+     * @param user : An user object
+     * @return Uni<User>
+     */
+    private Uni<User> sendEmail(final User user) {
         return sendValidationEmail(user)
             .onItem().transform(u -> u);
     }
@@ -162,6 +165,5 @@ public class UpdateWS extends BaseWS {
                     Response.Status.BAD_REQUEST);
             });
     }
-
 
 }
