@@ -186,14 +186,11 @@ public class UserUC implements UseCase {
      * @param code  : The validation code
      * @return true if the validation code is correct for the respective e-mail
      */
-    public Uni<Boolean> validateEmail(final String email, final String code) {
+    public Uni<User> validateEmail(final String email, final String code) {
         if (email.isBlank() || code.isBlank()) {
             throw new IllegalArgumentException("Blank Arguments");
         } else {
-            return repository.validateEmail(email, code)
-                .onItem().ifNotNull().transform(user -> {
-                    return true;
-                });
+            return repository.validateEmail(email, code);
         }
     }
 }

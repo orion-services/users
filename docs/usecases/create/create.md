@@ -10,7 +10,7 @@ nav_order: 1
 ## Normal flow
 
 * A client sends a name, e-mail and password
-* The service receives and validades the data. The name must be not empty, the e-mail must be unique in the server and the format must be valid and, the password must be bigger than eight characters.
+* The service receives and validates the data. The name must be not empty, the e-mail must be unique in the server and the format must be valid and, the password must be bigger than eight characters.
 * The server generates an identifier (hash) of the user
 * The server encrypt the password
 * The server stores the new user
@@ -19,7 +19,7 @@ nav_order: 1
 ## Exception flow
 
 * A client sends an invalid name or e-mail or password.
-* The service validade the arguments. The arguments can not be empty/null and the password need to have at least eight characters. In all of these cases the service will throw an exception.
+* The service validate the arguments. The arguments can not be empty/null and the password need to have at least eight characters. In all of these cases the service will throw an exception.
 
 ## Sequence of normal flow
 

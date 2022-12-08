@@ -18,7 +18,6 @@ package dev.orion.users;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;

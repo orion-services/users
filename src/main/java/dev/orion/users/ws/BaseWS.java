@@ -26,7 +26,9 @@ import org.eclipse.microprofile.jwt.Claims;
 
 import dev.orion.users.model.User;
 import dev.orion.users.ws.exceptions.UserWSException;
+import dev.orion.users.ws.mail.MailTemplate;
 import io.smallrye.jwt.build.Jwt;
+import io.smallrye.mutiny.Uni;
 /**
  * Common Web Service code.
  */
@@ -36,6 +38,11 @@ public class BaseWS {
     @ConfigProperty(name = "users.issuer")
     Optional<String> issuer;
 
+    /** Set the validation url. */
+    @ConfigProperty(name = "users.email.validation.url",
+    defaultValue = "http://localhost:8080/api/users/validateEmail")
+    String validateURL;
+
     /**
      * Creates a JWT (JSON Web Token) to a user.
      *
@@ -43,7 +50,7 @@ public class BaseWS {
      *
      * @return Returns the JWT
      */
-    public String generateJWT(final User user) {
+    protected String generateJWT(final User user) {
         return Jwt.issuer(issuer.orElse("orion-users"))
             .upn(user.getEmail())
             .groups(new HashSet<>(user.getRoleList()))
@@ -68,6 +75,26 @@ public class BaseWS {
                 Response.Status.BAD_REQUEST);
         }
         return true;
+    }
+
+     /**
+     * Send a message to the user validates the e-mail.
+     *
+     * @param user : A user object
+     * @return Return a Uni<User> after to send an e-mail.
+     */
+    protected Uni<User> sendValidationEmail(User user) {
+        StringBuilder url = new StringBuilder();
+        url.append(validateURL);
+        url.append("?code=" + user.getEmailValidationCode());
+        url.append("&email=" + user.getEmail());
+
+        return MailTemplate.validateEmail(url.toString())
+            .to(user.getEmail())
+            .subject("E-mail confirmation")
+            .send()
+                .onItem().ifNotNull()
+                    .transform(item -> user);
     }
 
 }

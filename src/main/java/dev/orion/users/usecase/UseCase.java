@@ -97,7 +97,7 @@ public interface UseCase {
      *
      * @param email : The e-mail of a user
      * @param code  : The validation code
-     * @return true if the validation code is correct for the respective e-mail
+     * @return The Uni<User> object
      */
-    Uni<Boolean> validateEmail(String email, String code);
+    Uni<User> validateEmail(String email, String code);
 }
