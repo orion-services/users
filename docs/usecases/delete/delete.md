@@ -1,25 +1,24 @@
 ---
 layout: default
-title: Delete
+title: Delete user
 parent: Use Cases
-nav_order: 2
+nav_order: 5
 ---
-
-# Delete User
 
 ## Normal flow
 
 * A client sends a e-mail.
-* The service validates the input data and verifies if the users exists in the system.
+* The service validates the input data and verifies if the users exists in the
+  system.
 * If the users exists, delete the user.
 
 # Technical specifications
 
-## HTTP endpoints
+## HTTP(S) endpoints
 
 * /api/users/delete
-    * Method: DELETE
-    * Consume: application/x-www-form-urlencoded
+    * HTTP method: DELETE
+    * Consumes: application/x-www-form-urlencoded
     * Produces: application/json
     * Examples:
 
@@ -33,9 +32,12 @@ nav_order: 2
             --data-urlencode 'email=orion@test.com'
         ```
         * Response:
-        ```1
+        ```
+            1
         ```
 
 ## Exceptions
 
-In the use case layer, exceptions related with arguments will be IllegalArgumentException. However, in the RESTful Web Service layer will be transformed to Bad Request (HTTP 400).
+In the use case layer, exceptions related with arguments will be
+IllegalArgumentException. However, in the RESTful Web Service layer will be
+transformed to Bad Request (HTTP 400).

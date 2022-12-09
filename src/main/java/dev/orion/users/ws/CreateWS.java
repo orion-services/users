@@ -91,6 +91,8 @@ public class CreateWS extends BaseWS {
     @GET
     @PermitAll
     @Path("/validateEmail")
+    @Consumes(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_PLAIN)
     public Uni<Boolean> validateEmail(
             @QueryParam("email") @NotEmpty final String email,
             @QueryParam("code") @NotEmpty final String code) {

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.ws;
+package dev.orion.users.ws.authentication;
 
 import javax.annotation.security.PermitAll;
 import javax.validation.constraints.Email;
@@ -33,6 +33,7 @@ import org.jboss.resteasy.reactive.RestForm;
 import dev.orion.users.dto.AuthenticationDTO;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
+import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;
 import io.smallrye.mutiny.Uni;
 
@@ -43,7 +44,7 @@ import io.smallrye.mutiny.Uni;
 @PermitAll
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
-public class AuthenticateWS extends BaseWS {
+public class AuthenticationWS extends BaseWS {
 
     /** Business logic. */
     private UseCase uc = new UserUC();

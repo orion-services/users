@@ -70,7 +70,7 @@ public class UpdateWS extends BaseWS {
     @PUT
     @Path("/update/email")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 0, delay = 2000)
     public Uni<String> updateEmail(
             @FormParam("email") @NotEmpty @Email final String email,

@@ -71,7 +71,6 @@ public class User extends PanacheEntityBase {
     private List<Role> roles;
 
     /** Stores if the e-mail was validated.  */
-    @JsonIgnore
     private boolean emailValid;
 
     /** The hash used to identify the user.  */

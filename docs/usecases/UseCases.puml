@@ -4,12 +4,14 @@ left to right direction
 actor "Client" as client
 
 rectangle Users{
-    usecase "Create User" as UC1
-    usecase "Authenticate" as UC2
-    usecase "Update Email" as UC3
-    usecase "Update Password" as UC4
-    usecase "Recover Password" as UC5
-    usecase "Delete User" as UC6
+    usecase "Authenticate" as UC1
+    usecase "Create and Authenticate" as UC2
+    usecase "Create User" as UC3
+    usecase "Validate E-mail" as UC4
+    usecase "Delete User" as UC5
+    usecase "Recover Password" as UC6
+    usecase "Update Email" as UC7
+    usecase "Update Password" as UC8
 }
 
 client -->  UC1
@@ -18,5 +20,7 @@ client -->  UC3
 client -->  UC4
 client -->  UC5
 client -->  UC6
+client -->  UC7
+client -->  UC8
 
 @enduml
