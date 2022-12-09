@@ -26,12 +26,13 @@ nav_order: 2
 ## HTTP(S) endpoints
 
 * /api/users/createAuthenticate
-    * HTTP method: POST
-    * Consumes: application/x-www-form-urlencoded
-    * Produces: application/json
-    * Examples:
+  * HTTP method: POST
+  * Consumes: application/x-www-form-urlencoded
+  * Produces: application/json
+  * Examples:
 
-    * Example of request:
+  * Example of request:
+
     ```shell
        curl -X 'POST' \
             'http://localhost:8080/api/users/createAuthenticate' \
@@ -39,7 +40,9 @@ nav_order: 2
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'
     ```
-    * Example of response: User in JSON and encrypted Token.
+
+  * Example of response: User in JSON and encrypted Token.
+
     ```json
        {
             "user": {

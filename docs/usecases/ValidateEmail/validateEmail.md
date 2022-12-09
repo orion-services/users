@@ -16,21 +16,25 @@ nav_order: 4
 ## HTTP(S) endpoints
 
 * /api/users/validateEmail
-    * HTTP method: GET
-    * Consumes: text/plain
-    * Produces: text/plain
-    * Examples:
+  * HTTP method: GET
+  * Consumes: text/plain
+  * Produces: text/plain
+  * Examples:
 
-        * Example of request:
+    * Example of request:
+
         ```shell
            curl -X 'GET' \
                 'http://localhost:8080/api/users/validateEmail?code=d32c2a8e-ea4b-4260-b4d7-b3e62d8488e1&email=orion%40test.com' \
                 -H 'accept: application/json'
         ```
-        * Example of response:
+
+    * Example of response:
+
         ```txt
             true
         ```
+
 ## Exceptions
 
 In the use case layer, exceptions related with arguments will be

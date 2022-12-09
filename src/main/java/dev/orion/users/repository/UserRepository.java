@@ -181,7 +181,7 @@ public class UserRepository implements Repository {
         String password = generateSecurePassword();
         return checkEmail(email)
             .onItem().ifNull()
-                .failWith(new IllegalArgumentException("Email not found"))
+                .failWith(new IllegalArgumentException("E-mail not found"))
             .onItem().ifNotNull()
             .transformToUni(user -> changePassword(user.getPassword(),
                 DigestUtils.sha256Hex(password), email)

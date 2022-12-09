@@ -35,7 +35,8 @@ nav_order: 3
 * Produces: application/json
 * Examples:
 
-    * Example of request:
+  * Example of request:
+
     ```shell
             curl -X 'POST' \
             'http://localhost:8080/api/users/create' \
@@ -43,7 +44,9 @@ nav_order: 3
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'
     ```
-    * Example of response: User in JSON.
+
+  * Example of response: User in JSON.
+
     ```json
         {
             "hash": "7eba8ef2-426b-446a-9f05-4ab67e71383d",

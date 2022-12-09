@@ -15,12 +15,12 @@ nav_order: 5
 ## HTTP(S) endpoints
 
 * /api/users/delete
-  * HTTP method: DELETE
-  * Consumes: application/x-www-form-urlencoded
+  * Method: DELETE
+  * Consume: application/x-www-form-urlencoded
   * Produces: application/json
   * Examples:
 
-    * Request:
+    * Example of request:
 
         ```shell
             curl -X DELETE \
@@ -30,7 +30,8 @@ nav_order: 5
             --header 'Content-Type: application/x-www-form-urlencoded' \
             --data-urlencode 'email=orion@test.com'
         ```
-    * Response:
+
+    * Example of response:
 
         ```
             1

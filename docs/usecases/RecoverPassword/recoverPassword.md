@@ -14,12 +14,13 @@ nav_order: 6
 ## HTTP(S) endpoints
 
 * api/users/recoverPassword
-    * HTTP method: POST
-    * Consumes: application/x-www-form-urlencoded
-    * Produces: HTTP 204 (Undocumented)
-    * Examples:
+  * HTTP method: POST
+  * Consumes: application/x-www-form-urlencoded
+  * Produces: HTTP 204 (Undocumented)
+  * Examples:
 
-        * Example of request:
+    * Example of request:
+
         ```shell
            curl -X 'POST' \
                 'http://localhost:8080/api/users/recoverPassword' \
@@ -27,7 +28,9 @@ nav_order: 6
                 -H 'Content-Type: application/x-www-form-urlencoded' \
                 -d 'email=orion%40test.com'
         ```
-        * Example of response:
+
+    * Example of response:
+
         ```
             204 Undocumented
         ```

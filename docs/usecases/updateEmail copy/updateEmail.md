@@ -1,46 +1,44 @@
 ---
 layout: default
-title: Update password
+title: Update e-mail
 parent: Use Cases
-nav_order: 8
+nav_order: 7
 ---
 
 ## Normal flow
 
-* A client sends user's e-mail, the current and the new password.
-* The service check to see if the user's e-mail exists and if the given password
-  follow the password rules. Thus, update the user's password and return a
-  User in JSON.
+* A client sends two email addresses, the actual and the new.
+* The service validates the input data and verifies if the users exists in the
+  system, so updates the user email.
+* If the users exists, update the user's email.
 
 ## HTTP(S) endpoints
 
-* /api/users/update/password
+* /api/users/update/email
   * HTTP method: PUT
-  * Consumes: application/x-www-form-urlencoded
-  * Produces: application/json
+  * Consume: application/x-www-form-urlencoded
+  * Produce: application/json
   * Examples:
 
     * Example of request:
 
         ```shell
             curl -X PUT \
-            'http://localhost:8080/api/users/update/password' \
+            'http://localhost:8080/api/users/update/email' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \
             --data-urlencode 'email=orion@test.com' \
-            --data-urlencode 'password=12345678' \
-            --data-urlencode 'newPassword=87654321'
+            --data-urlencode 'newEmail=orionOrion@test.com'
         ```
 
-    * Example of response: User in JSON.
+    * Example of response:
 
         ```json
         {
-            "hash": "7eba8ef2-426b-446a-9f05-4ab67e71383d",
+            "hash": "49819fac-58d9-4a09-9ee0-1eb1c7141eda",
             "name": "Orion",
-            "email": "orion@test.com",
-            "emailValid": false
+            "email": "orionOrion@test.com"
         }
         ```
 
