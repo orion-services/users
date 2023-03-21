@@ -16,6 +16,7 @@
  */
 package dev.orion.users.model;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
+import org.apache.commons.codec.binary.Base32;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -77,6 +80,11 @@ public class User extends PanacheEntityBase {
     @JsonIgnore
     private String emailValidationCode;
 
+    /** Stores if is using 2FA */
+    private boolean isUsing2FA;
+
+    /**Secret code to be used at 2FA validation */
+    private String secret2FA;
     /**
      * User constructor.
      */
@@ -84,6 +92,7 @@ public class User extends PanacheEntityBase {
         this.hash = UUID.randomUUID().toString();
         this.roles = new ArrayList<>();
         this.emailValidationCode = UUID.randomUUID().toString();
+        this.secret2FA = generateSecretKey();
     }
 
     /**
@@ -112,6 +121,13 @@ public class User extends PanacheEntityBase {
             }
         }
         return strRoles;
+    }
+    public static String generateSecretKey(){
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[20];
+        random.nextBytes(bytes);
+        Base32 base32 = new Base32();
+        return base32.encodeToString(bytes);
     }
 
     /**

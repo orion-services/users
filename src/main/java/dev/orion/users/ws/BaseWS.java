@@ -56,6 +56,7 @@ public class BaseWS {
             .groups(new HashSet<>(user.getRoleList()))
             .claim(Claims.c_hash, user.getHash())
             .claim(Claims.email, user.getEmail())
+            // .claim(Claims.mky, user.getSecret2FA())
             //.sign();
             .jwe().encrypt();
     }
