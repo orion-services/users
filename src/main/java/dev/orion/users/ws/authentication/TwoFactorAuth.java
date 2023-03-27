@@ -59,14 +59,6 @@ public class TwoFactorAuth extends BaseWS {
                         Response.Status.UNAUTHORIZED));
     }
 
-    // @POST
-    // @Path("google/2FAuth/createAuth/qrCode")
-    // @Consumes(MediaType.APPLICATION_JSON)
-    // @Produces("image/png")
-    // public Response googleCreateAuth2FAQrCode() {
-    // return null;
-    // }
-
     @POST
     @Path("google/2FAuth/validate")
     @Retry(maxRetries = 1, delay = 2000)
@@ -86,10 +78,8 @@ public class TwoFactorAuth extends BaseWS {
                     val secret = user.getSecret2FA();
                     val userCode = googleUtils.getTOTPCode(secret);
                     if (!userCode.toString().equals(code)) {
-                        System.out.println(code);
                         return null;
                     }
-                    System.out.println(user.toString());
                     return generateJWT(user);
                 })
                 .onItem()
