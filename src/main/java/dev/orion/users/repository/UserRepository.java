@@ -51,25 +51,25 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> createUser(final User u) {
         return checkEmail(u.getEmail())
-            .onItem().ifNotNull().transform(user -> user)
-            .onItem().ifNull().switchTo(() -> {
-                return checkName(u.getName())
-                    .onItem().ifNotNull()
-                        .failWith(new IllegalArgumentException(
-                            "The name already existis"))
-                    .onItem().ifNull().switchTo(() -> {
-                            return checkHash(u.getHash())
-                                .onItem().ifNotNull()
-                                    .failWith(new IllegalArgumentException(
-                                        "The hash already existis"))
-                                .onItem().ifNull().switchTo(() -> {
-                                    if (u.getPassword().isBlank()) {
-                                        u.setPassword(generateSecurePassword());
-                                    }
-                                    return persistUser(u);
-                                });
-                    });
-            });
+                .onItem().ifNotNull().transform(user -> user)
+                .onItem().ifNull().switchTo(() -> {
+                    return checkName(u.getName())
+                            .onItem().ifNotNull()
+                            .failWith(new IllegalArgumentException(
+                                    "The name already existis"))
+                            .onItem().ifNull().switchTo(() -> {
+                                return checkHash(u.getHash())
+                                        .onItem().ifNotNull()
+                                        .failWith(new IllegalArgumentException(
+                                                "The hash already existis"))
+                                        .onItem().ifNull().switchTo(() -> {
+                                            if (u.getPassword().isBlank()) {
+                                                u.setPassword(generateSecurePassword());
+                                            }
+                                            return persistUser(u);
+                                        });
+                            });
+                });
     }
 
     /**
@@ -81,7 +81,7 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> authenticate(final User user) {
         Map<String, Object> params = Parameters.with("email",
-            user.getEmail()).and("password", user.getPassword()).map();
+                user.getEmail()).and("password", user.getPassword()).map();
         return find("email = :email and password = :password", params)
                 .firstResult();
     }
@@ -98,47 +98,47 @@ public class UserRepository implements Repository {
             final String email,
             final String newEmail) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException("User not found"))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     return checkEmail(newEmail)
-                        .onItem().ifNotNull()
+                            .onItem().ifNotNull()
                             .failWith(new IllegalArgumentException(
-                                "Email already in use"))
-                        .onItem().ifNull()
+                                    "Email already in use"))
+                            .onItem().ifNull()
                             .switchTo(() -> {
                                 user.setEmailValidationCode();
                                 user.setEmailValid(false);
                                 user.setEmail(newEmail);
                                 return Panache.<User>withTransaction(
-                                    user::persist);
+                                        user::persist);
                             });
                 });
     }
 
-     /**
+    /**
      * Validates the user's e-mail, change the emailValid property to true
      * if the code is correct.
      *
-     * @param email  : User's email
-     * @param code   : The validation code
+     * @param email : User's email
+     * @param code  : The validation code
      * @return Uni<User> object
      */
     @Override
     public Uni<User> validateEmail(final String email, final String code) {
         Map<String, Object> params = Parameters.with("email",
-        email).and("code", code).map();
+                email).and("code", code).map();
         return find("email = :email and emailValidationCode = :code",
-            params)
+                params)
                 .firstResult()
-                    .onItem().ifNotNull().transformToUni(user -> {
-                        user.setEmailValid(true);
-                        return Panache.<User>withTransaction(user::persist);
-                    })
-                    .onItem().ifNull()
-                        .failWith(new IllegalArgumentException(
-                            "Invalid e-mail or code"));
+                .onItem().ifNotNull().transformToUni(user -> {
+                    user.setEmailValid(true);
+                    return Panache.<User>withTransaction(user::persist);
+                })
+                .onItem().ifNull()
+                .failWith(new IllegalArgumentException(
+                        "Invalid e-mail or code"));
     }
 
     /**
@@ -155,15 +155,15 @@ public class UserRepository implements Repository {
             final String newPassword,
             final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException("User not found"))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     if (password.equals(user.getPassword())) {
                         user.setPassword(newPassword);
                     } else {
                         throw new IllegalArgumentException(
-                            "Passwords don't match");
+                                "Passwords don't match");
                     }
                     return Panache.<User>withTransaction(user::persist);
                 });
@@ -180,14 +180,14 @@ public class UserRepository implements Repository {
     public Uni<String> recoverPassword(final String email) {
         String password = generateSecurePassword();
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException("E-mail not found"))
-            .onItem().ifNotNull()
-            .transformToUni(user -> changePassword(user.getPassword(),
-                DigestUtils.sha256Hex(password), email)
-                .onItem().transform(item -> {
-                    return password;
-                }));
+                .onItem().ifNotNull()
+                .transformToUni(user -> changePassword(user.getPassword(),
+                        DigestUtils.sha256Hex(password), email)
+                        .onItem().transform(item -> {
+                            return password;
+                        }));
     }
 
     /**
@@ -199,12 +199,12 @@ public class UserRepository implements Repository {
     @Override
     public Uni<Long> deleteUser(final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException("User not found"))
-            .onItem().ifNotNull()
-            .transformToUni(user -> {
-                return User.delete("email", email);
-            });
+                .onItem().ifNotNull()
+                .transformToUni(user -> {
+                    return User.delete("email", email);
+                });
     }
 
     /**
@@ -241,14 +241,14 @@ public class UserRepository implements Repository {
     /**
      * Persists a user in the service with a default role (user).
      *
-     * @param user     : The user object
+     * @param user : The user object
      * @return Uni<User> object
      */
     private Uni<User> persistUser(final User user) {
         return getDefaultRole()
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IOException("Role not found"))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni((role) -> {
                     user.addRole(role);
                     return Panache.<User>withTransaction(user::persist);
@@ -313,5 +313,16 @@ public class UserRepository implements Repository {
                 return character;
             }
         };
+    }
+
+    @Override
+    public Uni<User> findUserByEmail(String email) {
+        return find("email", email).firstResult();
+    }
+
+    @Override
+    public Uni<User> updateUser(User user) {
+
+        return Panache.<User>withTransaction(user::persist);
     }
 }

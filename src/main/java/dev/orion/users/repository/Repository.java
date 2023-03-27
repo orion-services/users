@@ -16,6 +16,8 @@
  */
 package dev.orion.users.repository;
 
+import javax.enterprise.context.ApplicationScoped;
+
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
@@ -23,20 +25,23 @@ import io.smallrye.mutiny.Uni;
 /**
  * User repository interface.
  */
+@ApplicationScoped
 public interface Repository extends PanacheRepository<User> {
 
     /**
      * Creates a user in the service.
      *
-     * @param user  : An user object
+     * @param user : An user object
      * @return A Uni<User> object
      */
     Uni<User> createUser(User user);
 
+    Uni<User> findUserByEmail(String email);
+
     /**
      * Returns a user searching for email and password.
      *
-     * @param user  : The user object
+     * @param user : The user object
      * @return A Uni<User> object
      */
     Uni<User> authenticate(User user);
@@ -50,6 +55,8 @@ public interface Repository extends PanacheRepository<User> {
      * @return A Uni<User> object
      */
     Uni<User> updateEmail(String email, String newEmail);
+
+    Uni<User> updateUser(User user);
 
     /**
      * Validates an e-mail of a user.

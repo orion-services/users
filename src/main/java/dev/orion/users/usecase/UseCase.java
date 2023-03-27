@@ -37,8 +37,8 @@ public interface UseCase {
     /**
      * Creates a user in the service (UC: Create).
      *
-     * @param name     : The name of the user
-     * @param email    : The e-mail of the user
+     * @param name         : The name of the user
+     * @param email        : The e-mail of the user
      * @param isEmailValid : Confirm if the e-mail is valid or not
      * @return A Uni<User> object
      */
@@ -54,7 +54,13 @@ public interface UseCase {
     Uni<User> authenticate(String email, String password);
 
     /**
-     * Updates the e-mail of the user.
+     * @param email
+     * @param code
+     * @return
+     *
+     * 
+     *         /**
+     *         Updates the e-mail of the user.
      *
      * @param email    : Current user's e-mail
      * @param newEmail : New e-mail
@@ -62,6 +68,10 @@ public interface UseCase {
      * @return An Uni<User> object
      */
     Uni<User> updateEmail(String email, String newEmail);
+
+    Uni<User> findUserByEmail(String email);
+
+    Uni<User> updateUser(User user);
 
     /**
      * Updates the user's password.
