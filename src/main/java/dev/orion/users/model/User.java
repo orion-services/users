@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -122,5 +123,12 @@ public class User extends PanacheEntityBase {
      */
     public void setEmailValidationCode() {
         this.emailValidationCode = UUID.randomUUID().toString();
+    }
+
+    /**
+     * Removes all roles of the object.
+     */
+    public void removeRoles(){
+        this.roles.removeAll(roles);
     }
 }

@@ -21,7 +21,7 @@ nav_order: 2
 #### Alternative flow
 
 * If the user already exists, the service just return a a JSON with the user
-  and a encrypted JWT.
+  and a signed JWT.
 
 ## HTTP(S) endpoints
 
@@ -41,7 +41,7 @@ nav_order: 2
             -d 'name=Orion&email=orion%40test.com&password=12345678'
     ```
 
-  * Example of response: User in JSON and encrypted Token.
+  * Example of response: User in JSON and signed Token.
 
     ```json
        {

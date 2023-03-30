@@ -171,7 +171,7 @@ public class UserUC implements UseCase {
      * @return Return 1 if user was deleted
      */
     @Override
-    public Uni<Long> deleteUser(final String email) {
+    public Uni<Void> deleteUser(final String email) {
         if (email.isBlank()) {
             throw new IllegalArgumentException("Email can not be blank");
         } else {

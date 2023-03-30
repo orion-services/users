@@ -52,7 +52,7 @@ public class DeleteWS {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public Uni<Long> deleteUser(
+    public Uni<Void> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
             return uc.deleteUser(email)

@@ -30,6 +30,7 @@ import org.passay.PasswordGenerator;
 import dev.orion.users.model.Role;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
+import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 
@@ -46,7 +47,7 @@ public class UserRepository implements Repository {
     private static final int PASSWORD_LENGTH = 8;
 
     /** Default user not found message. */
-    private static final String USER_NOT_FOUND = "User not found";
+    private static final String USER_NOT_FOUND_ERROR = "Error: user not found";
 
     /** E-mail column. */
     private static final String EMAIL = "email";
@@ -108,7 +109,7 @@ public class UserRepository implements Repository {
             final String newEmail) {
         return checkEmail(email)
             .onItem().ifNull()
-                .failWith(new IllegalArgumentException(USER_NOT_FOUND))
+                .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
             .onItem().ifNotNull()
                 .transformToUni(user -> {
                     return checkEmail(newEmail)
@@ -165,14 +166,14 @@ public class UserRepository implements Repository {
             final String email) {
         return checkEmail(email)
             .onItem().ifNull()
-                .failWith(new IllegalArgumentException(USER_NOT_FOUND))
+                .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
             .onItem().ifNotNull()
                 .transformToUni(user -> {
                     if (password.equals(user.getPassword())) {
                         user.setPassword(newPassword);
                     } else {
                         throw new IllegalArgumentException(
-                            "Passwords don't match");
+                            "Passwords doesn't match");
                     }
                     return Panache.<User>withTransaction(user::persist);
                 });
@@ -206,14 +207,14 @@ public class UserRepository implements Repository {
      * @return Return 1 if user was deleted
      */
     @Override
-    public Uni<Long> deleteUser(final String email) {
+    public Uni<Void> deleteUser(final String email) {
         return checkEmail(email)
             .onItem().ifNull()
-                .failWith(new IllegalArgumentException(USER_NOT_FOUND))
+                .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
             .onItem().ifNotNull()
-            .transformToUni(user -> {
-                return User.delete(EMAIL, email);
-            });
+                .transformToUni(user -> {
+                    return Panache.<Void>withTransaction(user::delete);
+                });
     }
 
     /**
@@ -258,7 +259,7 @@ public class UserRepository implements Repository {
             .onItem().ifNull()
                 .failWith(new IOException("Role not found"))
             .onItem().ifNotNull()
-                .transformToUni((role) -> {
+                .transformToUni(role -> {
                     user.addRole(role);
                     return Panache.<User>withTransaction(user::persist);
                 });
