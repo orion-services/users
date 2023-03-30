@@ -58,7 +58,7 @@ public class CreateWS extends BaseWS {
     @POST
     @Path("/create")
     @PermitAll
-    @Retry(maxRetries = 1, delay = 2000)
+    @Retry(maxRetries = 1, delay = DELAY)
     public Uni<User> create(
         @FormParam("name") @NotEmpty final String name,
         @FormParam("email") @NotEmpty @Email final String email,

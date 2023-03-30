@@ -71,7 +71,7 @@ public class UpdateWS extends BaseWS {
     @Path("/update/email")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    @Retry(maxRetries = 0, delay = 2000)
+    @Retry(maxRetries = 0, delay = DELAY)
     public Uni<String> updateEmail(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
@@ -117,7 +117,7 @@ public class UpdateWS extends BaseWS {
     @Path("/update/password")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Retry(maxRetries = 1, delay = 2000)
+    @Retry(maxRetries = 1, delay = DELAY)
     public Uni<User> changePassword(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password,

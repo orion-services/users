@@ -61,7 +61,7 @@ public class AuthenticationWS extends BaseWS {
     @POST
     @Path("/authenticate")
     @Produces(MediaType.TEXT_PLAIN)
-    @Retry(maxRetries = 1, delay = 2000)
+    @Retry(maxRetries = 1, delay = DELAY)
     public Uni<String> authenticate(
         @RestForm @NotEmpty @Email final String email,
         @RestForm @NotEmpty final String password) {
@@ -86,7 +86,7 @@ public class AuthenticationWS extends BaseWS {
      */
     @POST
     @Path("/createAuthenticate")
-    @Retry(maxRetries = 1, delay = 2000)
+    @Retry(maxRetries = 1, delay = DELAY)
     public Uni<AuthenticationDTO> createAuthenticate(
         @FormParam("name") @NotEmpty final String name,
         @FormParam("email") @NotEmpty @Email final String email,

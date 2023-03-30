@@ -45,7 +45,7 @@ public class SocialAuthenticationWS extends BaseWS {
     private UseCase uc = new UserUC();
 
      /**
-     * ID Token issued by the OpenID Connect Provider
+     * ID Token issued by the OpenID Connect Provider.
      */
     @Inject
     @IdToken

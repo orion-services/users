@@ -34,6 +34,9 @@ import io.smallrye.mutiny.Uni;
  */
 public class BaseWS {
 
+    /** Fault tolerance default delay. */
+    protected static final long DELAY = 2000;
+
     /** Configure the issuer for JWT generation. */
     @ConfigProperty(name = "users.issuer")
     Optional<String> issuer;
@@ -56,8 +59,7 @@ public class BaseWS {
             .groups(new HashSet<>(user.getRoleList()))
             .claim(Claims.c_hash, user.getHash())
             .claim(Claims.email, user.getEmail())
-            //.sign();
-            .jwe().encrypt();
+            .sign();
     }
 
     /**

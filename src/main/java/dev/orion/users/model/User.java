@@ -41,6 +41,9 @@ import lombok.Setter;
 @Getter @Setter
 public class User extends PanacheEntityBase {
 
+    /** Default size for column. */
+    private static final int COLUMN_LENGTH = 256;
+
     /** Primary key. */
     @Id
     @GeneratedValue
@@ -61,7 +64,7 @@ public class User extends PanacheEntityBase {
 
      /** The password of the user. */
     @JsonIgnore
-    @Column(length = 256)
+    @Column(length = COLUMN_LENGTH)
     @NotNull(message = "The password can't be null")
     private String password;
 
