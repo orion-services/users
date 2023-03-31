@@ -10,7 +10,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;

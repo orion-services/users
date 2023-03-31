@@ -22,6 +22,7 @@ import de.taimos.totp.TOTP;
 
 @ApplicationScoped
 public class GoogleUtils {
+    private static final String UTF_8 = "UTF-8";
     public String getTOTPCode(String secretKey) {
         Base32 base32 = new Base32();
         byte[] bytes = base32.decode(secretKey);
@@ -32,9 +33,9 @@ public class GoogleUtils {
     public String getGoogleAutheticatorBarCode(String secretKey, String account, String issuer) {
         try {
             return "otpauth://totp/"
-                    + URLEncoder.encode(issuer + ":" + account, "UTF-8").replace("+", "%20")
-                    + "?secret=" + URLEncoder.encode(secretKey, "UTF-8").replace("+", "%20")
-                    + "&issuer=" + URLEncoder.encode(issuer, "UTF-8").replace("+", "%20");
+                    + URLEncoder.encode(issuer + ":" + account, UTF_8).replace("+", "%20")
+                    + "?secret=" + URLEncoder.encode(secretKey, UTF_8).replace("+", "%20")
+                    + "&issuer=" + URLEncoder.encode(issuer, UTF_8).replace("+", "%20");
         } catch (UnsupportedEncodingException e) {
             throw new IllegalStateException(e);
         }
@@ -47,11 +48,9 @@ public class GoogleUtils {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
-        } catch (WriterException e) {
+        } catch (WriterException | IOException e) {
             throw new IllegalStateException(e);
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        } 
     }
 
 }

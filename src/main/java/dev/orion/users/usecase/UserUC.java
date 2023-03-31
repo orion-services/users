@@ -17,7 +17,6 @@
 package dev.orion.users.usecase;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -199,7 +198,7 @@ public class UserUC implements UseCase {
 
     @Override
     public Uni<User> findUserByEmail(String email) {
-        if (email.isBlank() || email == null) {
+        if (email.isBlank()) {
             throw new IllegalArgumentException("Blank Arguments");
         }
         return repository.findUserByEmail(email);

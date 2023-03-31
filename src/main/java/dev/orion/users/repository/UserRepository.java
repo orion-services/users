@@ -30,7 +30,6 @@ import org.passay.PasswordGenerator;
 import dev.orion.users.model.Role;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
-import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 
@@ -327,7 +326,7 @@ public class UserRepository implements Repository {
 
     @Override
     public Uni<User> findUserByEmail(String email) {
-        return find("email", email).firstResult();
+        return find(email).firstResult();
     }
 
     @Override
