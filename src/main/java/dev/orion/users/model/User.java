@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -44,6 +45,9 @@ import lombok.Setter;
 @Getter @Setter
 public class User extends PanacheEntityBase {
 
+    /** Default size for column. */
+    private static final int COLUMN_LENGTH = 256;
+
     /** Primary key. */
     @Id
     @GeneratedValue
@@ -64,7 +68,7 @@ public class User extends PanacheEntityBase {
 
      /** The password of the user. */
     @JsonIgnore
-    @Column(length = 256)
+    @Column(length = COLUMN_LENGTH)
     @NotNull(message = "The password can't be null")
     private String password;
 
@@ -135,5 +139,12 @@ public class User extends PanacheEntityBase {
      */
     public void setEmailValidationCode() {
         this.emailValidationCode = UUID.randomUUID().toString();
+    }
+
+    /**
+     * Removes all roles of the object.
+     */
+    public void removeRoles(){
+        this.roles.removeAll(roles);
     }
 }

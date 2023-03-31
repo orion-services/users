@@ -92,6 +92,6 @@ public interface Repository extends PanacheRepository<User> {
      * @param email : User e-mail
      * @return Returns a Long 1 if user was deleted
      */
-    Uni<Long> deleteUser(String email);
+    Uni<Void> deleteUser(String email);
 
 }

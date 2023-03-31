@@ -100,7 +100,7 @@ public interface UseCase {
      *
      * @return Return 1 if user was deleted
      */
-    Uni<Long> deleteUser(String email);
+    Uni<Void> deleteUser(String email);
 
     /**
      * Validates an e-mail of a user.
