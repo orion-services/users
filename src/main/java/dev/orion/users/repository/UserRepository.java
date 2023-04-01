@@ -326,7 +326,7 @@ public class UserRepository implements Repository {
 
     @Override
     public Uni<User> findUserByEmail(String email) {
-        return find(email).firstResult();
+        return find(EMAIL,email).firstResult();
     }
 
     @Override
