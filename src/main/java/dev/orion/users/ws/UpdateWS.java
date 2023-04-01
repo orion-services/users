@@ -64,8 +64,9 @@ public class UpdateWS extends BaseWS {
      * @param newEmail : The new e-mail of the user
      * @return A new JWT
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or if there are other problems such as username not found
-     * or email already used
+     *                         outdated or if there are other problems such as
+     *                         username not found
+     *                         or email already used
      */
     @PUT
     @Path("/update/email")
@@ -80,10 +81,10 @@ public class UpdateWS extends BaseWS {
         checkTokenEmail(email, jwtEmail);
 
         Uni<User> uni = uc.updateEmail(email, newEmail)
-            .log()
-            .onItem().ifNotNull()
+                .log()
+                .onItem().ifNotNull()
                 .call(this::sendEmail)
-            .onFailure()
+                .onFailure()
                 .transform(e -> {
                     throw new UserWSException(e.getMessage(),
                             Response.Status.BAD_REQUEST);
@@ -99,7 +100,7 @@ public class UpdateWS extends BaseWS {
      */
     private Uni<User> sendEmail(final User user) {
         return sendValidationEmail(user)
-            .onItem().transform(u -> u);
+                .onItem().transform(u -> u);
     }
 
     /**
@@ -111,7 +112,8 @@ public class UpdateWS extends BaseWS {
      * @param newPassword : New User password
      * @return Returns the User who have his password change in JSON format
      * @throws UserWSException Returns a HTTP 400 if the current jwt is outdated
-     * or if there are other problems such as e-mail not found
+     *                         or if there are other problems such as e-mail not
+     *                         found
      */
     @PUT
     @Path("/update/password")
@@ -127,10 +129,10 @@ public class UpdateWS extends BaseWS {
         checkTokenEmail(email, jwtEmail);
 
         return uc.updatePassword(email, password, newPassword)
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transform(user -> user)
-            .log()
-            .onFailure()
+                .log()
+                .onFailure()
                 .transform(e -> {
                     throw new UserWSException(e.getMessage(),
                             Response.Status.BAD_REQUEST);
@@ -143,7 +145,8 @@ public class UpdateWS extends BaseWS {
      * @param email : The current e-mail of the user
      * @return Returns HTTP 204 (No Content) if the method executed with success
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or if there are other problems such as e-mail not found
+     *                         outdated or if there are other problems such as
+     *                         e-mail not found
      */
     @POST
     @PermitAll
@@ -153,17 +156,17 @@ public class UpdateWS extends BaseWS {
             @FormParam("email") @NotEmpty @Email final String email) {
 
         return uc.recoverPassword(email)
-            .onItem().ifNotNull().transformToUni(password -> {
-                return MailTemplate.recoverPwd(password)
-                    .to(email)
-                    .subject("Recover Password")
-                    .send();
-            })
-            .log()
-            .onFailure().transform(e -> {
-                throw new UserWSException(e.getMessage(),
-                    Response.Status.BAD_REQUEST);
-            });
+                .onItem().ifNotNull().transformToUni(password -> {
+                    return MailTemplate.recoverPwd(password)
+                            .to(email)
+                            .subject("Recover Password")
+                            .send();
+                })
+                .log()
+                .onFailure().transform(e -> {
+                    throw new UserWSException(e.getMessage(),
+                            Response.Status.BAD_REQUEST);
+                });
     }
 
 }

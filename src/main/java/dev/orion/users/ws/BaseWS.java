@@ -29,6 +29,7 @@ import dev.orion.users.ws.exceptions.UserWSException;
 import dev.orion.users.ws.mail.MailTemplate;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Uni;
+
 /**
  * Common Web Service code.
  */
@@ -42,8 +43,7 @@ public class BaseWS {
     Optional<String> issuer;
 
     /** Set the validation url. */
-    @ConfigProperty(name = "users.email.validation.url",
-    defaultValue = "http://localhost:8080/api/users/validateEmail")
+    @ConfigProperty(name = "users.email.validation.url", defaultValue = "http://localhost:8080/api/users/validateEmail")
     String validateURL;
 
     /**
@@ -65,22 +65,23 @@ public class BaseWS {
     /**
      * Verifies if the e-mail from the jwt is the same from request.
      *
-     * @param email     : Request e-mail
-     * @param jwtEmail  : JWT e-mail
+     * @param email    : Request e-mail
+     * @param jwtEmail : JWT e-mail
      * @return true if the e-mails are the same
      * @throws UserWSException Throw an exception (HTTP 400) if the e-mails are
-     * different, indicating that possibly the JWT is outdated.
+     *                         different, indicating that possibly the JWT is
+     *                         outdated.
      */
     protected boolean checkTokenEmail(final String email,
-        final String jwtEmail) {
+            final String jwtEmail) {
         if (!email.equals(jwtEmail)) {
             throw new UserWSException("JWT outdated",
-                Response.Status.BAD_REQUEST);
+                    Response.Status.BAD_REQUEST);
         }
         return true;
     }
 
-     /**
+    /**
      * Send a message to the user validates the e-mail.
      *
      * @param user : A user object
@@ -93,11 +94,11 @@ public class BaseWS {
         url.append("&email=" + user.getEmail());
 
         return MailTemplate.validateEmail(url.toString())
-            .to(user.getEmail())
-            .subject("E-mail confirmation")
-            .send()
+                .to(user.getEmail())
+                .subject("E-mail confirmation")
+                .send()
                 .onItem().ifNotNull()
-                    .transform(item -> user);
+                .transform(item -> user);
     }
 
 }

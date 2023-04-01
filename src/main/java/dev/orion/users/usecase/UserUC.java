@@ -17,6 +17,7 @@
 package dev.orion.users.usecase;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -24,6 +25,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import dev.orion.users.model.User;
 import dev.orion.users.repository.Repository;
 import dev.orion.users.repository.UserRepository;
+
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -52,7 +54,7 @@ public class UserUC implements UseCase {
         if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
                 || password.isBlank()) {
             throw new IllegalArgumentException(
-                "Blank arguments or invalid e-mail");
+                    "Blank arguments or invalid e-mail");
         } else {
             if (password.length() < SIZE_PASSWORD) {
                 throw new IllegalArgumentException(
@@ -63,7 +65,7 @@ public class UserUC implements UseCase {
                 user.setEmail(email);
                 user.setPassword(DigestUtils.sha256Hex(password));
                 user.setEmailValid(false);
-               return repository.createUser(user);
+                return repository.createUser(user);
             }
         }
     }
@@ -78,16 +80,16 @@ public class UserUC implements UseCase {
      */
     @Override
     public Uni<User> createUser(final String name, final String email,
-        final Boolean isEmailValid) {
+            final Boolean isEmailValid) {
         if (name.isBlank() || !EmailValidator.getInstance().isValid(email)) {
             throw new IllegalArgumentException(
-                "Blank arguments or invalid e-mail");
+                    "Blank arguments or invalid e-mail");
         } else {
-                User user = new User();
-                user.setName(name);
-                user.setEmail(email);
-                user.setEmailValid(isEmailValid);
-                return repository.createUser(user);
+            User user = new User();
+            user.setName(name);
+            user.setEmail(email);
+            user.setEmailValid(isEmailValid);
+            return repository.createUser(user);
         }
     }
 
@@ -175,7 +177,7 @@ public class UserUC implements UseCase {
         if (email.isBlank()) {
             throw new IllegalArgumentException("Email can not be blank");
         } else {
-           return repository.deleteUser(email);
+            return repository.deleteUser(email);
         }
     }
 
@@ -193,4 +195,21 @@ public class UserUC implements UseCase {
             return repository.validateEmail(email, code);
         }
     }
+
+    @Override
+    public Uni<User> findUserByEmail(String email) {
+        if (email.isBlank()) {
+            throw new IllegalArgumentException("Blank Arguments");
+        }
+        return repository.findUserByEmail(email);
+    }
+
+    @Override
+    public Uni<User> updateUser(User user) {
+        if (user == null) {
+            throw new NotFoundException("User not found");
+        }
+        return repository.updateUser(user);
+    }
+
 }
