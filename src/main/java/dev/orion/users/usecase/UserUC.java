@@ -34,6 +34,9 @@ import io.smallrye.mutiny.Uni;
 @ApplicationScoped
 public class UserUC implements UseCase {
 
+    /** Default blanck arguments message. */
+    private static final String BLANK = "Blank Arguments";
+
     /** The minimum size of the password required. */
     private static final int SIZE_PASSWORD = 8;
 
@@ -123,7 +126,7 @@ public class UserUC implements UseCase {
     public Uni<User> updateEmail(final String email, final String newEmail) {
         Uni<User> user = null;
         if (email.isBlank() || newEmail.isBlank()) {
-            throw new IllegalArgumentException("Blank Arguments");
+            throw new IllegalArgumentException(BLANK);
         } else {
             user = repository.updateEmail(email, newEmail);
         }
@@ -142,7 +145,7 @@ public class UserUC implements UseCase {
     public Uni<User> updatePassword(final String email, final String password,
             final String newPassword) {
         if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
-            throw new IllegalArgumentException("Blank Arguments");
+            throw new IllegalArgumentException(BLANK);
         } else {
             return repository.changePassword(DigestUtils.sha256Hex(password),
                     DigestUtils.sha256Hex(newPassword), email);
@@ -159,7 +162,7 @@ public class UserUC implements UseCase {
     @Override
     public Uni<String> recoverPassword(final String email) {
         if (email.isBlank()) {
-            throw new IllegalArgumentException("Blank Arguments");
+            throw new IllegalArgumentException(BLANK);
         } else {
             return repository.recoverPassword(email);
         }
@@ -190,7 +193,7 @@ public class UserUC implements UseCase {
      */
     public Uni<User> validateEmail(final String email, final String code) {
         if (email.isBlank() || code.isBlank()) {
-            throw new IllegalArgumentException("Blank Arguments");
+            throw new IllegalArgumentException(BLANK);
         } else {
             return repository.validateEmail(email, code);
         }
@@ -199,7 +202,7 @@ public class UserUC implements UseCase {
     @Override
     public Uni<User> findUserByEmail(String email) {
         if (email.isBlank()) {
-            throw new IllegalArgumentException("Blank Arguments");
+            throw new IllegalArgumentException(BLANK);
         }
         return repository.findUserByEmail(email);
     }

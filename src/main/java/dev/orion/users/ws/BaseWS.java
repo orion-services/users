@@ -43,7 +43,8 @@ public class BaseWS {
     Optional<String> issuer;
 
     /** Set the validation url. */
-    @ConfigProperty(name = "users.email.validation.url", defaultValue = "http://localhost:8080/api/users/validateEmail")
+    @ConfigProperty(name = "users.email.validation.url",
+        defaultValue = "http://localhost:8080/api/users/validateEmail")
     String validateURL;
 
     /**

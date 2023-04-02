@@ -89,7 +89,7 @@ public class SocialAuthenticationWS extends BaseWS {
                     })
                 .log();
         } catch (Exception e) {
-            throw (UserWSException) new UserWSException(e.getMessage(),
+            throw new UserWSException(e.getMessage(),
                 Response.Status.BAD_REQUEST);
         }
     }

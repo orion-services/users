@@ -1,3 +1,19 @@
+/**
+ * @License
+ * Copyright 2022 Orion Services @ https://github.com/orion-services
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package dev.orion.users.ws.authentication;
 
 import javax.ws.rs.Produces;
@@ -36,23 +52,20 @@ public class TwoFactorAuth extends BaseWS {
             @FormParam("password") @NotEmpty final String password) {
 
         return useCase.authenticate(email, password)
-                .onItem()
-                .ifNotNull()
+            .onItem().ifNotNull()
                 .transformToUni(user -> {
                     user.setUsing2FA(true);
                     return useCase.updateUser(user);
                 })
-                .onItem()
-                .ifNotNull()
+            .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();
                     String userEmail = user.getEmail();
-                    String barCodeData = googleUtils.getGoogleAutheticatorBarCode(secret, userEmail,
-                            "Orion User Service");
+                    String barCodeData = googleUtils.getGoogleAutheticatorBarCode(
+                        secret, userEmail,"Orion User Service");
                     return googleUtils.createQrCode(barCodeData);
                 })
-                .onItem()
-                .ifNull()
+            .onItem().ifNull()
                 .failWith(new UserWSException("User not found",
                         Response.Status.UNAUTHORIZED));
     }
@@ -67,8 +80,7 @@ public class TwoFactorAuth extends BaseWS {
             @FormParam("code") @NotEmpty final String code) {
 
         return useCase.findUserByEmail(email)
-                .onItem()
-                .ifNotNull()
+            .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();
                     String userCode = googleUtils.getTOTPCode(secret);
@@ -80,8 +92,7 @@ public class TwoFactorAuth extends BaseWS {
                     }
                     return generateJWT(user);
                 })
-                .onItem()
-                .ifNull()
+            .onItem().ifNull()
                 .failWith(new UserWSException("Credentials not found",
                         Response.Status.UNAUTHORIZED));
     }

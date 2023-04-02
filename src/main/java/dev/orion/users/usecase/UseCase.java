@@ -54,13 +54,7 @@ public interface UseCase {
     Uni<User> authenticate(String email, String password);
 
     /**
-     * @param email
-     * @param code
-     * @return
-     *
-     * 
-     *         /**
-     *         Updates the e-mail of the user.
+     * Updates the e-mail of the user.
      *
      * @param email    : Current user's e-mail
      * @param newEmail : New e-mail
@@ -68,10 +62,6 @@ public interface UseCase {
      * @return An Uni<User> object
      */
     Uni<User> updateEmail(String email, String newEmail);
-
-    Uni<User> findUserByEmail(String email);
-
-    Uni<User> updateUser(User user);
 
     /**
      * Updates the user's password.
@@ -110,4 +100,20 @@ public interface UseCase {
      * @return The Uni<User> object
      */
     Uni<User> validateEmail(String email, String code);
+
+    /**
+     * Finds am user by e-mail.
+     *
+     * @param email A user'e-mail
+     * @return An Uni<User> object
+     */
+    Uni<User> findUserByEmail(String email);
+
+    /**
+     * Updates a user.
+     *
+     * @param user A user object
+     * @return An Uni<User> object
+     */
+    Uni<User> updateUser(User user);
 }
