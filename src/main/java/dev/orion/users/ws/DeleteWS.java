@@ -33,7 +33,7 @@ import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
 import io.smallrye.mutiny.Uni;
 
-@Path("/api/user")
+@Path("/api/users")
 @RolesAllowed("user")
 @RequestScoped
 public class DeleteWS {
@@ -52,7 +52,7 @@ public class DeleteWS {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public Uni<Long> deleteUser(
+    public Uni<Void> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
             return uc.deleteUser(email)

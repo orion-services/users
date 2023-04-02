@@ -39,11 +39,10 @@ import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
-import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
-import io.quarkus.qute.CheckedTemplate;
+import dev.orion.users.ws.mail.MailTemplate;
 import io.smallrye.mutiny.Uni;
 
-@Path("/api/user")
+@Path("/api/users")
 @RolesAllowed("user")
 @RequestScoped
 public class UpdateWS extends BaseWS {
@@ -54,41 +53,54 @@ public class UpdateWS extends BaseWS {
     /** Retrieve the e-mail from jwt. */
     @Inject
     @Claim(standard = Claims.email)
-    private String jwtEmail;
+    String jwtEmail;
 
     /**
      * Updates the e-mail of a user. A JWT with role user is mandatory to
      * execute this method. Returns a new JWT to replace the old one because
      * the e-mail is a JWT claim.
      *
-     * @param email    : Current e-mail
-     * @param newEmail : New e-mail
+     * @param email    : The current e-mail
+     * @param newEmail : The new e-mail of the user
      * @return A new JWT
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or if there are other problems such as username not found
-     * or email already used
+     *                         outdated or if there are other problems such as
+     *                         username not found
+     *                         or email already used
      */
     @PUT
     @Path("/update/email")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    @Retry(maxRetries = 0, delay = 2000)
+    @Retry(maxRetries = 0, delay = DELAY)
     public Uni<String> updateEmail(
-        @FormParam("email") @NotEmpty @Email final String email,
-        @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
+            @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
 
         // Checks the e-mail of the token
         checkTokenEmail(email, jwtEmail);
 
-        return uc.updateEmail(email, newEmail)
-            .log()
-            .onItem().ifNotNull()
-                .transform(this::generateJWT)
-            .onFailure()
+        Uni<User> uni = uc.updateEmail(email, newEmail)
+                .log()
+                .onItem().ifNotNull()
+                .call(this::sendEmail)
+                .onFailure()
                 .transform(e -> {
                     throw new UserWSException(e.getMessage(),
-                        Response.Status.BAD_REQUEST);
+                            Response.Status.BAD_REQUEST);
                 });
+        return uni.onItem().transform(this::generateJWT);
+    }
+
+    /**
+     * Helper method to send an email confirmation message to users.
+     *
+     * @param user : An user object
+     * @return Uni<User>
+     */
+    private Uni<User> sendEmail(final User user) {
+        return sendValidationEmail(user)
+                .onItem().transform(u -> u);
     }
 
     /**
@@ -99,30 +111,31 @@ public class UpdateWS extends BaseWS {
      * @param password    : Actual User password
      * @param newPassword : New User password
      * @return Returns the User who have his password change in JSON format
-     * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or if there are other problems such as e-mail not found
+     * @throws UserWSException Returns a HTTP 400 if the current jwt is outdated
+     *                         or if there are other problems such as e-mail not
+     *                         found
      */
     @PUT
     @Path("/update/password")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
-    @Retry(maxRetries = 1, delay = 2000)
+    @Retry(maxRetries = 1, delay = DELAY)
     public Uni<User> changePassword(
-        @FormParam("email") @NotEmpty @Email final String email,
-        @FormParam("password") @NotEmpty final String password,
-        @FormParam("newPassword") @NotEmpty final String newPassword) {
+            @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("password") @NotEmpty final String password,
+            @FormParam("newPassword") @NotEmpty final String newPassword) {
 
         // Checks the e-mail of the token
         checkTokenEmail(email, jwtEmail);
 
         return uc.updatePassword(email, password, newPassword)
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transform(user -> user)
-            .log()
-            .onFailure()
+                .log()
+                .onFailure()
                 .transform(e -> {
                     throw new UserWSException(e.getMessage(),
-                        Response.Status.BAD_REQUEST);
+                            Response.Status.BAD_REQUEST);
                 });
     }
 
@@ -132,7 +145,8 @@ public class UpdateWS extends BaseWS {
      * @param email : The current e-mail of the user
      * @return Returns HTTP 204 (No Content) if the method executed with success
      * @throws UserWSException Returns a HTTP 400 if the current jwt is
-     * outdated or if there are other problems such as e-mail not found
+     *                         outdated or if there are other problems such as
+     *                         e-mail not found
      */
     @POST
     @PermitAll
@@ -141,32 +155,18 @@ public class UpdateWS extends BaseWS {
     public Uni<Void> sendEmailUsingReactiveMailer(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-         return uc.recoverPassword(email)
+        return uc.recoverPassword(email)
                 .onItem().ifNotNull().transformToUni(password -> {
-                    return Templates.recoverPassword(password).to(email)
-                        .subject("Recover Password").send();
+                    return MailTemplate.recoverPwd(password)
+                            .to(email)
+                            .subject("Recover Password")
+                            .send();
                 })
                 .log()
                 .onFailure().transform(e -> {
-                    throw new UserWSException(
-                        e.getMessage(),
+                    throw new UserWSException(e.getMessage(),
                             Response.Status.BAD_REQUEST);
                 });
-    }
-     /**
-     * Class to load mail templates.
-     */
-    @CheckedTemplate
-    public static class Templates {
-
-        /**
-         * Generates a mail template object.
-         *
-         * @param password : The new password of the user
-         * @return A MailTemplateInstance object
-         */
-        public static native MailTemplateInstance recoverPassword(
-            String password);
     }
 
 }

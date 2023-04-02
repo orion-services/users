@@ -16,14 +16,21 @@
  */
 package dev.orion.users.model;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
+
+import org.apache.commons.codec.binary.Base32;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -36,6 +43,9 @@ import lombok.Setter;
 @Entity
 @Getter @Setter
 public class User extends PanacheEntityBase {
+
+    /** Default size for column. */
+    private static final int COLUMN_LENGTH = 256;
 
     /** Primary key. */
     @Id
@@ -57,15 +67,83 @@ public class User extends PanacheEntityBase {
 
      /** The password of the user. */
     @JsonIgnore
-    @Column(length = 256)
+    @Column(length = COLUMN_LENGTH)
     @NotNull(message = "The password can't be null")
     private String password;
 
+    /** Role list. */
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.EAGER)
+    private List<Role> roles;
+
+    /** Stores if the e-mail was validated.  */
+    private boolean emailValid;
+
+    /** The hash used to identify the user.  */
+    @JsonIgnore
+    private String emailValidationCode;
+
+    /** Stores if is using 2FA */
+    private boolean isUsing2FA;
+
+    /**Secret code to be used at 2FA validation */
+    private String secret2FA;
     /**
      * User constructor.
      */
     public User() {
         this.hash = UUID.randomUUID().toString();
+        this.roles = new ArrayList<>();
+        this.emailValidationCode = UUID.randomUUID().toString();
+        this.secret2FA = generateSecretKey();
     }
 
+    /**
+     * Add a role in a user.
+     *
+     * @param role A role object.
+     */
+    public void addRole(final Role role) {
+        roles.add(role);
+    }
+
+    /**
+     * Transform the a list of object role to a list of String. The role "user"
+     * is the default role of the server
+     *
+     * @return A list of roles in String format
+     */
+    @JsonIgnore
+    public List<String> getRoleList() {
+        List<String> strRoles = new ArrayList<>();
+        if (this.roles.isEmpty()) {
+            strRoles.add("user");
+        } else {
+            for (Role role : roles) {
+                strRoles.add(role.getName());
+            }
+        }
+        return strRoles;
+    }
+    public static String generateSecretKey(){
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[20];
+        random.nextBytes(bytes);
+        Base32 base32 = new Base32();
+        return base32.encodeToString(bytes);
+    }
+
+    /**
+     * Generates a e-mail validation code to the user.
+     */
+    public void setEmailValidationCode() {
+        this.emailValidationCode = UUID.randomUUID().toString();
+    }
+
+    /**
+     * Removes all roles of the object.
+     */
+    public void removeRoles(){
+        this.roles.removeAll(roles);
+    }
 }

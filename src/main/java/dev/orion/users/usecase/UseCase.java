@@ -35,6 +35,16 @@ public interface UseCase {
     Uni<User> createUser(String name, String email, String password);
 
     /**
+     * Creates a user in the service (UC: Create).
+     *
+     * @param name         : The name of the user
+     * @param email        : The e-mail of the user
+     * @param isEmailValid : Confirm if the e-mail is valid or not
+     * @return A Uni<User> object
+     */
+    Uni<User> createUser(String name, String email, Boolean isEmailValid);
+
+    /**
      * Authenticates the user in the service (UC: Authenticate).
      *
      * @param email    : The email of the user
@@ -80,5 +90,30 @@ public interface UseCase {
      *
      * @return Return 1 if user was deleted
      */
-    Uni<Long> deleteUser(String email);
+    Uni<Void> deleteUser(String email);
+
+    /**
+     * Validates an e-mail of a user.
+     *
+     * @param email : The e-mail of a user
+     * @param code  : The validation code
+     * @return The Uni<User> object
+     */
+    Uni<User> validateEmail(String email, String code);
+
+    /**
+     * Finds am user by e-mail.
+     *
+     * @param email A user'e-mail
+     * @return An Uni<User> object
+     */
+    Uni<User> findUserByEmail(String email);
+
+    /**
+     * Updates a user.
+     *
+     * @param user A user object
+     * @return An Uni<User> object
+     */
+    Uni<User> updateUser(User user);
 }
