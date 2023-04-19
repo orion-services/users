@@ -12,3 +12,7 @@
 - Recovers password
 - Updates e-mail
 - Updates password
+
+##
+- Creates Two Factor QrCode
+- Validates Two Factor Code Login
