@@ -12,6 +12,7 @@ rectangle Users{
     usecase "Recover Password" as UC6
     usecase "Update Email" as UC7
     usecase "Update Password" as UC8
+    usecase "Two Factor Authenticate" as UC9
 }
 
 client -->  UC1
@@ -22,5 +23,6 @@ client -->  UC5
 client -->  UC6
 client -->  UC7
 client -->  UC8
+client -->  UC9
 
 @enduml
