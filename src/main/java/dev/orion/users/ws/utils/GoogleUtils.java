@@ -20,10 +20,19 @@ import com.google.zxing.common.BitMatrix;
 
 import de.taimos.totp.TOTP;
 
+/**
+ * Google Utilities
+ */
 @ApplicationScoped
 public class GoogleUtils {
     private static final String UTF_8 = "UTF-8";
 
+    /**
+     * Create Time-based one-time password.
+     *
+     * @return The Time-based one-time password code in String format
+     * @throws IllegalArgumentException
+     */
     public String getTOTPCode(String secretKey) {
         try {
             Base32 base32 = new Base32();
@@ -36,6 +45,12 @@ public class GoogleUtils {
 
     }
 
+    /**
+     * Create Google Bar Code.
+     *
+     * @return The Google Bar Code in String format
+     * @throws IllegalArgumentException
+     */
     public String getGoogleAutheticatorBarCode(String secretKey, String account, String issuer) {
         try {
             return "otpauth://totp/"
@@ -47,6 +62,12 @@ public class GoogleUtils {
         }
     }
 
+    /**
+     * Create QrCode.
+     *
+     * @return The QrCode with Google Bar Code in a array of byte format
+     * @throws IllegalArgumentException
+     */
     public byte[] createQrCode(String barCodeData) {
         try {
             BitMatrix matrix = new MultiFormatWriter().encode(barCodeData, BarcodeFormat.QR_CODE, 400, 400);

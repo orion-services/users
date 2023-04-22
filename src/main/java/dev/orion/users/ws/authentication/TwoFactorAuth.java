@@ -34,15 +34,26 @@ import dev.orion.users.ws.utils.GoogleUtils;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+/**
+ * Two Factor Authenticate.
+ */
 @Path("api/users")
 public class TwoFactorAuth extends BaseWS {
 
+    /** Google auth utilities */
     @Inject
     protected GoogleUtils googleUtils;
 
+    /** Business logic */
     @Inject
     protected UseCase useCase;
 
+    /**
+     * Authenticate and returns a qrCode to google auth.
+     *
+     * @return The return is in image/png format
+     * @throws UserWSException Returns a HTTP 401 if credentials not found
+     */
     @POST
     @Path("google/2FAuth/qrCode")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
@@ -52,24 +63,30 @@ public class TwoFactorAuth extends BaseWS {
             @FormParam("password") @NotEmpty final String password) {
 
         return useCase.authenticate(email, password)
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     user.setUsing2FA(true);
                     return useCase.updateUser(user);
                 })
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();
                     String userEmail = user.getEmail();
                     String barCodeData = googleUtils.getGoogleAutheticatorBarCode(
-                        secret, userEmail,"Orion User Service");
+                            secret, userEmail, "Orion User Service");
                     return googleUtils.createQrCode(barCodeData);
                 })
-            .onItem().ifNull()
-                .failWith(new UserWSException("User not found",
+                .onItem().ifNull()
+                .failWith(new UserWSException("Credentials not found",
                         Response.Status.UNAUTHORIZED));
     }
 
+    /**
+     * Validate google auth code
+     *
+     * @return The return is a string with token
+     * @throws UserWSException Returns a HTTP 401 if credentials not found
+     */
     @POST
     @Path("google/2FAuth/validate")
     @Retry(maxRetries = 1, delay = 2000)
@@ -80,7 +97,7 @@ public class TwoFactorAuth extends BaseWS {
             @FormParam("code") @NotEmpty final String code) {
 
         return useCase.findUserByEmail(email)
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();
                     String userCode = googleUtils.getTOTPCode(secret);
@@ -92,7 +109,7 @@ public class TwoFactorAuth extends BaseWS {
                     }
                     return generateJWT(user);
                 })
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new UserWSException("Credentials not found",
                         Response.Status.UNAUTHORIZED));
     }
