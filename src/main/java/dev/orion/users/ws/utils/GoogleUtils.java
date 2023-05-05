@@ -6,7 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.awt.image.BufferedImage;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.codec.binary.Base32;

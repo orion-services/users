@@ -16,8 +16,8 @@
  */
 package dev.orion.users.usecase;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.NotFoundException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;

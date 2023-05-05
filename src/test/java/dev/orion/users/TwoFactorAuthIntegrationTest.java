@@ -18,7 +18,7 @@ package dev.orion.users;
 
 import static io.restassured.RestAssured.given;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;

@@ -16,17 +16,16 @@
  */
 package dev.orion.users.ws.authentication;
 
-import javax.annotation.security.PermitAll;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.annotation.security.PermitAll;
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.resteasy.reactive.RestForm;
 
@@ -35,6 +34,7 @@ import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -62,6 +62,7 @@ public class AuthenticationWS extends BaseWS {
     @Path("/authenticate")
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 1, delay = DELAY)
+    @WithSession
     public Uni<String> authenticate(
         @RestForm @NotEmpty @Email final String email,
         @RestForm @NotEmpty final String password) {
@@ -87,6 +88,7 @@ public class AuthenticationWS extends BaseWS {
     @POST
     @Path("/createAuthenticate")
     @Retry(maxRetries = 1, delay = DELAY)
+    @WithSession
     public Uni<AuthenticationDTO> createAuthenticate(
         @FormParam("name") @NotEmpty final String name,
         @FormParam("email") @NotEmpty @Email final String email,

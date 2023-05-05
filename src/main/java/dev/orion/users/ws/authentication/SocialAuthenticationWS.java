@@ -16,13 +16,13 @@
  */
 package dev.orion.users.ws.authentication;
 
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -31,6 +31,7 @@ import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.security.Authenticated;
 import io.smallrye.mutiny.Uni;
@@ -63,6 +64,7 @@ public class SocialAuthenticationWS extends BaseWS {
     @Authenticated
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.APPLICATION_JSON)
+    @WithSession
     public Uni<AuthenticationDTO> google() {
 
         // Getting information from id token
