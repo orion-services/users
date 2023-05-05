@@ -159,12 +159,12 @@ public class UpdateWS extends BaseWS {
             @FormParam("email") @NotEmpty @Email final String email) {
 
         return uc.recoverPassword(email)
-                .onItem().ifNotNull().transformToUni(password -> {
-                    return MailTemplate.recoverPwd(password)
+                .onItem().ifNotNull().transformToUni(password ->
+                    MailTemplate.recoverPwd(password)
                             .to(email)
                             .subject("Recover Password")
-                            .send();
-                })
+                            .send()
+                )
                 .log()
                 .onFailure().transform(e -> {
                     throw new UserWSException(e.getMessage(),

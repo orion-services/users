@@ -61,24 +61,24 @@ public class UserRepository implements Repository {
     public Uni<User> createUser(final User u) {
         return checkEmail(u.getEmail())
                 .onItem().ifNotNull().transform(user -> user)
-                .onItem().ifNull().switchTo(() -> {
-                    return checkName(u.getName())
-                            .onItem().ifNotNull()
-                            .failWith(new IllegalArgumentException(
-                                    "The name already existis"))
-                            .onItem().ifNull().switchTo(() -> {
-                                return checkHash(u.getHash())
-                                        .onItem().ifNotNull()
-                                        .failWith(new IllegalArgumentException(
-                                                "The hash already existis"))
-                                        .onItem().ifNull().switchTo(() -> {
-                                            if (u.getPassword().isBlank()) {
-                                                u.setPassword(generateSecurePassword());
-                                            }
-                                            return persistUser(u);
-                                        });
-                            });
-                });
+                .onItem().ifNull().switchTo(() ->
+                    checkName(u.getName())
+                        .onItem().ifNotNull()
+                        .failWith(new IllegalArgumentException(
+                                "The name already existis"))
+                        .onItem().ifNull().switchTo(() ->
+                            checkHash(u.getHash())
+                                .onItem().ifNotNull()
+                                .failWith(new IllegalArgumentException(
+                                        "The hash already existis"))
+                                .onItem().ifNull().switchTo(() -> {
+                                    if (u.getPassword().isBlank()) {
+                                        u.setPassword(generateSecurePassword());
+                                    }
+                                    return persistUser(u);
+                                })
+                        )
+                );
     }
 
     /**
@@ -110,20 +110,20 @@ public class UserRepository implements Repository {
             .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
             .onItem().ifNotNull()
-                .transformToUni(user -> {
-                    return checkEmail(newEmail)
-                            .onItem().ifNotNull()
-                            .failWith(new IllegalArgumentException(
-                                    "Email already in use"))
-                            .onItem().ifNull()
-                            .switchTo(() -> {
-                                user.setEmailValidationCode();
-                                user.setEmailValid(false);
-                                user.setEmail(newEmail);
-                                return Panache.<User>withTransaction(
-                                        user::persist);
-                            });
-                });
+                .transformToUni(user ->
+                    checkEmail(newEmail)
+                        .onItem().ifNotNull()
+                        .failWith(new IllegalArgumentException(
+                                "Email already in use"))
+                        .onItem().ifNull()
+                        .switchTo(() -> {
+                            user.setEmailValidationCode();
+                            user.setEmailValid(false);
+                            user.setEmail(newEmail);
+                            return Panache.<User>withTransaction(
+                                    user::persist);
+                        })
+                );
     }
 
     /**
@@ -194,9 +194,9 @@ public class UserRepository implements Repository {
                 .onItem().ifNotNull()
                 .transformToUni(user -> changePassword(user.getPassword(),
                         DigestUtils.sha256Hex(password), email)
-                        .onItem().transform(item -> {
-                            return password;
-                        }));
+                        .onItem().transform(item ->
+                            password
+                        ));
     }
 
     /**
@@ -211,9 +211,9 @@ public class UserRepository implements Repository {
             .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
             .onItem().ifNotNull()
-                .transformToUni(user -> {
-                    return Panache.<Void>withTransaction(user::delete);
-                });
+                .transformToUni(user ->
+                    Panache.<Void>withTransaction(user::delete)
+                );
     }
 
     /**
