@@ -156,4 +156,22 @@ class UnitTest {
     });
   }
 
+  @Test
+  @DisplayName("create User Google With Blank Name")
+  @Order(13)
+  void createUserGoogleWithBlankName() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      uc.createUser("", "devoriontest@gmail.com", true);
+    });
+  }
+
+  @Test
+  @DisplayName("Create User Google With Blank Email")
+  @Order(14)
+  void createUserGoogleWithBlankEmail() {
+    Assertions.assertThrows(IllegalArgumentException.class, () -> {
+      uc.createUser("Orion", "", true);
+    });
+  }
+
 }
