@@ -1,0 +1,110 @@
+package dev.orion.users;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.IOException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import com.google.zxing.WriterException;
+import dev.orion.users.ws.utils.GoogleUtils;
+
+@ExtendWith(MockitoExtension.class)
+@TestMethodOrder(OrderAnnotation.class)
+public class GoogleUtilsUnitTest {
+
+    @InjectMocks
+    private GoogleUtils googleUtils;
+
+    @Test
+    @Order(1)
+    @DisplayName("Test create TOTP code with valid secret key")
+    public void shouldCreateTOTPCode() {
+        String secretKey = "JBSWY3DPEHPK3PXP";
+        String expectedCode = "432143";
+        GoogleUtils googleUtils = mock(GoogleUtils.class);
+        when(googleUtils.getTOTPCode(secretKey)).thenReturn(expectedCode);
+        String actualCode = googleUtils.getTOTPCode(secretKey);
+        assertEquals(expectedCode, actualCode);
+    }
+
+    @Test()
+    @Order(2)
+    @DisplayName("Test create TOTP code with null secret key")
+
+    public void testGetTOTPCodeWithNullSecretKey() {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            googleUtils.getTOTPCode(null);
+        });
+    }
+
+    @Test
+    @Order(3)
+    @DisplayName("Test create create the auth barcode")
+    public void shouldCreateGoogleAutheticatorBarCode() {
+        String secretKey = "MFRGGZDFMZTWQ2LK";
+        String account = "testuser";
+        String issuer = "testcompany";
+        String expectedBarCode = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
+        String actualBarCode = googleUtils.getGoogleAutheticatorBarCode(secretKey, account, issuer);
+        assertEquals(expectedBarCode, actualBarCode);
+    }
+
+    @Test
+    @Order(4)
+    @DisplayName("Test create auth barcode with null secret key")
+    public void testGetGoogleAutheticatorBarCodeWithNullSecretKey() {
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            googleUtils.getGoogleAutheticatorBarCode(null, "account", "issuer");
+        });
+
+    }
+
+    // @Test
+    // public void testGetGoogleAutheticatorBarCodeWithNullAccount() {
+    // Assertions.assertThrows(IllegalStateException.class, () -> {
+    // googleUtils.getGoogleAutheticatorBarCode("secretKey", null, "issuer");
+    // });
+    // }
+
+    @Test
+    @Order(5)
+    @DisplayName("Test create auth barcode with null issuer")
+    public void testGetGoogleAuthenticatorBarCodeWithNullIssuer() {
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            googleUtils.getGoogleAutheticatorBarCode("secretKey", "account", null);
+        });
+
+    }
+
+    @Test
+    @Order(6)
+    @DisplayName("Test create create the qrcode")
+    public void createQrCodeTest() throws WriterException, IOException {
+        String barCodeData = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
+        byte[] result = googleUtils.createQrCode(barCodeData);
+
+        assertNotNull(result);
+        assertTrue(result.length > 0);
+    }
+
+    @Test
+    @Order(7)
+    @DisplayName("Test create create qrcode with invalid barcode data")
+    public void testCreateQrCodeWithInvalidBarCodeData() {
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            googleUtils.createQrCode(null);
+        });
+    }
+
+}

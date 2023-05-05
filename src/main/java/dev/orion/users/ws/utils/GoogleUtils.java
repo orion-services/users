@@ -20,27 +20,54 @@ import com.google.zxing.common.BitMatrix;
 
 import de.taimos.totp.TOTP;
 
+/**
+ * Google Utilities
+ */
 @ApplicationScoped
 public class GoogleUtils {
     private static final String UTF_8 = "UTF-8";
+
+    /**
+     * Create Time-based one-time password.
+     *
+     * @return The Time-based one-time password code in String format
+     * @throws IllegalArgumentException
+     */
     public String getTOTPCode(String secretKey) {
-        Base32 base32 = new Base32();
-        byte[] bytes = base32.decode(secretKey);
-        String hexKey = Hex.encodeHexString(bytes);
-        return TOTP.getOTP(hexKey);
+        try {
+            Base32 base32 = new Base32();
+            byte[] bytes = base32.decode(secretKey);
+            String hexKey = Hex.encodeHexString(bytes);
+            return TOTP.getOTP(hexKey);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e);
+        }
+
     }
 
+    /**
+     * Create Google Bar Code.
+     *
+     * @return The Google Bar Code in String format
+     * @throws IllegalArgumentException
+     */
     public String getGoogleAutheticatorBarCode(String secretKey, String account, String issuer) {
         try {
             return "otpauth://totp/"
                     + URLEncoder.encode(issuer + ":" + account, UTF_8).replace("+", "%20")
                     + "?secret=" + URLEncoder.encode(secretKey, UTF_8).replace("+", "%20")
                     + "&issuer=" + URLEncoder.encode(issuer, UTF_8).replace("+", "%20");
-        } catch (UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException | NullPointerException e) {
             throw new IllegalStateException(e);
         }
     }
 
+    /**
+     * Create QrCode.
+     *
+     * @return The QrCode with Google Bar Code in a array of byte format
+     * @throws IllegalArgumentException
+     */
     public byte[] createQrCode(String barCodeData) {
         try {
             BitMatrix matrix = new MultiFormatWriter().encode(barCodeData, BarcodeFormat.QR_CODE, 400, 400);
@@ -48,9 +75,9 @@ public class GoogleUtils {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);
             return baos.toByteArray();
-        } catch (WriterException | IOException e) {
+        } catch (WriterException | IOException | NullPointerException e) {
             throw new IllegalStateException(e);
-        } 
+        }
     }
 
 }
