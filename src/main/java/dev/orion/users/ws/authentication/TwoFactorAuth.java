@@ -16,21 +16,22 @@
  */
 package dev.orion.users.ws.authentication;
 
-import javax.ws.rs.Produces;
-import javax.inject.Inject;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.Produces;
+import jakarta.inject.Inject;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;
 import dev.orion.users.ws.utils.GoogleUtils;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
@@ -58,6 +59,7 @@ public class TwoFactorAuth extends BaseWS {
     @Path("google/2FAuth/qrCode")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("image/png")
+    @WithSession
     public Uni<byte[]> googleAuth2FAQrCode(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {

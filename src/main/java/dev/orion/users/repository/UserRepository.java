@@ -19,7 +19,7 @@ package dev.orion.users.repository;
 import java.io.IOException;
 import java.util.Map;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.passay.CharacterData;

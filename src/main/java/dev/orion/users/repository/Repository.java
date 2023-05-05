@@ -16,7 +16,7 @@
  */
 package dev.orion.users.repository;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
