@@ -14,7 +14,7 @@
 
     WebService -> WebService : user.setUsing2FA(true)
     WebService -> UseCase: updateUser(user)
-    
+
     UseCase --> UseCase : updateUser(user)
     UseCase -->> WebService: Uni<User>
     deactivate UseCase
@@ -30,6 +30,6 @@
     GoogleUtils -->> WebService : byte[] qrCode
     deactivate GoogleUtils
 
-    WebService -->> user : QrCode Image 
+    WebService -->> user : QrCode Image
     deactivate WebService
 @enduml
