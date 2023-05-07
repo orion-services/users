@@ -340,7 +340,8 @@ public class UserRepository implements Repository {
         if (params.values().stream().allMatch(Objects::isNull)) {
             return User.findAll().list();
         }
-        return User.find("hash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
+        return User.find(
+                "hash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%') or status = :status",
                 params).list();
     }
 }

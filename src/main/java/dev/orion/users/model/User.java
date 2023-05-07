@@ -91,7 +91,7 @@ public class User extends PanacheEntityBase {
     /** Secret code to be used at 2FA validation */
     private String secret2FA;
 
-    private Status status;
+    private String status;
 
     /**
      * User constructor.
@@ -101,7 +101,7 @@ public class User extends PanacheEntityBase {
         this.roles = new ArrayList<>();
         this.emailValidationCode = UUID.randomUUID().toString();
         this.secret2FA = generateSecretKey();
-        this.status = Status.ACTIVATED;
+        this.status = Status.ACTIVATED.getDescription();
     }
 
     /**

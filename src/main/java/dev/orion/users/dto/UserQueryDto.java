@@ -20,6 +20,6 @@ public class UserQueryDto {
     @QueryParam("email")
     public String email;
 
-    // @QueryParam("status")
-    // public String status;
+    @QueryParam("status")
+    public String status;
 }
