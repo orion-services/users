@@ -18,6 +18,8 @@ package dev.orion.users.repository;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 
@@ -27,10 +29,15 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.Role;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
+import io.quarkus.hibernate.reactive.panache.PanacheQuery;
 import io.quarkus.panache.common.Parameters;
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -90,7 +97,7 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> authenticate(final User user) {
         Map<String, Object> params = Parameters.with(EMAIL,
-            user.getEmail()).and("password", user.getPassword()).map();
+                user.getEmail()).and("password", user.getPassword()).map();
         return find("email = :email and password = :password", params)
                 .firstResult();
     }
@@ -107,9 +114,9 @@ public class UserRepository implements Repository {
             final String email,
             final String newEmail) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     return checkEmail(newEmail)
                             .onItem().ifNotNull()
@@ -137,7 +144,7 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> validateEmail(final String email, final String code) {
         Map<String, Object> params = Parameters.with(EMAIL,
-        email).and("code", code).map();
+                email).and("code", code).map();
         return find("email = :email and emailValidationCode = :code",
                 params)
                 .firstResult()
@@ -164,15 +171,15 @@ public class UserRepository implements Repository {
             final String newPassword,
             final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     if (password.equals(user.getPassword())) {
                         user.setPassword(newPassword);
                     } else {
                         throw new IllegalArgumentException(
-                            "Passwords doesn't match");
+                                "Passwords doesn't match");
                     }
                     return Panache.<User>withTransaction(user::persist);
                 });
@@ -208,9 +215,9 @@ public class UserRepository implements Repository {
     @Override
     public Uni<Void> deleteUser(final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     return Panache.<Void>withTransaction(user::delete);
                 });
@@ -257,7 +264,7 @@ public class UserRepository implements Repository {
         return getDefaultRole()
                 .onItem().ifNull()
                 .failWith(new IOException("Role not found"))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(role -> {
                     user.addRole(role);
                     return Panache.<User>withTransaction(user::persist);
@@ -326,12 +333,23 @@ public class UserRepository implements Repository {
 
     @Override
     public Uni<User> findUserByEmail(String email) {
-        return find(EMAIL,email).firstResult();
+        return find(EMAIL, email).firstResult();
     }
 
     @Override
     public Uni<User> updateUser(User user) {
 
         return Panache.<User>withTransaction(user::persist);
+    }
+
+    @Override
+    public Multi<User> findUserByQuery(UserQueryDto userQueryDto) {
+        Map<String, Object> params = new ObjectMapper().convertValue(userQueryDto, Map.class);
+
+        if (params.values().stream().allMatch(Objects::isNull)) {
+            return findAll().stream();
+        }
+        return find("userHash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
+                params).stream();
     }
 }

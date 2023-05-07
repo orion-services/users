@@ -56,20 +56,20 @@ public class AuthenticationWS extends BaseWS {
      * @param password : The password of the user
      * @return A JWT (JSON Web Token)
      * @throws UserWSException Returns a HTTP 401 if the services is not
-     * able to find the user in the database
+     *                         able to find the user in the database
      */
     @POST
     @Path("/authenticate")
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 1, delay = DELAY)
     public Uni<String> authenticate(
-        @RestForm @NotEmpty @Email final String email,
-        @RestForm @NotEmpty final String password) {
+            @RestForm @NotEmpty @Email final String email,
+            @RestForm @NotEmpty final String password) {
 
         return uc.authenticate(email, password)
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transform(super::generateJWT)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new UserWSException("User not found",
                         Response.Status.UNAUTHORIZED));
     }
@@ -82,30 +82,42 @@ public class AuthenticationWS extends BaseWS {
      * @param password : The password of the user
      * @return The Authentication DTO
      * @throws UserWSException Returns a HTTP 409 if the e-mail already exists
-     * in the database or if the password is lower than eight characters
+     *                         in the database or if the password is lower than
+     *                         eight characters
      */
     @POST
     @Path("/createAuthenticate")
     @Retry(maxRetries = 1, delay = DELAY)
     public Uni<AuthenticationDTO> createAuthenticate(
-        @FormParam("name") @NotEmpty final String name,
-        @FormParam("email") @NotEmpty @Email final String email,
-        @FormParam("password") @NotEmpty final String password) {
+            @FormParam("name") @NotEmpty final String name,
+            @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("password") @NotEmpty final String password) {
 
         try {
             return uc.createUser(name, email, password)
-                .onItem().ifNotNull()
+                    .onItem().ifNotNull()
                     .transform(user -> {
-                        String token = generateJWT(user);
+                        String token = generathttps://docs.google.com/document/d/1_NrWhZafWHe4mxuwDElrXZAvqS6DTRjGuApudDU5swA/edit?usp=sharingeJWT(user);
                         AuthenticationDTO auth = new AuthenticationDTO();
                         auth.setToken(token);
                         auth.setUser(user);
                         return auth;
                     })
-                .log();
+                    .log();
         } catch (Exception e) {
             throw new UserWSException(e.getMessage(),
-                Response.Status.BAD_REQUEST);
+                    Response.Status.BAD_REQUEST);
         }
+    }
+
+    @POST
+    @Path("/refreshToken")
+    @Retry(maxRetries = 1, delay = DELAY)
+    public Uni<AuthenticationDTO> refreshToken(
+            @FormParam("name") @NotEmpty final String name,
+            @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("password") @NotEmpty final String password) {
+
+        return null;
     }
 }

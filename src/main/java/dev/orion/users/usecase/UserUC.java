@@ -22,10 +22,11 @@ import javax.ws.rs.NotFoundException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
+import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.User;
 import dev.orion.users.repository.Repository;
 import dev.orion.users.repository.UserRepository;
-
+import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -213,6 +214,11 @@ public class UserUC implements UseCase {
             throw new NotFoundException("User not found");
         }
         return repository.updateUser(user);
+    }
+
+    @Override
+    public Multi<User> findUserByQuery(UserQueryDto userQueryDto) {
+        return repository.findUserByQuery(userQueryDto);
     }
 
 }
