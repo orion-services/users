@@ -1,11 +1,20 @@
 package dev.orion.users.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-public class Authorization {
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+public class Authorization extends PanacheEntityBase {
     @Id
     @GeneratedValue
     private Long id;

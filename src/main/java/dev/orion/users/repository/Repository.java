@@ -16,12 +16,13 @@
  */
 package dev.orion.users.repository;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.List;
 
 import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -38,7 +39,7 @@ public interface Repository extends PanacheRepository<User> {
      */
     Uni<User> createUser(User user);
 
-    Multi<User> findUserByQuery(UserQueryDto userQueryDto);
+    Uni<List<User>> findUserByQuery(UserQueryDto userQueryDto);
 
     /**
      * Returns a user searching for email

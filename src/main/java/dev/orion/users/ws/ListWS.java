@@ -1,22 +1,24 @@
 package dev.orion.users.ws;
 
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.hibernate.service.spi.ServiceException;
-
+import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import dev.orion.users.dto.UserQueryDto;
+import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
+import io.smallrye.mutiny.Uni;
+
+import java.util.List;
 
 @Path("api/users")
+
 public class ListWS {
 
     @Inject
@@ -25,14 +27,10 @@ public class ListWS {
     @GET
     @Path("/find")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    // @Produces(MediaType.APPLICATION_JSON)
-    @Transactional
-    public Response find(@BeanParam UserQueryDto query) {
+    @WithSession
+    public Uni<List<User>> find(@BeanParam UserQueryDto query) {
         try {
-            return Response
-                    .status(Response.Status.OK)
-                    .entity(useCase.findUserByQuery(query))
-                    .build();
+            return useCase.findUserByQuery(query);
         } catch (Exception e) {
             throw new UserWSException(e.getMessage(),
                     Response.Status.BAD_REQUEST);

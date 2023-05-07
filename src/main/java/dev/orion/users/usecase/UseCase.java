@@ -16,9 +16,10 @@
  */
 package dev.orion.users.usecase;
 
+import java.util.List;
+
 import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.User;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -111,7 +112,7 @@ public interface UseCase {
      */
     Uni<User> findUserByEmail(String email);
 
-    Multi<User> findUserByQuery(UserQueryDto userQueryDto);
+    Uni<List<User>> findUserByQuery(UserQueryDto userQueryDto);
 
     /**
      * Updates a user.

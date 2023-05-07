@@ -16,22 +16,23 @@
  */
 package dev.orion.users.ws;
 
-import javax.annotation.security.RolesAllowed;
-import javax.enterprise.context.RequestScoped;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
+import jakarta.annotation.security.RolesAllowed;
 
 @Path("/api/users")
 @RolesAllowed("user")
@@ -52,6 +53,7 @@ public class DeleteWS {
     @Path("/delete")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
+    @WithSession
     public Uni<Void> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 

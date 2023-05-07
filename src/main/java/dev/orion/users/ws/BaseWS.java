@@ -19,7 +19,7 @@ package dev.orion.users.ws;
 import java.util.HashSet;
 import java.util.Optional;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;

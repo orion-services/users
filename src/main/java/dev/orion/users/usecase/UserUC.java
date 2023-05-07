@@ -16,8 +16,10 @@
  */
 package dev.orion.users.usecase;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.ws.rs.NotFoundException;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.NotFoundException;
+
+import java.util.List;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
@@ -26,7 +28,6 @@ import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.User;
 import dev.orion.users.repository.Repository;
 import dev.orion.users.repository.UserRepository;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -217,7 +218,7 @@ public class UserUC implements UseCase {
     }
 
     @Override
-    public Multi<User> findUserByQuery(UserQueryDto userQueryDto) {
+    public Uni<List<User>> findUserByQuery(UserQueryDto userQueryDto) {
         return repository.findUserByQuery(userQueryDto);
     }
 

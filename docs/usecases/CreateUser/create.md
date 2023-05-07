@@ -22,8 +22,8 @@ nav_order: 3
 ### Sequence diagram of the normal flow
 
 <center>
-    <a href="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/create/sequence.puml">
-    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/create/sequence.puml" alt="Sequence" width="70%" height="70%"/>
+    <a href="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/CreateUser/sequence.puml">
+    <img src="http://www.plantuml.com/plantuml/proxy?cache=no&src=https://raw.githubusercontent.com/orion-services/users/dev/docs/usecases/CreateUser/sequence.puml" alt="Sequence" width="70%" height="70%"/>
     </a>
 </center>
 

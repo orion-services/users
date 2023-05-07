@@ -1,7 +1,6 @@
 package dev.orion.users.dto;
 
-import javax.ws.rs.QueryParam;
-
+import jakarta.ws.rs.QueryParam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,6 +20,6 @@ public class UserQueryDto {
     @QueryParam("email")
     public String email;
 
-    @QueryParam("status")
-    public String status;
+    // @QueryParam("status")
+    // public String status;
 }

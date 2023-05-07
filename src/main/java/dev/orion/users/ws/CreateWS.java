@@ -16,25 +16,25 @@
  */
 package dev.orion.users.ws;
 
-import javax.annotation.security.PermitAll;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotEmpty;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.annotation.security.PermitAll;
 import org.eclipse.microprofile.faulttolerance.Retry;
 
 import dev.orion.users.model.User;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.usecase.UserUC;
 import dev.orion.users.ws.exceptions.UserWSException;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/users")
@@ -59,6 +59,7 @@ public class CreateWS extends BaseWS {
     @Path("/create")
     @PermitAll
     @Retry(maxRetries = 1, delay = DELAY)
+    @WithSession
     public Uni<User> create(
         @FormParam("name") @NotEmpty final String name,
         @FormParam("email") @NotEmpty @Email final String email,
@@ -93,6 +94,7 @@ public class CreateWS extends BaseWS {
     @Path("/validateEmail")
     @Consumes(MediaType.TEXT_PLAIN)
     @Produces(MediaType.TEXT_PLAIN)
+    @WithSession
     public Uni<Boolean> validateEmail(
             @QueryParam("email") @NotEmpty final String email,
             @QueryParam("code") @NotEmpty final String code) {

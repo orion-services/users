@@ -17,11 +17,11 @@
 package dev.orion.users.repository;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.passay.CharacterData;
@@ -35,9 +35,9 @@ import dev.orion.users.dto.UserQueryDto;
 import dev.orion.users.model.Role;
 import dev.orion.users.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
-import io.quarkus.hibernate.reactive.panache.PanacheQuery;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
+import io.quarkus.hibernate.reactive.panache.common.WithSessionOnDemand;
 import io.quarkus.panache.common.Parameters;
-import io.smallrye.mutiny.Multi;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -68,24 +68,20 @@ public class UserRepository implements Repository {
     public Uni<User> createUser(final User u) {
         return checkEmail(u.getEmail())
                 .onItem().ifNotNull().transform(user -> user)
-                .onItem().ifNull().switchTo(() -> {
-                    return checkName(u.getName())
-                            .onItem().ifNotNull()
-                            .failWith(new IllegalArgumentException(
-                                    "The name already existis"))
-                            .onItem().ifNull().switchTo(() -> {
-                                return checkHash(u.getHash())
-                                        .onItem().ifNotNull()
-                                        .failWith(new IllegalArgumentException(
-                                                "The hash already existis"))
-                                        .onItem().ifNull().switchTo(() -> {
-                                            if (u.getPassword().isBlank()) {
-                                                u.setPassword(generateSecurePassword());
-                                            }
-                                            return persistUser(u);
-                                        });
-                            });
-                });
+                .onItem().ifNull().switchTo(() -> checkName(u.getName())
+                        .onItem().ifNotNull()
+                        .failWith(new IllegalArgumentException(
+                                "The name already existis"))
+                        .onItem().ifNull().switchTo(() -> checkHash(u.getHash())
+                                .onItem().ifNotNull()
+                                .failWith(new IllegalArgumentException(
+                                        "The hash already existis"))
+                                .onItem().ifNull().switchTo(() -> {
+                                    if (u.getPassword().isBlank()) {
+                                        u.setPassword(generateSecurePassword());
+                                    }
+                                    return persistUser(u);
+                                })));
     }
 
     /**
@@ -117,20 +113,18 @@ public class UserRepository implements Repository {
                 .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
                 .onItem().ifNotNull()
-                .transformToUni(user -> {
-                    return checkEmail(newEmail)
-                            .onItem().ifNotNull()
-                            .failWith(new IllegalArgumentException(
-                                    "Email already in use"))
-                            .onItem().ifNull()
-                            .switchTo(() -> {
-                                user.setEmailValidationCode();
-                                user.setEmailValid(false);
-                                user.setEmail(newEmail);
-                                return Panache.<User>withTransaction(
-                                        user::persist);
-                            });
-                });
+                .transformToUni(user -> checkEmail(newEmail)
+                        .onItem().ifNotNull()
+                        .failWith(new IllegalArgumentException(
+                                "Email already in use"))
+                        .onItem().ifNull()
+                        .switchTo(() -> {
+                            user.setEmailValidationCode();
+                            user.setEmailValid(false);
+                            user.setEmail(newEmail);
+                            return Panache.<User>withTransaction(
+                                    user::persist);
+                        }));
     }
 
     /**
@@ -201,9 +195,7 @@ public class UserRepository implements Repository {
                 .onItem().ifNotNull()
                 .transformToUni(user -> changePassword(user.getPassword(),
                         DigestUtils.sha256Hex(password), email)
-                        .onItem().transform(item -> {
-                            return password;
-                        }));
+                        .onItem().transform(item -> password));
     }
 
     /**
@@ -218,9 +210,7 @@ public class UserRepository implements Repository {
                 .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
                 .onItem().ifNotNull()
-                .transformToUni(user -> {
-                    return Panache.<Void>withTransaction(user::delete);
-                });
+                .transformToUni(user -> Panache.<Void>withTransaction(user::delete));
     }
 
     /**
@@ -343,13 +333,14 @@ public class UserRepository implements Repository {
     }
 
     @Override
-    public Multi<User> findUserByQuery(UserQueryDto userQueryDto) {
+    @WithSession
+    public Uni<List<User>> findUserByQuery(UserQueryDto userQueryDto) {
         Map<String, Object> params = new ObjectMapper().convertValue(userQueryDto, Map.class);
 
         if (params.values().stream().allMatch(Objects::isNull)) {
-            return findAll().stream();
+            return User.findAll().list();
         }
-        return find("userHash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
-                params).stream();
+        return User.find("hash = :hash or name like concat('%',:name,'%') or email like concat('%',:email,'%')",
+                params).list();
     }
 }
