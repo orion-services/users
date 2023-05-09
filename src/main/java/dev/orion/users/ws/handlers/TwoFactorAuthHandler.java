@@ -1,4 +1,4 @@
-package dev.orion.users.ws.utils;
+package dev.orion.users.ws.handlers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -24,7 +24,7 @@ import de.taimos.totp.TOTP;
  * Google Utilities
  */
 @ApplicationScoped
-public class GoogleUtils {
+public class TwoFactorAuthHandler {
     private static final String UTF_8 = "UTF-8";
 
     /**
@@ -51,7 +51,7 @@ public class GoogleUtils {
      * @return The Google Bar Code in String format
      * @throws IllegalArgumentException
      */
-    public String getGoogleAutheticatorBarCode(String secretKey, String account, String issuer) {
+    public String getAutheticatorBarCode(String secretKey, String account, String issuer) {
         try {
             return "otpauth://totp/"
                     + URLEncoder.encode(issuer + ":" + account, UTF_8).replace("+", "%20")

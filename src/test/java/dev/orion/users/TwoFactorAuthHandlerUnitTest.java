@@ -18,14 +18,15 @@ import org.mockito.InjectMocks;
 
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.zxing.WriterException;
-import dev.orion.users.ws.utils.GoogleUtils;
+
+import dev.orion.users.ws.handlers.TwoFactorAuthHandler;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
-class GoogleUtilsUnitTest {
+class TwoFactorAuthHandlerUnitTest {
 
     @InjectMocks
-    private GoogleUtils googleUtils;
+    private TwoFactorAuthHandler twoFactorHandler;
 
     @Test
     @Order(1)
@@ -33,9 +34,9 @@ class GoogleUtilsUnitTest {
     void shouldCreateTOTPCode() {
         String secretKey = "JBSWY3DPEHPK3PXP";
         String expectedCode = "432143";
-        GoogleUtils googleUtils = mock(GoogleUtils.class);
-        when(googleUtils.getTOTPCode(secretKey)).thenReturn(expectedCode);
-        String actualCode = googleUtils.getTOTPCode(secretKey);
+        TwoFactorAuthHandler twoFactorHandler = mock(TwoFactorAuthHandler.class);
+        when(twoFactorHandler.getTOTPCode(secretKey)).thenReturn(expectedCode);
+        String actualCode = twoFactorHandler.getTOTPCode(secretKey);
         assertEquals(expectedCode, actualCode);
     }
 
@@ -44,9 +45,9 @@ class GoogleUtilsUnitTest {
     @DisplayName("Test create TOTP code with null secret key")
     void testGetTOTPCodeWithNullSecretKey() {
         Assertions.assertThrows(IllegalArgumentException.class,
-        () -> {
-            googleUtils.getTOTPCode(null);
-        });
+                () -> {
+                    twoFactorHandler.getTOTPCode(null);
+                });
     }
 
     @Test
@@ -57,8 +58,8 @@ class GoogleUtilsUnitTest {
         String account = "testuser";
         String issuer = "testcompany";
         String expectedBarCode = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
-        String actualBarCode = googleUtils.getGoogleAutheticatorBarCode(
-            secretKey, account, issuer);
+        String actualBarCode = twoFactorHandler.getAutheticatorBarCode(
+                secretKey, account, issuer);
         assertEquals(expectedBarCode, actualBarCode);
     }
 
@@ -67,10 +68,10 @@ class GoogleUtilsUnitTest {
     @DisplayName("Test create auth barcode with null secret key")
     void testGetGoogleAutheticatorBarCodeWithNullSecretKey() {
         Assertions.assertThrows(IllegalStateException.class,
-        () -> {
-            googleUtils.getGoogleAutheticatorBarCode(null,
-                "account", "issuer");
-        });
+                () -> {
+                    twoFactorHandler.getAutheticatorBarCode(null,
+                            "account", "issuer");
+                });
 
     }
 
@@ -79,10 +80,10 @@ class GoogleUtilsUnitTest {
     @DisplayName("Test create auth barcode with null issuer")
     void testGetGoogleAuthenticatorBarCodeWithNullIssuer() {
         Assertions.assertThrows(IllegalStateException.class,
-        () -> {
-            googleUtils.getGoogleAutheticatorBarCode("secretKey",
-                "account", null);
-        });
+                () -> {
+                    twoFactorHandler.getAutheticatorBarCode("secretKey",
+                            "account", null);
+                });
 
     }
 
@@ -91,7 +92,7 @@ class GoogleUtilsUnitTest {
     @DisplayName("Test create create the qrcode")
     void createQrCodeTest() throws WriterException, IOException {
         String barCodeData = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
-        byte[] result = googleUtils.createQrCode(barCodeData);
+        byte[] result = twoFactorHandler.createQrCode(barCodeData);
         assertNotNull(result);
         assertTrue(result.length > 0);
     }
@@ -101,9 +102,9 @@ class GoogleUtilsUnitTest {
     @DisplayName("Test create create qrcode with invalid barcode data")
     void testCreateQrCodeWithInvalidBarCodeData() {
         Assertions.assertThrows(IllegalStateException.class,
-        () -> {
-            googleUtils.createQrCode(null);
-        });
+                () -> {
+                    twoFactorHandler.createQrCode(null);
+                });
     }
 
 }

@@ -30,7 +30,7 @@ import jakarta.ws.rs.core.Response;
 import dev.orion.users.usecase.UseCase;
 import dev.orion.users.ws.BaseWS;
 import dev.orion.users.ws.exceptions.UserWSException;
-import dev.orion.users.ws.utils.GoogleUtils;
+import dev.orion.users.ws.handlers.TwoFactorAuthHandler;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -43,24 +43,24 @@ public class TwoFactorAuth extends BaseWS {
 
     /** Google auth utilities */
     @Inject
-    protected GoogleUtils googleUtils;
+    protected TwoFactorAuthHandler twoFactorAuthHandler;
 
     /** Business logic */
     @Inject
     protected UseCase useCase;
 
     /**
-     * Authenticate and returns a qrCode to google auth.
+     * Authenticate and returns a qrCode to two factor auth.
      *
      * @return The return is in image/png format
      * @throws UserWSException Returns a HTTP 401 if credentials not found
      */
     @POST
-    @Path("google/2FAuth/qrCode")
+    @Path("twoFactorAuth/qrCode")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces("image/png")
     @WithSession
-    public Uni<byte[]> googleAuth2FAQrCode(
+    public Uni<byte[]> generateTwoFactorAuthQrCode(
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {
 
@@ -74,9 +74,9 @@ public class TwoFactorAuth extends BaseWS {
                 .transform(user -> {
                     String secret = user.getSecret2FA();
                     String userEmail = user.getEmail();
-                    String barCodeData = googleUtils.getGoogleAutheticatorBarCode(
+                    String barCodeData = twoFactorAuthHandler.getAutheticatorBarCode(
                             secret, userEmail, "Orion User Service");
-                    return googleUtils.createQrCode(barCodeData);
+                    return twoFactorAuthHandler.createQrCode(barCodeData);
                 })
                 .onItem().ifNull()
                 .failWith(new UserWSException("Credentials not found",
@@ -84,25 +84,26 @@ public class TwoFactorAuth extends BaseWS {
     }
 
     /**
-     * Validate google auth code
+     * Validate two factor auth code
      *
      * @return The return is a string with token
      * @throws UserWSException Returns a HTTP 401 if credentials not found
      */
     @POST
-    @Path("google/2FAuth/validate")
+    @Path("twoFactorAuth/validate")
     @Retry(maxRetries = 1, delay = 2000)
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
-    public Uni<String> google2FAValidate(
+    public Uni<String> validateTwoFactorAuthCode(
             @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("password") @NotEmpty final String password,
             @FormParam("code") @NotEmpty final String code) {
 
-        return useCase.findUserByEmail(email)
+        return useCase.authenticate(email, password)
                 .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();
-                    String userCode = googleUtils.getTOTPCode(secret);
+                    String userCode = twoFactorAuthHandler.getTOTPCode(secret);
                     if (!user.isUsing2FA()) {
                         return null;
                     }
@@ -112,7 +113,7 @@ public class TwoFactorAuth extends BaseWS {
                     return generateJWT(user);
                 })
                 .onItem().ifNull()
-                .failWith(new UserWSException("Credentials not found",
+                .failWith(new UserWSException("Credentials not found or 2FAuth not activated",
                         Response.Status.UNAUTHORIZED));
     }
 }
