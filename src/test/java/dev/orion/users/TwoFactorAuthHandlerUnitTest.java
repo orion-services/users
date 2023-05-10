@@ -53,7 +53,7 @@ class TwoFactorAuthHandlerUnitTest {
     @Test
     @Order(3)
     @DisplayName("Test create create the auth barcode")
-    void shouldCreateGoogleAutheticatorBarCode() {
+    void shouldCreateAutheticatorBarCode() {
         String secretKey = "MFRGGZDFMZTWQ2LK";
         String account = "testuser";
         String issuer = "testcompany";
@@ -66,7 +66,7 @@ class TwoFactorAuthHandlerUnitTest {
     @Test
     @Order(4)
     @DisplayName("Test create auth barcode with null secret key")
-    void testGetGoogleAutheticatorBarCodeWithNullSecretKey() {
+    void testGetAutheticatorBarCodeWithNullSecretKey() {
         Assertions.assertThrows(IllegalStateException.class,
                 () -> {
                     twoFactorHandler.getAutheticatorBarCode(null,
@@ -78,7 +78,7 @@ class TwoFactorAuthHandlerUnitTest {
     @Test
     @Order(5)
     @DisplayName("Test create auth barcode with null issuer")
-    void testGetGoogleAuthenticatorBarCodeWithNullIssuer() {
+    void testGetAuthenticatorBarCodeWithNullIssuer() {
         Assertions.assertThrows(IllegalStateException.class,
                 () -> {
                     twoFactorHandler.getAutheticatorBarCode("secretKey",
