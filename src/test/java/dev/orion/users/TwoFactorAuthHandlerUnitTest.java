@@ -110,7 +110,7 @@ class TwoFactorAuthHandlerUnitTest {
     @Test
     @DisplayName("Test generate a secrete Key")
     @Order(14)
-    public void testGenerateSecretKey() {
+    void testGenerateSecretKey() {
         String secretKey = twoFactorHandler.generateSecretKey();
 
         Assertions.assertNotNull(secretKey);
