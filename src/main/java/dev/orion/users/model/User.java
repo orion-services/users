@@ -89,7 +89,6 @@ public class User extends PanacheEntityBase {
     private boolean isUsing2FA;
 
     /** Secret code to be used at 2FA validation */
-    @JsonIgnore
     private String secret2FA;
 
     /**
@@ -99,7 +98,6 @@ public class User extends PanacheEntityBase {
         this.hash = UUID.randomUUID().toString();
         this.roles = new ArrayList<>();
         this.emailValidationCode = UUID.randomUUID().toString();
-        this.secret2FA = generateSecretKey();
     }
 
     /**
@@ -128,14 +126,6 @@ public class User extends PanacheEntityBase {
             }
         }
         return strRoles;
-    }
-
-    public static String generateSecretKey() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[20];
-        random.nextBytes(bytes);
-        Base32 base32 = new Base32();
-        return base32.encodeToString(bytes);
     }
 
     /**

@@ -107,4 +107,15 @@ class TwoFactorAuthHandlerUnitTest {
                 });
     }
 
+    @Test
+    @DisplayName("Test generate a secrete Key")
+    @Order(14)
+    public void testGenerateSecretKey() {
+        String secretKey = twoFactorHandler.generateSecretKey();
+
+        Assertions.assertNotNull(secretKey);
+        Assertions.assertTrue(secretKey.matches("[A-Z2-7]*"));
+        Assertions.assertEquals(32, secretKey.length());
+    }
+
 }

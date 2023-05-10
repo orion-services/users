@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
 import java.awt.image.BufferedImage;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -78,6 +79,14 @@ public class TwoFactorAuthHandler {
         } catch (WriterException | IOException | NullPointerException e) {
             throw new IllegalStateException(e);
         }
+    }
+
+    public String generateSecretKey() {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[20];
+        random.nextBytes(bytes);
+        Base32 base32 = new Base32();
+        return base32.encodeToString(bytes);
     }
 
 }

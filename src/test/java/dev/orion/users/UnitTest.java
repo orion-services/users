@@ -51,10 +51,10 @@ class UnitTest {
   @Order(1)
   void createUserTest() {
     // Mockito.when(repository.createUser("Orion", "orion@test.com",
-    //     DigestUtils.sha256Hex("12345678")))
-    //     .thenReturn(Uni.createFrom().item(new User()));
+    // DigestUtils.sha256Hex("12345678")))
+    // .thenReturn(Uni.createFrom().item(new User()));
     // Uni<User> uni = uc.createUser("Orion", "orion@test.com",
-    //     "12345678");
+    // "12345678");
     assertTrue(true);
   }
 
@@ -63,9 +63,9 @@ class UnitTest {
   @Order(2)
   void createUserWithBlankName() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("", "orion@test.com", "12345678");
-    });
+        () -> {
+          uc.createUser("", "orion@test.com", "12345678");
+        });
   }
 
   @Test
@@ -73,9 +73,9 @@ class UnitTest {
   @Order(3)
   void createUserWithBlankEmail() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("Orion", "", "12345678");
-    });
+        () -> {
+          uc.createUser("Orion", "", "12345678");
+        });
   }
 
   @Test
@@ -83,9 +83,9 @@ class UnitTest {
   @Order(4)
   void createUserWithBlankPassword() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("Orion", "orion@test.com", "");
-    });
+        () -> {
+          uc.createUser("Orion", "orion@test.com", "");
+        });
   }
 
   @Test
@@ -93,9 +93,9 @@ class UnitTest {
   @Order(5)
   void createUserWithInvalidEmail() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("Orion", "orion#test.com", "12345678");
-    });
+        () -> {
+          uc.createUser("Orion", "orion#test.com", "12345678");
+        });
   }
 
   @Test
@@ -103,9 +103,9 @@ class UnitTest {
   @Order(6)
   void createUserWithInvalidPasswordTest() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("Orion", "orion@test.com", "12345");
-    });
+        () -> {
+          uc.createUser("Orion", "orion@test.com", "12345");
+        });
   }
 
   @Test
@@ -113,9 +113,9 @@ class UnitTest {
   @Order(7)
   void createUserWithNullName() {
     Assertions.assertThrows(NullPointerException.class,
-    () -> {
-      uc.createUser(null, "orion#test.com", "12345678");
-    });
+        () -> {
+          uc.createUser(null, "orion#test.com", "12345678");
+        });
   }
 
   @Test
@@ -135,9 +135,9 @@ class UnitTest {
   @Order(9)
   void changeEmailWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.updateEmail("", "orion@test.com");
-    });
+        () -> {
+          uc.updateEmail("", "orion@test.com");
+        });
   }
 
   @Test
@@ -145,9 +145,9 @@ class UnitTest {
   @Order(10)
   void changePasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.updatePassword("", "1234", "12345678");
-    });
+        () -> {
+          uc.updatePassword("", "1234", "12345678");
+        });
   }
 
   @Test
@@ -155,7 +155,7 @@ class UnitTest {
   @Order(11)
   void recoverPassword() {
     Mockito.when(repository.recoverPassword("orion@test.com"))
-      .thenReturn(Uni.createFrom().item("ok"));
+        .thenReturn(Uni.createFrom().item("ok"));
     Uni<String> uni = uc.recoverPassword("orion@test.com");
     assertNotNull(uni);
   }
@@ -165,9 +165,9 @@ class UnitTest {
   @Order(12)
   void recoverPasswordWithBlankArguments() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.recoverPassword("");
-    });
+        () -> {
+          uc.recoverPassword("");
+        });
   }
 
   @Test
@@ -175,9 +175,9 @@ class UnitTest {
   @Order(13)
   void createUserGoogleWithBlankName() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("", "devoriontest@gmail.com", true);
-    });
+        () -> {
+          uc.createUser("", "devoriontest@gmail.com", true);
+        });
   }
 
   @Test
@@ -185,9 +185,9 @@ class UnitTest {
   @Order(14)
   void createUserGoogleWithBlankEmail() {
     Assertions.assertThrows(IllegalArgumentException.class,
-    () -> {
-      uc.createUser("Orion", "", true);
-    });
+        () -> {
+          uc.createUser("Orion", "", true);
+        });
   }
 
 }
