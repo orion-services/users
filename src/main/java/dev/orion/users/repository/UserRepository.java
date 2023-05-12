@@ -27,8 +27,8 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 
-import dev.orion.users.model.Role;
-import dev.orion.users.model.User;
+import dev.orion.users.domain.model.Role;
+import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
 import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
@@ -61,13 +61,11 @@ public class UserRepository implements Repository {
     public Uni<User> createUser(final User u) {
         return checkEmail(u.getEmail())
                 .onItem().ifNotNull().transform(user -> user)
-                .onItem().ifNull().switchTo(() ->
-                    checkName(u.getName())
+                .onItem().ifNull().switchTo(() -> checkName(u.getName())
                         .onItem().ifNotNull()
                         .failWith(new IllegalArgumentException(
                                 "The name already existis"))
-                        .onItem().ifNull().switchTo(() ->
-                            checkHash(u.getHash())
+                        .onItem().ifNull().switchTo(() -> checkHash(u.getHash())
                                 .onItem().ifNotNull()
                                 .failWith(new IllegalArgumentException(
                                         "The hash already existis"))
@@ -76,9 +74,7 @@ public class UserRepository implements Repository {
                                         u.setPassword(generateSecurePassword());
                                     }
                                     return persistUser(u);
-                                })
-                        )
-                );
+                                })));
     }
 
     /**
@@ -90,7 +86,7 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> authenticate(final User user) {
         Map<String, Object> params = Parameters.with(EMAIL,
-            user.getEmail()).and("password", user.getPassword()).map();
+                user.getEmail()).and("password", user.getPassword()).map();
         return find("email = :email and password = :password", params)
                 .firstResult();
     }
@@ -107,11 +103,10 @@ public class UserRepository implements Repository {
             final String email,
             final String newEmail) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
-                .transformToUni(user ->
-                    checkEmail(newEmail)
+                .onItem().ifNotNull()
+                .transformToUni(user -> checkEmail(newEmail)
                         .onItem().ifNotNull()
                         .failWith(new IllegalArgumentException(
                                 "Email already in use"))
@@ -122,8 +117,7 @@ public class UserRepository implements Repository {
                             user.setEmail(newEmail);
                             return Panache.<User>withTransaction(
                                     user::persist);
-                        })
-                );
+                        }));
     }
 
     /**
@@ -137,7 +131,7 @@ public class UserRepository implements Repository {
     @Override
     public Uni<User> validateEmail(final String email, final String code) {
         Map<String, Object> params = Parameters.with(EMAIL,
-        email).and("code", code).map();
+                email).and("code", code).map();
         return find("email = :email and emailValidationCode = :code",
                 params)
                 .firstResult()
@@ -164,15 +158,15 @@ public class UserRepository implements Repository {
             final String newPassword,
             final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(user -> {
                     if (password.equals(user.getPassword())) {
                         user.setPassword(newPassword);
                     } else {
                         throw new IllegalArgumentException(
-                            "Passwords doesn't match");
+                                "Passwords doesn't match");
                     }
                     return Panache.<User>withTransaction(user::persist);
                 });
@@ -194,9 +188,7 @@ public class UserRepository implements Repository {
                 .onItem().ifNotNull()
                 .transformToUni(user -> changePassword(user.getPassword(),
                         DigestUtils.sha256Hex(password), email)
-                        .onItem().transform(item ->
-                            password
-                        ));
+                        .onItem().transform(item -> password));
     }
 
     /**
@@ -208,12 +200,10 @@ public class UserRepository implements Repository {
     @Override
     public Uni<Void> deleteUser(final String email) {
         return checkEmail(email)
-            .onItem().ifNull()
+                .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull()
-                .transformToUni(user ->
-                    Panache.<Void>withTransaction(user::delete)
-                );
+                .onItem().ifNotNull()
+                .transformToUni(user -> Panache.<Void>withTransaction(user::delete));
     }
 
     /**
@@ -257,7 +247,7 @@ public class UserRepository implements Repository {
         return getDefaultRole()
                 .onItem().ifNull()
                 .failWith(new IOException("Role not found"))
-            .onItem().ifNotNull()
+                .onItem().ifNotNull()
                 .transformToUni(role -> {
                     user.addRole(role);
                     return Panache.<User>withTransaction(user::persist);
@@ -326,7 +316,7 @@ public class UserRepository implements Repository {
 
     @Override
     public Uni<User> findUserByEmail(String email) {
-        return find(EMAIL,email).firstResult();
+        return find(EMAIL, email).firstResult();
     }
 
     @Override

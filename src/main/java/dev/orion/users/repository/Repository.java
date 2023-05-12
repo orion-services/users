@@ -17,8 +17,7 @@
 package dev.orion.users.repository;
 
 import jakarta.enterprise.context.ApplicationScoped;
-
-import dev.orion.users.model.User;
+import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
 
