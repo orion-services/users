@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.repository;
+package dev.orion.users.infra.repository;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,6 +27,7 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 
+import dev.orion.users.data.interfaces.Repository;
 import dev.orion.users.domain.model.Role;
 import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;

@@ -31,9 +31,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import dev.orion.users.data.interfaces.Repository;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.repository.Repository;
 import io.smallrye.mutiny.Uni;
 
 @ExtendWith(MockitoExtension.class)

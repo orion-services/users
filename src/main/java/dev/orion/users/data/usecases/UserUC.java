@@ -23,11 +23,11 @@ import jakarta.ws.rs.NotFoundException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
+import dev.orion.users.data.interfaces.Repository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UseCase;
+import dev.orion.users.infra.repository.UserRepository;
 import dev.orion.users.presentation.handlers.TwoFactorAuthHandler;
-import dev.orion.users.repository.Repository;
-import dev.orion.users.repository.UserRepository;
 import io.smallrye.mutiny.Uni;
 
 /**
