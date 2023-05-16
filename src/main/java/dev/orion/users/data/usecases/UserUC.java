@@ -46,7 +46,7 @@ public class UserUC implements UseCase {
     private Repository repository = new UserRepository();
 
     @Inject
-    private TwoFactorAuthHandler twoFactorAuthHandler = new TwoFactorAuthHandler();
+    private TwoFactorAuthHandler twoFactorAuthHandler;
 
     /**
      * Creates a user in the service (UC: Create).
