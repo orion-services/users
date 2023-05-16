@@ -1,4 +1,4 @@
-package dev.orion.users.presentation.mail;
+package dev.orion.users.data.mail;
 
 import io.quarkus.mailer.MailTemplate.MailTemplateInstance;
 import io.quarkus.qute.CheckedTemplate;

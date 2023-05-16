@@ -26,13 +26,16 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+
 import org.eclipse.microprofile.faulttolerance.Retry;
 import org.jboss.resteasy.reactive.RestForm;
 
+import dev.orion.users.data.exceptions.UserWSException;
+import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.dto.AuthenticationDTO;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
 import dev.orion.users.presentation.services.BaseWS;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
@@ -44,7 +47,13 @@ import io.smallrye.mutiny.Uni;
 @PermitAll
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
-public class AuthenticationWS extends BaseWS {
+public class AuthenticationWS {
+
+    /** Fault tolerance default delay. */
+    protected static final long DELAY = 2000;
+
+    @Inject
+    private AuthenticationHandler authHandler;
 
     /** Business logic. */
     private UseCase uc = new UserUC();
@@ -69,7 +78,7 @@ public class AuthenticationWS extends BaseWS {
 
         return uc.authenticate(email, password)
                 .onItem().ifNotNull()
-                .transform(super::generateJWT)
+                .transform(user -> authHandler.generateJWT(user))
                 .onItem().ifNull()
                 .failWith(new UserWSException("User not found",
                         Response.Status.UNAUTHORIZED));
@@ -99,7 +108,7 @@ public class AuthenticationWS extends BaseWS {
             return uc.createUser(name, email, password)
                     .onItem().ifNotNull()
                     .transform(user -> {
-                        String token = generateJWT(user);
+                        String token = authHandler.generateJWT(user);
                         AuthenticationDTO auth = new AuthenticationDTO();
                         auth.setToken(token);
                         auth.setUser(user);

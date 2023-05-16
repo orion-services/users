@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation.exceptions;
+package dev.orion.users.data.exceptions;
 
 import java.util.ArrayList;
 import java.util.List;

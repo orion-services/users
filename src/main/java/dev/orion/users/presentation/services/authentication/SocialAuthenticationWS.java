@@ -26,10 +26,11 @@ import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import dev.orion.users.data.exceptions.UserWSException;
+import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.dto.AuthenticationDTO;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
 import dev.orion.users.presentation.services.BaseWS;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.oidc.IdToken;
@@ -40,7 +41,13 @@ import io.smallrye.mutiny.Uni;
  * Social Authenticate.
  */
 @Path("/api/users")
-public class SocialAuthenticationWS extends BaseWS {
+public class SocialAuthenticationWS {
+
+    /** Fault tolerance default delay. */
+    protected static final long DELAY = 2000;
+
+    @Inject
+    private AuthenticationHandler authHandler;
 
     /** Business logic. */
     private UseCase uc = new UserUC();
@@ -82,7 +89,7 @@ public class SocialAuthenticationWS extends BaseWS {
                     .onItem().ifNotNull()
                     .transform(user -> {
                         AuthenticationDTO auth = new AuthenticationDTO();
-                        auth.setToken(generateJWT(user));
+                        auth.setToken(authHandler.generateJWT(user));
                         auth.setUser(user);
                         return auth;
                     })

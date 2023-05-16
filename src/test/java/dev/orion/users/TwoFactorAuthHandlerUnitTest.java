@@ -19,7 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 import com.google.zxing.WriterException;
 
-import dev.orion.users.presentation.handlers.TwoFactorAuthHandler;
+import dev.orion.users.data.handlers.TwoFactorAuthHandler;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)

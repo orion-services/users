@@ -1,25 +1,7 @@
-/**
- * @License
- * Copyright 2022 Orion Services @ https://github.com/orion-services
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package dev.orion.users.presentation.services;
+package dev.orion.users.data.handlers;
 
 import java.util.HashSet;
 import java.util.Optional;
-
-import jakarta.ws.rs.core.Response;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.jwt.Claims;
@@ -29,12 +11,11 @@ import dev.orion.users.data.mail.MailTemplate;
 import dev.orion.users.domain.model.User;
 import io.smallrye.jwt.build.Jwt;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.Response;
 
-/**
- * Common Web Service code.
- */
-public class BaseWS {
-
+@ApplicationScoped
+public class AuthenticationHandler {
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;
 
@@ -53,7 +34,7 @@ public class BaseWS {
      *
      * @return Returns the JWT
      */
-    protected String generateJWT(final User user) {
+    public String generateJWT(final User user) {
         return Jwt.issuer(issuer.orElse("orion-users"))
                 .upn(user.getEmail())
                 .groups(new HashSet<>(user.getRoleList()))
@@ -72,7 +53,7 @@ public class BaseWS {
      *                         different, indicating that possibly the JWT is
      *                         outdated.
      */
-    protected boolean checkTokenEmail(final String email,
+    public boolean checkTokenEmail(final String email,
             final String jwtEmail) {
         if (!email.equals(jwtEmail)) {
             throw new UserWSException("JWT outdated",
@@ -87,7 +68,7 @@ public class BaseWS {
      * @param user : A user object
      * @return Return a Uni<User> after to send an e-mail.
      */
-    protected Uni<User> sendValidationEmail(final User user) {
+    public Uni<User> sendValidationEmail(final User user) {
         StringBuilder url = new StringBuilder();
         url.append(validateURL);
         url.append("?code=" + user.getEmailValidationCode());

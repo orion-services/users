@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation.services;
+package dev.orion.users.presentation.services.users;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
@@ -34,21 +34,28 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.jwt.Claim;
 import org.eclipse.microprofile.jwt.Claims;
 
+import dev.orion.users.data.exceptions.UserWSException;
+import dev.orion.users.data.handlers.AuthenticationHandler;
+import dev.orion.users.data.mail.MailTemplate;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
-import dev.orion.users.presentation.mail.MailTemplate;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/users")
 @RolesAllowed("user")
 @RequestScoped
-public class UpdateWS extends BaseWS {
+public class UpdateWS {
+
+        /** Fault tolerance default delay. */
+        protected static final long DELAY = 2000;
 
         /** Business logic of the system. */
         private UseCase uc = new UserUC();
+
+        @Inject
+        private AuthenticationHandler authHandler;
 
         /** Retrieve the e-mail from jwt. */
         @Inject
@@ -79,7 +86,7 @@ public class UpdateWS extends BaseWS {
                         @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
 
                 // Checks the e-mail of the token
-                checkTokenEmail(email, jwtEmail);
+                authHandler.checkTokenEmail(email, jwtEmail);
 
                 Uni<User> uni = uc.updateEmail(email, newEmail)
                                 .log()
@@ -90,7 +97,7 @@ public class UpdateWS extends BaseWS {
                                         throw new UserWSException(e.getMessage(),
                                                         Response.Status.BAD_REQUEST);
                                 });
-                return uni.onItem().transform(this::generateJWT);
+                return uni.onItem().transform(user -> authHandler.generateJWT(user));
         }
 
         /**
@@ -100,7 +107,7 @@ public class UpdateWS extends BaseWS {
          * @return Uni<User>
          */
         private Uni<User> sendEmail(final User user) {
-                return sendValidationEmail(user)
+                return authHandler.sendValidationEmail(user)
                                 .onItem().transform(u -> u);
         }
 
@@ -128,7 +135,7 @@ public class UpdateWS extends BaseWS {
                         @FormParam("newPassword") @NotEmpty final String newPassword) {
 
                 // Checks the e-mail of the token
-                checkTokenEmail(email, jwtEmail);
+                authHandler.checkTokenEmail(email, jwtEmail);
 
                 return uc.updatePassword(email, password, newPassword)
                                 .onItem().ifNotNull()

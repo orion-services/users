@@ -1,4 +1,4 @@
-package dev.orion.users.presentation.handlers;
+package dev.orion.users.data.handlers;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

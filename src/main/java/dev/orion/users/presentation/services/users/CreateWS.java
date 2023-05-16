@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation.services;
+package dev.orion.users.presentation.services.users;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -28,19 +28,28 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.annotation.security.PermitAll;
+import jakarta.inject.Inject;
+
 import org.eclipse.microprofile.faulttolerance.Retry;
 
+import dev.orion.users.data.exceptions.UserWSException;
+import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
 @Path("/api/users")
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
-public class CreateWS extends BaseWS {
+public class CreateWS {
+
+    /** Fault tolerance default delay. */
+    protected static final long DELAY = 2000;
+
+    @Inject
+    private AuthenticationHandler authHandler;
 
     /** Business logic. */
     private UseCase uc = new UserUC();
@@ -70,7 +79,7 @@ public class CreateWS extends BaseWS {
             return uc.createUser(name, email, password)
                     .log()
                     .onItem().ifNotNull()
-                    .call(this::sendValidationEmail)
+                    .call(user -> authHandler.sendValidationEmail(user))
                     .onFailure().transform(e -> {
                         throw new UserWSException(e.getMessage(),
                                 Response.Status.BAD_REQUEST);

@@ -26,11 +26,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
+import dev.orion.users.data.handlers.TwoFactorAuthHandler;
 import dev.orion.users.data.interfaces.Repository;
 import dev.orion.users.domain.dto.AuthenticationDTO;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.handlers.TwoFactorAuthHandler;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 import io.smallrye.mutiny.Uni;

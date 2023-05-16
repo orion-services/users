@@ -26,9 +26,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import dev.orion.users.data.exceptions.UserWSException;
+import dev.orion.users.data.handlers.AuthenticationHandler;
+import dev.orion.users.data.handlers.TwoFactorAuthHandler;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
-import dev.orion.users.presentation.handlers.TwoFactorAuthHandler;
 import dev.orion.users.presentation.services.BaseWS;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
@@ -38,7 +39,13 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  * Two Factor Authenticate.
  */
 @Path("api/users")
-public class TwoFactorAuth extends BaseWS {
+public class TwoFactorAuth {
+
+    /** Fault tolerance default delay. */
+    protected static final long DELAY = 2000;
+
+    @Inject
+    private AuthenticationHandler authHandler;
 
     /** Google auth utilities */
     @Inject
@@ -109,7 +116,7 @@ public class TwoFactorAuth extends BaseWS {
                     if (!userCode.equals(code)) {
                         return null;
                     }
-                    return generateJWT(user);
+                    return authHandler.generateJWT(user);
                 })
                 .onItem().ifNull()
                 .failWith(new UserWSException("Credentials not found or 2FAuth not activated",

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.presentation.services;
+package dev.orion.users.presentation.services.users;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.validation.constraints.Email;
@@ -26,9 +26,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.exceptions.UserWSException;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.annotation.security.RolesAllowed;
