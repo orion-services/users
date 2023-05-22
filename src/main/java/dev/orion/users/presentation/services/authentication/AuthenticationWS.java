@@ -33,10 +33,9 @@ import org.jboss.resteasy.reactive.RestForm;
 
 import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
-import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.dto.AuthenticationDTO;
-import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.services.BaseWS;
+import dev.orion.users.domain.usecases.AuthenticateUser;
+import dev.orion.users.domain.usecases.CreateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
@@ -52,11 +51,15 @@ public class AuthenticationWS {
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;
 
-    @Inject
-    private AuthenticationHandler authHandler;
-
     /** Business logic. */
-    private UseCase uc = new UserUC();
+    @Inject
+    protected AuthenticationHandler authHandler;
+
+    @Inject
+    protected AuthenticateUser authenticateUserUseCase;
+
+    @Inject
+    protected CreateUser createUserUseCase;
 
     /**
      * Authenticates the user.
@@ -76,7 +79,7 @@ public class AuthenticationWS {
             @RestForm @NotEmpty @Email final String email,
             @RestForm @NotEmpty final String password) {
 
-        return uc.authenticate(email, password)
+        return authenticateUserUseCase.authenticate(email, password)
                 .onItem().ifNotNull()
                 .transform(user -> authHandler.generateJWT(user))
                 .onItem().ifNull()
@@ -105,7 +108,7 @@ public class AuthenticationWS {
             @FormParam("password") @NotEmpty final String password) {
 
         try {
-            return uc.createUser(name, email, password)
+            return createUserUseCase.createUser(name, email, password)
                     .onItem().ifNotNull()
                     .transform(user -> {
                         String token = authHandler.generateJWT(user);

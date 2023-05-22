@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users;
+package dev.orion.users.integrationTests;
 
 import static io.restassured.RestAssured.given;
 
 import jakarta.inject.Inject;
-import lombok.val;
+import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -28,15 +28,14 @@ import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
 import dev.orion.users.data.interfaces.Repository;
-import dev.orion.users.domain.dto.AuthenticationDTO;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.domain.usecases.UseCase;
+
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
-import io.smallrye.mutiny.Uni;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
+@Transactional
 public class TwoFactorAuthIntegrationTest {
 
     static User user;

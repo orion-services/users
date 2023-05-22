@@ -37,9 +37,9 @@ import org.eclipse.microprofile.jwt.Claims;
 import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.mail.MailTemplate;
-import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.domain.usecases.UseCase;
+import dev.orion.users.domain.usecases.AuthenticateUser;
+import dev.orion.users.domain.usecases.UpdateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
@@ -52,10 +52,14 @@ public class UpdateWS {
         protected static final long DELAY = 2000;
 
         /** Business logic of the system. */
-        private UseCase uc = new UserUC();
+        @Inject
+        protected UpdateUser updateUserUseCase;
 
         @Inject
-        private AuthenticationHandler authHandler;
+        protected AuthenticateUser authenticateUserUseCase;
+
+        @Inject
+        protected AuthenticationHandler authHandler;
 
         /** Retrieve the e-mail from jwt. */
         @Inject
@@ -88,7 +92,7 @@ public class UpdateWS {
                 // Checks the e-mail of the token
                 authHandler.checkTokenEmail(email, jwtEmail);
 
-                Uni<User> uni = uc.updateEmail(email, newEmail)
+                Uni<User> uni = updateUserUseCase.updateEmail(email, newEmail)
                                 .log()
                                 .onItem().ifNotNull()
                                 .call(this::sendEmail)
@@ -137,7 +141,7 @@ public class UpdateWS {
                 // Checks the e-mail of the token
                 authHandler.checkTokenEmail(email, jwtEmail);
 
-                return uc.updatePassword(email, password, newPassword)
+                return updateUserUseCase.updatePassword(email, password, newPassword)
                                 .onItem().ifNotNull()
                                 .transform(user -> user)
                                 .log()
@@ -165,7 +169,7 @@ public class UpdateWS {
         public Uni<Void> sendEmailUsingReactiveMailer(
                         @FormParam("email") @NotEmpty @Email final String email) {
 
-                return uc.recoverPassword(email)
+                return authenticateUserUseCase.recoverPassword(email)
                                 .onItem().ifNotNull().transformToUni(password -> MailTemplate.recoverPwd(password)
                                                 .to(email)
                                                 .subject("Recover Password")

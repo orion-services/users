@@ -16,7 +16,6 @@
  */
 package dev.orion.users.domain.model;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,8 +28,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
-
-import org.apache.commons.codec.binary.Base32;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 

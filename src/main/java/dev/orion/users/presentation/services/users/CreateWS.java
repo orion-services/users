@@ -34,9 +34,9 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 
 import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
-import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.domain.usecases.UseCase;
+import dev.orion.users.domain.usecases.AuthenticateUser;
+import dev.orion.users.domain.usecases.CreateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
@@ -49,10 +49,14 @@ public class CreateWS {
     protected static final long DELAY = 2000;
 
     @Inject
-    private AuthenticationHandler authHandler;
+    protected AuthenticationHandler authHandler;
 
     /** Business logic. */
-    private UseCase uc = new UserUC();
+    @Inject
+    protected CreateUser createUserUseCase;
+
+    @Inject
+    protected AuthenticateUser authenticateUserUseCase;
 
     /**
      * Creates a user inside the service.
@@ -76,7 +80,7 @@ public class CreateWS {
             @FormParam("password") @NotEmpty final String password) {
 
         try {
-            return uc.createUser(name, email, password)
+            return createUserUseCase.createUser(name, email, password)
                     .log()
                     .onItem().ifNotNull()
                     .call(user -> authHandler.sendValidationEmail(user))
@@ -109,7 +113,7 @@ public class CreateWS {
             @QueryParam("email") @NotEmpty final String email,
             @QueryParam("code") @NotEmpty final String code) {
 
-        return uc.validateEmail(email, code)
+        return authenticateUserUseCase.validateEmail(email, code)
                 .onFailure().transform(e -> {
                     throw new UserWSException(e.getMessage(),
                             Response.Status.BAD_REQUEST);

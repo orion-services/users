@@ -17,6 +17,7 @@
 package dev.orion.users.presentation.services.users;
 
 import jakarta.enterprise.context.RequestScoped;
+import jakarta.inject.Inject;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
@@ -26,9 +27,9 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+
 import dev.orion.users.data.exceptions.UserWSException;
-import dev.orion.users.data.usecases.UserUC;
-import dev.orion.users.domain.usecases.UseCase;
+import dev.orion.users.domain.usecases.DeleteUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.annotation.security.RolesAllowed;
@@ -39,7 +40,8 @@ import jakarta.annotation.security.RolesAllowed;
 public class DeleteWS {
 
     /** Business logic. */
-    private UseCase uc = new UserUC();
+    @Inject
+    protected DeleteUser deleteUserUseCase;
 
     /**
      * Deletes a User from the Service.
@@ -56,7 +58,7 @@ public class DeleteWS {
     public Uni<Void> deleteUser(
             @FormParam("email") @NotEmpty @Email final String email) {
 
-        return uc.deleteUser(email)
+        return deleteUserUseCase.deleteUser(email)
                 .log()
                 .onFailure().transform(e -> {
                     throw new UserWSException(e.getMessage(),

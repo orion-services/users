@@ -16,6 +16,15 @@ public interface AuthenticateUser {
     Uni<User> authenticate(String email, String password);
 
     /**
+     * Validates an e-mail of a user.
+     *
+     * @param email : The e-mail of a user
+     * @param code  : The validation code
+     * @return The Uni<User> object
+     */
+    Uni<User> validateEmail(String email, String code);
+
+    /**
      * Generates a new password of a user.
      *
      * @param email : The e-mail of the user

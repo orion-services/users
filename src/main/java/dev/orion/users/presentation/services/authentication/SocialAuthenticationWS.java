@@ -28,10 +28,8 @@ import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
-import dev.orion.users.data.usecases.UserUC;
 import dev.orion.users.domain.dto.AuthenticationDTO;
-import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.services.BaseWS;
+import dev.orion.users.domain.usecases.CreateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.oidc.IdToken;
 import io.quarkus.security.Authenticated;
@@ -47,10 +45,10 @@ public class SocialAuthenticationWS {
     protected static final long DELAY = 2000;
 
     @Inject
-    private AuthenticationHandler authHandler;
+    protected AuthenticationHandler authHandler;
 
     /** Business logic. */
-    private UseCase uc = new UserUC();
+    protected CreateUser createUserUseCase;
 
     /**
      * ID Token issued by the OpenID Connect Provider.
@@ -85,7 +83,7 @@ public class SocialAuthenticationWS {
         name.append(fname);
 
         try {
-            return uc.createUser(name.toString(), email, true)
+            return createUserUseCase.createUser(name.toString(), email, true)
                     .onItem().ifNotNull()
                     .transform(user -> {
                         AuthenticationDTO auth = new AuthenticationDTO();

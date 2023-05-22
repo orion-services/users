@@ -29,8 +29,8 @@ import jakarta.ws.rs.core.Response;
 import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
-import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.presentation.services.BaseWS;
+import dev.orion.users.domain.usecases.AuthenticateUser;
+import dev.orion.users.domain.usecases.UpdateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import org.eclipse.microprofile.faulttolerance.Retry;
@@ -47,13 +47,17 @@ public class TwoFactorAuth {
     @Inject
     private AuthenticationHandler authHandler;
 
-    /** Google auth utilities */
+    /** Auth utilities */
     @Inject
     protected TwoFactorAuthHandler twoFactorAuthHandler;
 
     /** Business logic */
+
     @Inject
-    protected UseCase useCase;
+    protected AuthenticateUser authenticateUserUseCase;
+
+    @Inject
+    protected UpdateUser updateUserUseCase;
 
     /**
      * Authenticate and returns a qrCode to two factor auth.
@@ -70,11 +74,11 @@ public class TwoFactorAuth {
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {
 
-        return useCase.authenticate(email, password)
+        return authenticateUserUseCase.authenticate(email, password)
                 .onItem().ifNotNull()
                 .transformToUni(user -> {
                     user.setUsing2FA(true);
-                    return useCase.updateUser(user);
+                    return updateUserUseCase.updateUser(user);
                 })
                 .onItem().ifNotNull()
                 .transform(user -> {
@@ -105,7 +109,7 @@ public class TwoFactorAuth {
             @FormParam("password") @NotEmpty final String password,
             @FormParam("code") @NotEmpty final String code) {
 
-        return useCase.authenticate(email, password)
+        return authenticateUserUseCase.authenticate(email, password)
                 .onItem().ifNotNull()
                 .transform(user -> {
                     String secret = user.getSecret2FA();

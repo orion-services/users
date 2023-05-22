@@ -6,8 +6,10 @@ import dev.orion.users.data.interfaces.Repository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.AuthenticateUser;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+@ApplicationScoped
 public class AuthenticateUserImpl implements AuthenticateUser {
     /** Default blanck arguments message. */
     private static final String BLANK = "Blank Arguments";
@@ -31,6 +33,21 @@ public class AuthenticateUserImpl implements AuthenticateUser {
             return repository.authenticate(user);
         } else {
             throw new IllegalArgumentException("All arguments are required");
+        }
+    }
+
+    /**
+     * Validates an e-mail of a user.
+     *
+     * @param email : The e-mail of a user
+     * @param code  : The validation code
+     * @return true if the validation code is correct for the respective e-mail
+     */
+    public Uni<User> validateEmail(final String email, final String code) {
+        if (email.isBlank() || code.isBlank()) {
+            throw new IllegalArgumentException(BLANK);
+        } else {
+            return repository.validateEmail(email, code);
         }
     }
 
