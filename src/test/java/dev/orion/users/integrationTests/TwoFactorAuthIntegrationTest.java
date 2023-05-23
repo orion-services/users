@@ -27,7 +27,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.User;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -50,7 +50,7 @@ public class TwoFactorAuthIntegrationTest {
     protected TwoFactorAuthHandler googleUtils;
 
     @Inject
-    protected Repository useCase;
+    protected UserRepository useCase;
 
     @Test
     @Order(1)

@@ -2,7 +2,7 @@ package dev.orion.users.data.usecases;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UpdateUser;
 import io.smallrye.mutiny.Uni;
@@ -16,7 +16,7 @@ public class UpdateUserImpl implements UpdateUser {
     private static final String BLANK = "Blank Arguments";
 
     @Inject
-    private Repository repository;
+    protected UserRepository repository;
 
     /**
      * Updates the e-mail of the user.

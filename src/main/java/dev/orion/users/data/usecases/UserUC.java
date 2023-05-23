@@ -24,10 +24,10 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.validator.routines.EmailValidator;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.UseCase;
-import dev.orion.users.infra.repository.UserRepository;
+import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -43,7 +43,7 @@ public class UserUC implements UseCase {
     private static final int SIZE_PASSWORD = 8;
 
     /** User repository. */
-    private Repository repository = new UserRepository();
+    private UserRepository repository = new UserRepositoryImpl();
 
     @Inject
     private TwoFactorAuthHandler twoFactorAuthHandler;

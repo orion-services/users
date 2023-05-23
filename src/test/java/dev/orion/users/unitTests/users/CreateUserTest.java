@@ -13,15 +13,13 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.usecases.CreateUserImpl;
 import dev.orion.users.domain.model.User;
-import dev.orion.users.infra.repository.UserRepository;
-import io.quarkus.test.Mock;
+import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.smallrye.mutiny.Uni;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,26 +27,25 @@ import io.smallrye.mutiny.Uni;
 @TestInstance(Lifecycle.PER_CLASS)
 class CreateUserTest {
 
-    @Mock
+    @InjectMocks
     private TwoFactorAuthHandler twoFactorAuthHandler;
 
-    @Mock
-    private Repository repository;
+    @InjectMocks
+    private UserRepository repository;
 
     @InjectMocks
     private CreateUserImpl createUserUseCase;
 
     @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         twoFactorAuthHandler = mock(TwoFactorAuthHandler.class);
-        repository = mock(UserRepository.class);
+        repository = mock(UserRepositoryImpl.class);
     }
 
     @Test
     @DisplayName("Create a user")
     @Order(1)
-    void testCreateUser_WithValidArguments_ShouldReturnUserObject() {
+    void createUserWithValidArguments() {
         String name = "Orion";
         String email = "orion@test.com";
         String password = "12345678";

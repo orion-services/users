@@ -25,7 +25,7 @@ import io.smallrye.mutiny.Uni;
  * User repository interface.
  */
 @ApplicationScoped
-public interface Repository extends PanacheRepository<User> {
+public interface UserRepository extends PanacheRepository<User> {
 
     /**
      * Creates a user in the service.

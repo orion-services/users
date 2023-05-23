@@ -1,6 +1,6 @@
 package dev.orion.users.data.usecases;
 
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.usecases.DeleteUser;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -10,7 +10,7 @@ import jakarta.inject.Inject;
 public class DeleteUserImpl implements DeleteUser {
 
     @Inject
-    private Repository repository;
+    protected UserRepository repository;
 
     /**
      * Deletes a User from the service.

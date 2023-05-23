@@ -27,7 +27,7 @@ import org.passay.CharacterRule;
 import org.passay.EnglishCharacterData;
 import org.passay.PasswordGenerator;
 
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.Role;
 import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.Panache;
@@ -38,7 +38,7 @@ import io.smallrye.mutiny.Uni;
  * Implements the repository pattern for the user entity.
  */
 @ApplicationScoped
-public class UserRepository implements Repository {
+public class UserRepositoryImpl implements UserRepository {
 
     /** Setting the default role name. */
     private static final String DEFAULT_ROLE_NAME = "user";

@@ -136,6 +136,6 @@ public class User extends PanacheEntityBase {
      * Removes all roles of the object.
      */
     public void removeRoles() {
-        this.roles.removeAll(roles);
+        this.roles.clear();
     }
 }

@@ -1,4 +1,4 @@
-package dev.orion.users.unitTests.authentication;
+package dev.orion.users.unitTests.handlers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

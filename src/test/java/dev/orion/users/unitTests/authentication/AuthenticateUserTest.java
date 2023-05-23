@@ -1,6 +1,8 @@
-package dev.orion.users.unitTests.users;
+package dev.orion.users.unitTests.authentication;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -13,25 +15,23 @@ import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import dev.orion.users.data.usecases.UpdateUserImpl;
-import dev.orion.users.domain.model.User;
 import dev.orion.users.data.interfaces.UserRepository;
+import dev.orion.users.data.usecases.AuthenticateUserImpl;
 import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.smallrye.mutiny.Uni;
 
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)
-class UpdateUserTest {
+class AuthenticateUserTest {
 
     @InjectMocks
     private UserRepository repository;
 
     @InjectMocks
-    private UpdateUserImpl updateUserUseCase;
+    private AuthenticateUserImpl authenticateUserUseCase;
 
     @BeforeAll
     void setUp() {
@@ -39,34 +39,22 @@ class UpdateUserTest {
     }
 
     @Test
-    @DisplayName("Change email")
+    @DisplayName("Recover password")
     @Order(1)
-    void changeEmail() {
-        Mockito.when(repository.updateEmail("orion@test.com",
-                "newOrion@test.com"))
-                .thenReturn(Uni.createFrom().item(new User()));
-        Uni<User> user = updateUserUseCase.updateEmail("orion@test.com",
-                "newOrion@test.com");
-        assertNotNull(user);
+    void recoverPassword() {
+        Mockito.when(repository.recoverPassword("orion@test.com"))
+                .thenReturn(Uni.createFrom().item("ok"));
+        Uni<String> uni = authenticateUserUseCase.recoverPassword("orion@test.com");
+        assertNotNull(uni);
     }
 
     @Test
-    @DisplayName("Change email")
+    @DisplayName("Recover password with blank arguments")
     @Order(2)
-    void changeEmailWithBlankArguments() {
+    void recoverPasswordWithBlankArguments() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> {
-                    updateUserUseCase.updateEmail("", "orion@test.com");
-                });
-    }
-
-    @Test
-    @DisplayName("Change password with blank arguments")
-    @Order(3)
-    void changePasswordWithBlankArguments() {
-        Assertions.assertThrows(IllegalArgumentException.class,
-                () -> {
-                    updateUserUseCase.updatePassword("", "1234", "12345678");
+                    authenticateUserUseCase.recoverPassword("");
                 });
     }
 }

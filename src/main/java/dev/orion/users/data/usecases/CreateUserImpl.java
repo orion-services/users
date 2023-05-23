@@ -1,7 +1,7 @@
 package dev.orion.users.data.usecases;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
-import dev.orion.users.data.interfaces.Repository;
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.usecases.CreateUser;
 import io.smallrye.mutiny.Uni;
@@ -18,10 +18,10 @@ public class CreateUserImpl implements CreateUser {
     private static final int SIZE_PASSWORD = 8;
 
     @Inject
-    private TwoFactorAuthHandler twoFactorAuthHandler;
+    protected TwoFactorAuthHandler twoFactorAuthHandler;
 
     @Inject
-    private Repository repository;
+    protected UserRepository repository;
 
     /**
      * Creates a user in the service (UC: Create).
