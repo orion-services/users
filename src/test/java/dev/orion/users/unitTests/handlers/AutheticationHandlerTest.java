@@ -27,9 +27,6 @@ import java.util.Optional;
 class AutheticationHandlerTest {
 
     @Mock
-    private User mockUser;
-
-    @Mock
     private UserWSException userWSExceptionMock;
 
     @Mock
