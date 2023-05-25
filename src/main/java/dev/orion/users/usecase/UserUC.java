@@ -17,6 +17,7 @@
 package dev.orion.users.usecase;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -25,7 +26,7 @@ import org.apache.commons.validator.routines.EmailValidator;
 import dev.orion.users.model.User;
 import dev.orion.users.repository.Repository;
 import dev.orion.users.repository.UserRepository;
-
+import dev.orion.users.ws.handlers.TwoFactorAuthHandler;
 import io.smallrye.mutiny.Uni;
 
 /**
@@ -42,6 +43,9 @@ public class UserUC implements UseCase {
 
     /** User repository. */
     private Repository repository = new UserRepository();
+
+    @Inject
+    private TwoFactorAuthHandler twoFactorAuthHandler = new TwoFactorAuthHandler();
 
     /**
      * Creates a user in the service (UC: Create).
@@ -68,6 +72,7 @@ public class UserUC implements UseCase {
                 user.setEmail(email);
                 user.setPassword(DigestUtils.sha256Hex(password));
                 user.setEmailValid(false);
+                user.setSecret2FA(twoFactorAuthHandler.generateSecretKey());
                 return repository.createUser(user);
             }
         }

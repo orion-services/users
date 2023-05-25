@@ -37,11 +37,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase;
 import lombok.Getter;
 import lombok.Setter;
+
 /**
  * User Entity.
  */
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 public class User extends PanacheEntityBase {
 
     /** Default size for column. */
@@ -53,7 +55,7 @@ public class User extends PanacheEntityBase {
     @JsonIgnore
     private Long id;
 
-    /** The hash used to identify the user.  */
+    /** The hash used to identify the user. */
     private String hash;
 
     /** The name of the user. */
@@ -65,7 +67,7 @@ public class User extends PanacheEntityBase {
     @Email(message = "The e-mail format is necessary")
     private String email;
 
-     /** The password of the user. */
+    /** The password of the user. */
     @JsonIgnore
     @Column(length = COLUMN_LENGTH)
     @NotNull(message = "The password can't be null")
@@ -76,18 +78,19 @@ public class User extends PanacheEntityBase {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
 
-    /** Stores if the e-mail was validated.  */
+    /** Stores if the e-mail was validated. */
     private boolean emailValid;
 
-    /** The hash used to identify the user.  */
+    /** The hash used to identify the user. */
     @JsonIgnore
     private String emailValidationCode;
 
     /** Stores if is using 2FA */
     private boolean isUsing2FA;
 
-    /**Secret code to be used at 2FA validation */
+    /** Secret code to be used at 2FA validation */
     private String secret2FA;
+
     /**
      * User constructor.
      */
@@ -95,7 +98,6 @@ public class User extends PanacheEntityBase {
         this.hash = UUID.randomUUID().toString();
         this.roles = new ArrayList<>();
         this.emailValidationCode = UUID.randomUUID().toString();
-        this.secret2FA = generateSecretKey();
     }
 
     /**
@@ -125,13 +127,6 @@ public class User extends PanacheEntityBase {
         }
         return strRoles;
     }
-    public static String generateSecretKey(){
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[20];
-        random.nextBytes(bytes);
-        Base32 base32 = new Base32();
-        return base32.encodeToString(bytes);
-    }
 
     /**
      * Generates a e-mail validation code to the user.
@@ -143,7 +138,7 @@ public class User extends PanacheEntityBase {
     /**
      * Removes all roles of the object.
      */
-    public void removeRoles(){
+    public void removeRoles() {
         this.roles.removeAll(roles);
     }
 }
