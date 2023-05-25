@@ -8,25 +8,30 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.MockitoAnnotations;
 import com.google.zxing.WriterException;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
+import io.quarkus.test.junit.QuarkusTest;
 
-@ExtendWith(MockitoExtension.class)
+@QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
 class TwoFactorAuthHandlerUnitTest {
 
     @InjectMocks
     private TwoFactorAuthHandler twoFactorHandler;
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     @Order(1)

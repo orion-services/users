@@ -44,11 +44,12 @@ public class CreateUserImpl implements CreateUser {
                         "Password less than eight characters");
             } else {
                 User user = new User();
+                String secretKey = twoFactorAuthHandler.generateSecretKey();
                 user.setName(name);
                 user.setEmail(email);
                 user.setPassword(DigestUtils.sha256Hex(password));
                 user.setEmailValid(false);
-                user.setSecret2FA(twoFactorAuthHandler.generateSecretKey());
+                user.setSecret2FA(secretKey);
                 return repository.createUser(user);
             }
         }

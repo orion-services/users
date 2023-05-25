@@ -16,11 +16,14 @@ import dev.orion.users.data.exceptions.UserWSException;
 import dev.orion.users.data.handlers.AuthenticationHandler;
 import dev.orion.users.data.mail.MailTemplate;
 import dev.orion.users.domain.model.User;
+import io.quarkus.test.junit.QuarkusTest;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 
+@QuarkusTest
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
 @TestInstance(Lifecycle.PER_CLASS)

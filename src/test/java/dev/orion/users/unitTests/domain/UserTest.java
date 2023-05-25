@@ -14,9 +14,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import dev.orion.users.domain.model.Role;
 import dev.orion.users.domain.model.User;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 
+@QuarkusTest
 @ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
 public class UserTest {
