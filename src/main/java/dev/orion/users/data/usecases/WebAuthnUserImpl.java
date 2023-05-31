@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Function;
 
 import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.data.interfaces.WebAuthnCredentialRepository;
@@ -14,15 +13,8 @@ import dev.orion.users.domain.model.WebAuthnCertificate;
 import dev.orion.users.domain.model.WebAuthnCredential;
 import io.quarkus.security.webauthn.WebAuthnUserProvider;
 import io.smallrye.mutiny.Uni;
-import io.vertx.codegen.annotations.Nullable;
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
 import io.vertx.ext.auth.webauthn.Authenticator;
-import io.vertx.ext.auth.webauthn.MetaDataService;
-import io.vertx.ext.auth.webauthn.WebAuthn;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 

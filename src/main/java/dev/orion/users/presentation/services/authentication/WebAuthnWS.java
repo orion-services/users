@@ -1,5 +1,12 @@
 package dev.orion.users.presentation.services.authentication;
 
+import jakarta.inject.Inject;
+import jakarta.ws.rs.BeanParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
+
 import org.jboss.resteasy.reactive.RestForm;
 
 import dev.orion.users.data.interfaces.UserRepository;
@@ -11,13 +18,7 @@ import io.quarkus.security.webauthn.WebAuthnRegisterResponse;
 import io.quarkus.security.webauthn.WebAuthnSecurity;
 import io.smallrye.mutiny.Uni;
 import io.vertx.ext.auth.webauthn.Authenticator;
-import io.vertx.mutiny.ext.web.RoutingContext;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.BeanParam;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.Status;
+import io.vertx.ext.web.RoutingContext;
 
 @Path("api/users")
 public class WebAuthnWS {
@@ -69,19 +70,20 @@ public class WebAuthnWS {
     @Path("webAuthn/register")
     @POST
     @WithSession
-    public Uni<Response> register(@RestForm String userName, 
-                                  @BeanParam WebAuthnRegisterResponse webAuthnResponse,
-                                  RoutingContext ctx) {
+    public Uni<Response> register(@RestForm String userName,
+
+            @BeanParam WebAuthnRegisterResponse webAuthnResponse,
+            RoutingContext ctx) {
         // Input validation
-        if(userName == null || userName.isEmpty()
+        if (userName == null || userName.isEmpty()
                 || !webAuthnResponse.isSet()
                 || !webAuthnResponse.isValid()) {
             return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
         }
 
-        Uni<User> userUni = User.findByUserName(userName);
+        Uni<User> userUni = userRepository.findUserByEmail(userName);
         return userUni.flatMap(user -> {
-            if(user != null) {
+            if (user != null) {
                 // Duplicate user
                 return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
             }
@@ -107,6 +109,7 @@ public class WebAuthnWS {
                         // make a proper error response
                         return Response.status(Status.BAD_REQUEST).build();
                     });
-            
+
         });
     }
+}
