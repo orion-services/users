@@ -39,7 +39,7 @@ import org.eclipse.microprofile.faulttolerance.Retry;
  * Two Factor Authenticate.
  */
 @Path("api/users")
-public class TwoFactorAuth {
+public class TwoFactorAuthWS {
 
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;

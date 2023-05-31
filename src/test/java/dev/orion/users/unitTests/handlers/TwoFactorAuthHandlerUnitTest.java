@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mockito;
 import com.google.zxing.WriterException;
 
 import dev.orion.users.data.handlers.TwoFactorAuthHandler;
@@ -30,7 +29,7 @@ class TwoFactorAuthHandlerUnitTest {
 
     @BeforeEach
     public void setup() {
-        MockitoAnnotations.openMocks(this);
+        twoFactorHandler = mock(TwoFactorAuthHandler.class);
     }
 
     @Test
@@ -39,9 +38,10 @@ class TwoFactorAuthHandlerUnitTest {
     void shouldCreateTOTPCode() {
         String secretKey = "JBSWY3DPEHPK3PXP";
         String expectedCode = "432143";
-        TwoFactorAuthHandler twoFactorHandler = mock(TwoFactorAuthHandler.class);
-        when(twoFactorHandler.getTOTPCode(secretKey)).thenReturn(expectedCode);
+        Mockito.when(twoFactorHandler.getTOTPCode(secretKey)).thenReturn(expectedCode);
+
         String actualCode = twoFactorHandler.getTOTPCode(secretKey);
+
         assertEquals(expectedCode, actualCode);
     }
 
@@ -49,6 +49,8 @@ class TwoFactorAuthHandlerUnitTest {
     @Order(2)
     @DisplayName("Test create TOTP code with null secret key")
     void testGetTOTPCodeWithNullSecretKey() {
+        Mockito.when(twoFactorHandler.getTOTPCode(null)).thenCallRealMethod();
+
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> {
                     twoFactorHandler.getTOTPCode(null);
@@ -63,6 +65,10 @@ class TwoFactorAuthHandlerUnitTest {
         String account = "testuser";
         String issuer = "testcompany";
         String expectedBarCode = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
+
+        Mockito.when(twoFactorHandler.getAutheticatorBarCode(
+                secretKey, account, issuer)).thenCallRealMethod();
+
         String actualBarCode = twoFactorHandler.getAutheticatorBarCode(
                 secretKey, account, issuer);
         assertEquals(expectedBarCode, actualBarCode);
@@ -72,6 +78,9 @@ class TwoFactorAuthHandlerUnitTest {
     @Order(4)
     @DisplayName("Test create auth barcode with null secret key")
     void testGetAutheticatorBarCodeWithNullSecretKey() {
+        Mockito.when(twoFactorHandler.getAutheticatorBarCode(null,
+                "account", "issuer")).thenCallRealMethod();
+
         Assertions.assertThrows(IllegalStateException.class,
                 () -> {
                     twoFactorHandler.getAutheticatorBarCode(null,
@@ -84,6 +93,9 @@ class TwoFactorAuthHandlerUnitTest {
     @Order(5)
     @DisplayName("Test create auth barcode with null issuer")
     void testGetAuthenticatorBarCodeWithNullIssuer() {
+        Mockito.when(twoFactorHandler.getAutheticatorBarCode("secretKey",
+                "account", null)).thenCallRealMethod();
+
         Assertions.assertThrows(IllegalStateException.class,
                 () -> {
                     twoFactorHandler.getAutheticatorBarCode("secretKey",
@@ -97,6 +109,8 @@ class TwoFactorAuthHandlerUnitTest {
     @DisplayName("Test create create the qrcode")
     void createQrCodeTest() throws WriterException, IOException {
         String barCodeData = "otpauth://totp/testcompany%3Atestuser?secret=MFRGGZDFMZTWQ2LK&issuer=testcompany";
+        Mockito.when(twoFactorHandler.createQrCode(barCodeData)).thenCallRealMethod();
+
         byte[] result = twoFactorHandler.createQrCode(barCodeData);
         assertNotNull(result);
         assertTrue(result.length > 0);
@@ -106,6 +120,7 @@ class TwoFactorAuthHandlerUnitTest {
     @Order(7)
     @DisplayName("Test create create qrcode with invalid barcode data")
     void testCreateQrCodeWithInvalidBarCodeData() {
+        Mockito.when(twoFactorHandler.createQrCode(null)).thenCallRealMethod();
         Assertions.assertThrows(IllegalStateException.class,
                 () -> {
                     twoFactorHandler.createQrCode(null);
@@ -116,6 +131,9 @@ class TwoFactorAuthHandlerUnitTest {
     @DisplayName("Test generate a secrete Key")
     @Order(14)
     void testGenerateSecretKey() {
+
+        Mockito.when(twoFactorHandler.generateSecretKey()).thenCallRealMethod();
+
         String secretKey = twoFactorHandler.generateSecretKey();
 
         Assertions.assertNotNull(secretKey);

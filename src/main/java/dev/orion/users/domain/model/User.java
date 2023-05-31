@@ -26,6 +26,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 
@@ -87,6 +88,10 @@ public class User extends PanacheEntityBase {
 
     /** Secret code to be used at 2FA validation */
     private String secret2FA;
+
+    // non-owning side, so we can add more credentials later
+    @OneToOne(mappedBy = "user")
+    public WebAuthnCredential webAuthnCredential;
 
     /**
      * User constructor.

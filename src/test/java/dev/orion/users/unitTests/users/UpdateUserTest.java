@@ -18,6 +18,7 @@ import dev.orion.users.domain.model.User;
 import dev.orion.users.infra.repository.UserRepositoryImpl;
 import io.quarkus.test.junit.QuarkusTest;
 import io.smallrye.mutiny.Uni;
+import jakarta.ws.rs.NotFoundException;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
@@ -72,6 +73,18 @@ class UpdateUserTest {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> {
                     updateUserUseCase.updatePassword("", "1234", "12345678");
+                });
+    }
+
+    @Test
+    @DisplayName("Update user null")
+    @Order(3)
+    void updateUserNull() {
+        Mockito.when(updateUserUseCase.updateUser(null)).thenCallRealMethod();
+
+        Assertions.assertThrows(NotFoundException.class,
+                () -> {
+                    updateUserUseCase.updateUser(null);
                 });
     }
 }
