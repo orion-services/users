@@ -1,6 +1,15 @@
-## 0.0.1
+# Users change Log
 
-- Initial version, created by Rodrigo Prestes Machado
+## 1.0.0
+
+    - Clean Architecture
+    - Updated to Quarkus 3
+    - Updated to Java 20 Temurin
+
+## 0.0.3
+
+- Creates Two Factor QrCode
+- Validates Two Factor Code Login
 
 ## 0.0.2
 
@@ -13,6 +22,6 @@
 - Updates e-mail
 - Updates password
 
-## 0.0.3
-- Creates Two Factor QrCode
-- Validates Two Factor Code Login
+## 0.0.1
+
+- Initial version

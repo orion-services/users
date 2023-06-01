@@ -10,13 +10,13 @@
     activate UseCase
 
     UseCase --> UseCase : autheticate(email,password)
-    UseCase -->> WebService : Uni<User>
+    UseCase -->> WebService : Uni<UserEntity>
 
     WebService -> WebService : user.setUsing2FA(true)
     WebService -> UseCase: updateUser(user)
 
     UseCase --> UseCase : updateUser(user)
-    UseCase -->> WebService: Uni<User>
+    UseCase -->> WebService: Uni<UserEntity>
     deactivate UseCase
 
     WebService -> WebService : secret = user.GetSecret2FA()

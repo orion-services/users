@@ -3,31 +3,51 @@
 title Create User
 actor "User agent"
 
+' User agente sends a request to endpoint /api/users/create to create a user
 "User agent" -> WebService: @POST /api/users/create (name, email, password)
 activate WebService #F9F3FC
+WebService --> Controller : createUser(name, email, password)
+activate Controller #F9F3FC
 
-WebService --> UseCase : createUser(name, email, password)
+' Controller creates a User object (POJO) through the use case
+Controller --> UseCase : createUser(name, email, password)
 activate UseCase #F9F3FC
+note right
+    The name must be not empty,
+    the e-mail must have a valid format,
+    the password must be bigger than eight characters.
+end note
+UseCase -->> Controller : User
+deactivate UseCase
 
-UseCase --> Repository : createUser(User user)
+' Contoller converts the User to UserEntity
+Controller -> Controller : mapper.map(user) : UserEntity
+
+'Repository checks if the e-mail and hash already existe in the data base
+'and persists the UserEntity
+Controller --> Repository : createUser(UserEntity)
 activate Repository #F9F3FC
 Repository -> Repository: checkEmail(email)
 activate Repository #F9F3FC
-
 Repository -> Repository: checkHash(hash)
 activate Repository #F9F3FC
-
 Repository -> Repository: persist(user)
-Repository -->> UseCase : Uni<User>
-
+Repository -->> Controller : Uni<UserEntity>
 deactivate Repository
 deactivate Repository
 deactivate Repository
 
-UseCase -->> WebService : Uni<User>
-deactivate UseCase
+' Controller sends a validation code/url to the user's e-mail
+Controller --> Controller : sendValidationEmail(UserEntity)
+activate Controller #F9F3FC
+Controller --> MailTemplae : validateEmail(url)
+deactivate Controller #F9F3FC
 
+' Controller returns the UserEntity to the WebService
+Controller -->> WebService : Uni<UserEntity>
+deactivate Controller #F9F3FC
+
+' WebService returns the UserEntity to the User agent in JSON
 WebService -->> "User agent" : User in JSON
 deactivate WebService
-
 @enduml
