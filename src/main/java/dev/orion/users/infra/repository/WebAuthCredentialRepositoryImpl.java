@@ -5,7 +5,9 @@ import java.util.List;
 import dev.orion.users.data.interfaces.WebAuthnCredentialRepository;
 import dev.orion.users.domain.model.WebAuthnCredential;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
 
+@ApplicationScoped
 public class WebAuthCredentialRepositoryImpl implements WebAuthnCredentialRepository {
 
     @Override

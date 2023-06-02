@@ -83,7 +83,7 @@ public class WebAuthnWS {
 
         Uni<User> userUni = userRepository.findUserByEmail(userName);
         return userUni.flatMap(user -> {
-            if (user != null) {
+            if (user == null) {
                 // Duplicate user
                 return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
             }
@@ -91,18 +91,17 @@ public class WebAuthnWS {
 
             return authenticator
                     // store the user
-                    .flatMap(auth -> {
-                        User newUser = new User();
-                        newUser.setEmail(auth.getUserName());
-                        WebAuthnCredential credential = new WebAuthnCredential(auth, newUser);
-                        return credential.persist()
-                                .flatMap(c -> newUser.<User>persist());
+                    .onItem()
+                    .transform(auth -> {
+                        // User newUser = new User();
+                        // newUser.setEmail(auth.getUserName());
+                        WebAuthnCredential credential = new WebAuthnCredential(auth, user);
 
-                    })
-                    .map(newUser -> {
+                        credential.persist();
                         // make a login cookie
-                        this.webAuthnSecurity.rememberUser(newUser.getEmail(), ctx);
+                        this.webAuthnSecurity.rememberUser(user.getEmail(), ctx);
                         return Response.ok().build();
+
                     })
                     // handle login failure
                     .onFailure().recoverWithItem(x -> {
