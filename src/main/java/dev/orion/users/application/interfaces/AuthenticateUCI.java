@@ -18,7 +18,7 @@ package dev.orion.users.application.interfaces;
 
 import dev.orion.users.enterprise.model.User;
 
-public interface AuthenticateUser {
+public interface AuthenticateUCI {
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
@@ -30,13 +30,13 @@ public interface AuthenticateUser {
     User authenticate(String email, String password);
 
     /**
-     * Validates an e-mail of a user.
+     * Validates an e-mail of a user. (UC: Validate e-mail)
      *
      * @param email : The e-mail of a user
      * @param code  : The validation code
      * @return The User object
      */
-    User validateEmail(String email, String code);
+    Boolean validateEmail(String email, String code);
 
     /**
      * Generates a new password of a user.

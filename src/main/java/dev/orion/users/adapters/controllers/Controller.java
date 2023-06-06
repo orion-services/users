@@ -26,7 +26,7 @@ import io.smallrye.mutiny.Uni;
 /**
  *  The controller class.
  */
-public class ServiceController {
+public class Controller {
 
     /** The model mapper. */
     protected ModelMapper mapper = new ModelMapper();

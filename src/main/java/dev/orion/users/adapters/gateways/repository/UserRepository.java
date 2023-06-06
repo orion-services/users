@@ -16,10 +16,10 @@
  */
 package dev.orion.users.adapters.gateways.repository;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import dev.orion.users.adapters.gateways.entities.UserEntity;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * User repository interface.
