@@ -1,15 +1,14 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+// README at: https://github.com/devcontainers/templates/tree/main/src/universal
 {
-	"name": "Ubuntu",
+	"name": "Default Linux Universal",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+	"image": "mcr.microsoft.com/devcontainers/universal:2-linux",
 	"features": {
 		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
-		"ghcr.io/devcontainers-contrib/features/maven-sdkman:2": {},
-		"ghcr.io/devcontainers-contrib/features/mvnd-sdkman:2": {},
-		"ghcr.io/devcontainers-contrib/features/quarkus-sdkman:2": {},
-		"ghcr.io/ebaskoro/devcontainer-features/sdkman:1": {}
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+		"ghcr.io/devcontainers/features/java:1": {},
+		"ghcr.io/devcontainers-contrib/features/quarkus-sdkman:2": {}
 	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
