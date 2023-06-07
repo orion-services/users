@@ -5,35 +5,12 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
 	"features": {
-		"ghcr.io/devcontainers/features/java:1": {
-			"installGradle": true,
-			"installMaven": true,
-			"installAnt": true,
-			"version": "latest",
-			"jdkDistro": "ms",
-			"gradleVersion": "latest",
-			"mavenVersion": "latest",
-			"antVersion": "latest"
-		},
-		"ghcr.io/devcontainers-contrib/features/quarkus-sdkman:2": {
-			"version": "latest",
-			"jdkVersion": "latest",
-			"jdkDistro": "ms"
-		},
-		"ghcr.io/ebaskoro/devcontainer-features/sdkman:1": {
-			"candidate": "java",
-			"version": "latest"
-		},
-		"ghcr.io/devcontainers/features/docker-from-docker:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:1": {},
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"moby": true,
-			"azureDnsAutoDetection": true,
-			"installDockerBuildx": true,
-			"version": "latest",
-			"dockerDashComposeVersion": "v1"
-		}
-	},
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {},
+		"ghcr.io/devcontainers-contrib/features/maven-sdkman:2": {},
+		"ghcr.io/devcontainers-contrib/features/mvnd-sdkman:2": {},
+		"ghcr.io/devcontainers-contrib/features/quarkus-sdkman:2": {},
+		"ghcr.io/ebaskoro/devcontainer-features/sdkman:1": {}
+	}
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -46,25 +23,7 @@
 
 	// Configure tool-specific properties.
 	// "customizations": {},
-	"customizations": {
-		"vscode": {
-		  "extensions": [
-			"vscjava.vscode-java-pack",
-			"redhat.vscode-quarkus",
-			"ms-azuretools.vscode-docker",
-			"cweijan.vscode-mysql-client2",
-			"eamodio.gitlens",
-			"redhat.java",
-			"vscjava.vscode-lombok",
-			"DavidAnson.vscode-markdownlint",
-			"amodio.amethyst-theme",
-			"Equinusocio.vsc-material-theme-icons",
-			"GitHub.copilot"
-		  ]
-		}
-	}
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
-
 }
