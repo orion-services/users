@@ -43,8 +43,12 @@
 			"ms-azuretools.vscode-docker",
 			"cweijan.vscode-mysql-client2",
 			"eamodio.gitlens",
+			"redhat.java",
 			"vscjava.vscode-lombok",
-			"amodio.amethyst-theme"
+			"DavidAnson.vscode-markdownlint",
+			"amodio.amethyst-theme",
+			"Equinusocio.vsc-material-theme-icons",
+			"GitHub.copilot"
 		  ]
 		}
 	}
