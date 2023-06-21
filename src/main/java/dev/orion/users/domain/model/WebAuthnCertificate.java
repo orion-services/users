@@ -2,12 +2,13 @@ package dev.orion.users.domain.model;
 
 import io.quarkus.hibernate.reactive.panache.PanacheEntity;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.ManyToOne;
 
 @Entity
 public class WebAuthnCertificate extends PanacheEntity {
 
-    @ManyToOne
+    @ManyToOne()
     public WebAuthnCredential webAuthnCredential;
 
     /**

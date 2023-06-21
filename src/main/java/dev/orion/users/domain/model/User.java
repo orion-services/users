@@ -63,6 +63,7 @@ public class User extends PanacheEntityBase {
     /** The e-mail of the user. */
     @NotNull(message = "The e-mail can't be null")
     @Email(message = "The e-mail format is necessary")
+    @Column(unique = true)
     private String email;
 
     /** The password of the user. */
@@ -100,6 +101,8 @@ public class User extends PanacheEntityBase {
         this.hash = UUID.randomUUID().toString();
         this.roles = new ArrayList<>();
         this.emailValidationCode = UUID.randomUUID().toString();
+        // webAuthnCredential = new WebAuthnCredential();
+        // webAuthnCredential.persist();
     }
 
     /**
@@ -143,4 +146,12 @@ public class User extends PanacheEntityBase {
     public void removeRoles() {
         this.roles.clear();
     }
+
+    // public long getWebAuthnCredentialCounter() {
+    // return this.webAuthnCredential.counter;
+    // }
+
+    // public void setWebAuthnCredentialCounter(long counter) {
+    // this.webAuthnCredential.counter = counter;
+    // }
 }

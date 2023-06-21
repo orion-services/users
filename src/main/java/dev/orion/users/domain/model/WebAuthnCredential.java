@@ -8,10 +8,18 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.ext.auth.webauthn.Authenticator;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.Getter;
+import lombok.Setter;
 
+// @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "userName", "credID" }))
 @Entity
+@Getter
+@Setter
 public class WebAuthnCredential extends PanacheEntity {
     /**
      * The username linked to this authenticator
@@ -61,7 +69,7 @@ public class WebAuthnCredential extends PanacheEntity {
      * The list of X509 certificates encoded as base64url.
      */
     @OneToMany(mappedBy = "webAuthnCredential")
-    public List<WebAuthnCertificate> x5c = new ArrayList();
+    public List<WebAuthnCertificate> x5c = new ArrayList<>();
 
     public String fmt;
 

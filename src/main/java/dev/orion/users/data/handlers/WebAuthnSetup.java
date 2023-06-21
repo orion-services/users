@@ -1,4 +1,4 @@
-package dev.orion.users.data.usecases;
+package dev.orion.users.data.handlers;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import dev.orion.users.data.interfaces.WebAuthnCredentialRepository;
 import dev.orion.users.domain.model.User;
 import dev.orion.users.domain.model.WebAuthnCertificate;
 import dev.orion.users.domain.model.WebAuthnCredential;
+import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.quarkus.security.webauthn.WebAuthnUserProvider;
 import io.smallrye.mutiny.Uni;
 import io.vertx.ext.auth.webauthn.AttestationCertificates;
@@ -19,7 +20,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 @ApplicationScoped
-public class WebAuthnUserImpl implements WebAuthnUserProvider {
+@WithSession
+public class WebAuthnSetup implements WebAuthnUserProvider {
 
     @Inject
     WebAuthnCredentialRepository webAuthnCredentialRepository;
@@ -30,25 +32,25 @@ public class WebAuthnUserImpl implements WebAuthnUserProvider {
     @Override
     public Uni<List<Authenticator>> findWebAuthnCredentialsByUserName(String userName) {
         return webAuthnCredentialRepository.findByUserName(userName)
-                .flatMap(WebAuthnUserImpl::toAuthenticators);
+                .flatMap(WebAuthnSetup::toAuthenticators);
     }
 
     @Override
     public Uni<List<Authenticator>> findWebAuthnCredentialsByCredID(String credID) {
         return webAuthnCredentialRepository.findByCredID(credID)
-                .flatMap(WebAuthnUserImpl::toAuthenticators);
+                .flatMap(WebAuthnSetup::toAuthenticators);
     }
 
     @Override
     public Uni<Void> updateOrStoreWebAuthnCredentials(Authenticator authenticator) {
         // leave the scooby user to the manual endpoint, because if we do it here it
         // will be
-        // created/udated twice
         if (authenticator.getUserName().equals("scooby"))
             return Uni.createFrom().nullItem();
         return userRepository.findUserByEmail(authenticator.getUserName())
                 .flatMap(user -> {
                     // new user
+
                     if (user == null) {
                         User newUser = new User();
                         newUser.setEmail(authenticator.getUserName());
@@ -58,7 +60,7 @@ public class WebAuthnUserImpl implements WebAuthnUserProvider {
                                 .onItem().ignore().andContinueWithNull();
                     } else {
                         // existing user
-                        user.webAuthnCredential.counter = authenticator.getCounter();
+                        // user.webAuthnCredential.counter = authenticator.getCounter();
                         return Uni.createFrom().nullItem();
                     }
                 });
