@@ -88,9 +88,11 @@ public class User extends PanacheEntityBase {
     private boolean isUsing2FA;
 
     /** Secret code to be used at 2FA validation */
+    @JsonIgnore
     private String secret2FA;
 
     // non-owning side, so we can add more credentials later
+    @JsonIgnore
     @OneToOne(mappedBy = "user")
     public WebAuthnCredential webAuthnCredential;
 

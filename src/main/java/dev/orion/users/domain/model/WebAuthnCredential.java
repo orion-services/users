@@ -8,7 +8,6 @@ import io.smallrye.mutiny.Uni;
 import io.vertx.ext.auth.webauthn.Authenticator;
 import io.vertx.ext.auth.webauthn.PublicKeyCredential;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
@@ -16,7 +15,7 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.Getter;
 import lombok.Setter;
 
-// @Table(uniqueConstraints = @UniqueConstraint(columnNames = { "userName", "credID" }))
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = { "userName", "credID" }))
 @Entity
 @Getter
 @Setter
