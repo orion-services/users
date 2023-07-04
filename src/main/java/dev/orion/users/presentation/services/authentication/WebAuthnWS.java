@@ -101,48 +101,49 @@ public class WebAuthnWS {
                 });
     }
 
-    @Path("/webauthn/activate")
-    @POST
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @WithSession
+    // @Path("/webauthn/activate")
+    // @POST
+    // @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    // @WithSession
     // @RolesAllowed("user")
-    public Uni<Response> activate(
-            @RestForm @Email String userEmail,
-            @BeanParam WebAuthnRegisterResponse webAuthnResponse,
-            RoutingContext ctx) {
+    // public Uni<Response> activate(
+    // @RestForm @Email String userEmail,
+    // @BeanParam WebAuthnRegisterResponse webAuthnResponse,
+    // RoutingContext ctx) {
 
-        if (userEmail == null || userEmail.isEmpty()
-                || !webAuthnResponse.isSet()
-                || !webAuthnResponse.isValid()) {
-            return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
-        }
+    // if (userEmail == null || userEmail.isEmpty()
+    // || !webAuthnResponse.isSet()
+    // || !webAuthnResponse.isValid()) {
+    // return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
+    // }
 
-        return userRepository.findUserByEmail(userEmail)
-                .flatMap((user) -> {
-                    if (user == null) {
-                        return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
-                    }
+    // return userRepository.findUserByEmail(userEmail)
+    // .flatMap((user) -> {
+    // if (user == null) {
+    // return Uni.createFrom().item(Response.status(Status.BAD_REQUEST).build());
+    // }
 
-                    Uni<Authenticator> authenticator = this.webAuthnSecurity.register(webAuthnResponse, ctx);
+    // Uni<Authenticator> authenticator =
+    // this.webAuthnSecurity.register(webAuthnResponse, ctx);
 
-                    return authenticator
-                            // store the user
-                            .flatMap(auth -> {
-                                WebAuthnCredential credential = new WebAuthnCredential(auth, user);
-                                return credential.persist().flatMap(c -> updateUserUseCase.updateUser(user));
-                            })
-                            .map(newUser -> {
-                                this.webAuthnSecurity.rememberUser(newUser.getEmail(), ctx);
-                                return Response.ok().entity(newUser).build();
-                            })
-                            // handle login failure
-                            .onFailure().recoverWithItem(x -> {
-                                // make a proper error response
-                                LOG.error(x.getMessage());
-                                return Response.status(Status.BAD_REQUEST).build();
-                            });
-                });
-    }
+    // return authenticator
+    // // store the user
+    // .flatMap(auth -> {
+    // WebAuthnCredential credential = new WebAuthnCredential(auth, user);
+    // return credential.persist().flatMap(c -> updateUserUseCase.updateUser(user));
+    // })
+    // .map(newUser -> {
+    // this.webAuthnSecurity.rememberUser(newUser.getEmail(), ctx);
+    // return Response.ok().entity(newUser).build();
+    // })
+    // // handle login failure
+    // .onFailure().recoverWithItem(x -> {
+    // // make a proper error response
+    // LOG.error(x.getMessage());
+    // return Response.status(Status.BAD_REQUEST).build();
+    // });
+    // });
+    // }
 
     @Path("/webauthn/register")
     @POST

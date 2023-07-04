@@ -18,10 +18,10 @@ public class CreateUserImpl implements CreateUser {
     private static final int SIZE_PASSWORD = 8;
 
     @Inject
-    protected TwoFactorAuthHandler twoFactorAuthHandler;
+    public TwoFactorAuthHandler twoFactorAuthHandler;
 
     @Inject
-    protected UserRepository repository;
+    public UserRepository repository;
 
     /**
      * Creates a user in the service (UC: Create).

@@ -79,19 +79,15 @@ public class CreateWS {
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {
 
-        try {
-            return createUserUseCase.createUser(name, email, password)
-                    .log()
-                    .onItem().ifNotNull()
-                    .call(user -> authHandler.sendValidationEmail(user))
-                    .onFailure().transform(e -> {
-                        throw new UserWSException(e.getMessage(),
-                                Response.Status.BAD_REQUEST);
-                    });
-        } catch (Exception e) {
-            throw new UserWSException(e.getMessage(),
-                    Response.Status.BAD_REQUEST);
-        }
+        return createUserUseCase.createUser(name, email, password)
+                .log()
+                .onItem().ifNotNull()
+                .call(user -> authHandler.sendValidationEmail(user))
+                .onFailure().transform(e -> {
+                    throw new UserWSException(e.getMessage(),
+                            Response.Status.BAD_REQUEST);
+                });
+
     }
 
     /**

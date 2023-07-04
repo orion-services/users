@@ -107,20 +107,19 @@ public class AuthenticationWS {
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {
 
-        try {
-            return createUserUseCase.createUser(name, email, password)
-                    .onItem().ifNotNull()
-                    .transform(user -> {
-                        String token = authHandler.generateJWT(user);
-                        AuthenticationDTO auth = new AuthenticationDTO();
-                        auth.setToken(token);
-                        auth.setUser(user);
-                        return auth;
-                    })
-                    .log();
-        } catch (Exception e) {
-            throw new UserWSException(e.getMessage(),
-                    Response.Status.BAD_REQUEST);
-        }
+        return createUserUseCase.createUser(name, email, password)
+
+                .onItem().ifNotNull()
+                .transform(user -> {
+                    String token = authHandler.generateJWT(user);
+                    AuthenticationDTO auth = new AuthenticationDTO();
+                    auth.setToken(token);
+                    auth.setUser(user);
+                    return auth;
+                })
+                .onItem().ifNull()
+                .failWith(new UserWSException("User not created",
+                        Response.Status.BAD_GATEWAY))
+                .log();
     }
 }

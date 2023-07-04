@@ -15,7 +15,7 @@ public class AuthenticateUserImpl implements AuthenticateUser {
     private static final String BLANK = "Blank Arguments";
 
     @Inject
-    protected UserRepository repository;
+    public UserRepository repository;
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
