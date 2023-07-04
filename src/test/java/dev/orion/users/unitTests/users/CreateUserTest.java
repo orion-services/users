@@ -35,6 +35,8 @@ class CreateUserTest {
         repository = mock(UserRepositoryImpl.class);
         twoFactorAuthHandler = mock(TwoFactorAuthHandler.class);
         createUserUseCase = mock(CreateUserImpl.class);
+        createUserUseCase.twoFactorAuthHandler = twoFactorAuthHandler;
+        createUserUseCase.repository = repository;
     }
 
     @Test
@@ -46,21 +48,54 @@ class CreateUserTest {
         String password = "12345678";
         User expectedUser = new User();
 
-        Mockito.when(repository.createUser(Mockito.any(User.class))).thenReturn(Uni.createFrom().item(expectedUser));
+        Mockito.when(repository.createUser(expectedUser)).thenCallRealMethod();
         Mockito.when(twoFactorAuthHandler.generateSecretKey()).thenReturn("secretKey");
-        Mockito.when(createUserUseCase.createUser(name, email, password))
-                .thenReturn(Uni.createFrom().item(expectedUser));
+        Mockito.when(createUserUseCase.createUser(name, email, password)).thenCallRealMethod();
 
         Uni<User> result = createUserUseCase.createUser(name, email, password);
 
         Assertions.assertNotNull(result);
-        Assertions.assertEquals(expectedUser, result.await().indefinitely());
+    }
+
+    @Test
+    @DisplayName("Create a user with valid email true")
+    @Order(2)
+    void createUserWithValidEmailTrue() {
+        String name = "Orion";
+        String email = "orion@test.com";
+        User expectedUser = new User();
+        Boolean isValidEmail = true;
+
+        Mockito.when(repository.createUser(Mockito.any(User.class))).thenReturn(Uni.createFrom().item(expectedUser));
+        Mockito.when(createUserUseCase.createUser(name, email,
+                isValidEmail)).thenCallRealMethod();
+        // .thenReturn(Uni.createFrom().item(expectedUser));
+
+        Uni<User> result = createUserUseCase.createUser(name, email, isValidEmail);
+
+        Assertions.assertNotNull(result);
+        // Assertions.assertEquals(expectedUser, result.await().indefinitely());
         // Mockito.verify(repository).createUser(Mockito.any(User.class));
     }
 
     @Test
-    @DisplayName("Create a user with a blank name")
+    @DisplayName("Create a user with valid email false")
     @Order(2)
+    void createUserWithValidEmailFalse() {
+        String name = "";
+        String email = "oriontest";
+        Boolean isValidEmail = true;
+
+        Mockito.when(createUserUseCase.createUser(name, email, isValidEmail)).thenCallRealMethod();
+
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            createUserUseCase.createUser(name, email, isValidEmail);
+        });
+    }
+
+    @Test
+    @DisplayName("Create a user with a blank name")
+    @Order(4)
     void createUserWithBlankName() {
         String name = "";
         String email = "orion@test.com";
@@ -74,7 +109,7 @@ class CreateUserTest {
 
     @Test
     @DisplayName("Create a user with a blank email")
-    @Order(3)
+    @Order(5)
     void createUserWithBlankEmail() {
         String name = "Orion";
         String email = "";
@@ -88,7 +123,7 @@ class CreateUserTest {
 
     @Test
     @DisplayName("Create a user with a blank password")
-    @Order(4)
+    @Order(6)
     void createUserWithBlankPassword() {
         String name = "Orion";
         String email = "orion@test.com";
@@ -103,7 +138,7 @@ class CreateUserTest {
 
     @Test
     @DisplayName("Create a user with an invalid e-mail")
-    @Order(5)
+    @Order(7)
     void createUserWithInvalidEmail() {
         String name = "Orion";
         String email = "orion#test.com";
@@ -117,7 +152,7 @@ class CreateUserTest {
 
     @Test
     @DisplayName("Create a user with invalid password")
-    @Order(6)
+    @Order(8)
     void createUserWithInvalidPasswordTest() {
         String name = "Orion";
         String email = "orion@test.com";

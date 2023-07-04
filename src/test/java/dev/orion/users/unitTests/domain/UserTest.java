@@ -4,7 +4,12 @@ import jakarta.validation.Validator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -19,9 +24,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.ValidatorFactory;
 
 @QuarkusTest
-@ExtendWith(MockitoExtension.class)
 @TestMethodOrder(OrderAnnotation.class)
-public class UserTest {
+class UserTest {
     private static final String VALID_EMAIL = "orion@test.com";
     private static final String INVALID_EMAIL = "invalid_email";
     private static final String VALID_PASSWORD = "password";
@@ -35,9 +39,34 @@ public class UserTest {
     }
 
     @Test
+    void testSetUserId() {
+        User user = new User();
+        user.setName("Orion");
+        user.setEmail(VALID_EMAIL);
+        user.setPassword(VALID_PASSWORD);
+        user.setId(Long.MIN_VALUE);
+
+        assertTrue(validator.validate(user).isEmpty());
+    }
+
+    @Test
+    void testGetUserId() {
+        User user = new User();
+        user.setName("Orion");
+        user.setEmail(VALID_EMAIL);
+        user.setPassword(VALID_PASSWORD);
+        user.setId(Long.MIN_VALUE);
+
+        Long userId = user.getId();
+
+        assertNotNull(userId);
+        assertTrue(validator.validate(user).isEmpty());
+    }
+
+    @Test
     void testValidUser() {
         User user = new User();
-        user.setName("JOrion");
+        user.setName("Orion");
         user.setEmail(VALID_EMAIL);
         user.setPassword(VALID_PASSWORD);
 
@@ -90,6 +119,19 @@ public class UserTest {
         user.addRole(role);
 
         assertTrue(user.getRoleList().contains(VALID_ROLE));
+    }
+
+    @Test
+    void testSetRole() {
+        User user = new User();
+        Role role = new Role();
+
+        List<Role> roles = new ArrayList<>();
+        roles.add(role);
+
+        user.setRoles(roles);
+
+        assertTrue(user.getRoles().size() > 0);
     }
 
     @Test

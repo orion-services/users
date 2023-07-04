@@ -22,7 +22,7 @@ import io.quarkus.test.junit.QuarkusTest;
 
 @QuarkusTest
 @TestMethodOrder(OrderAnnotation.class)
-class TwoFactorAuthHandlerUnitTest {
+class TwoFactorAuthHandlerTest {
 
     @InjectMocks
     private TwoFactorAuthHandler twoFactorHandler;

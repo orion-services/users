@@ -29,7 +29,7 @@ class DeleteUserTest {
     private DeleteUserImpl deleteUserUseCase;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         repository = mock(UserRepositoryImpl.class);
         deleteUserUseCase = mock(DeleteUserImpl.class);
         deleteUserUseCase = mock(DeleteUserImpl.class);

@@ -160,4 +160,35 @@ public class TwoFactorAuthIntegrationTest {
                 .statusCode(200);
 
     }
+
+    @Test
+    @Order(8)
+    void validateWithout2FAuthActivated() {
+        user = given()
+                .when()
+                .param("name", "orion3")
+                .param("email", "orion3@test.com")
+                .param("password", USER_PASS)
+                .post("/api/users/create")
+                .then()
+                .statusCode(200)
+                .extract()
+                .body()
+                .as(User.class);
+
+        String code = googleUtils.getTOTPCode(user.getSecret2FA());
+
+        given()
+                .when()
+                .contentType(ContentType.URLENC)
+                .formParam("email", "orion3@test.com")
+                .formParam("password", USER_PASS)
+                .formParam("code", code)
+                .post("/api/users/twoFactorAuth/validate")
+                .then()
+                .assertThat()
+                .statusCode(401);
+
+    }
+
 }

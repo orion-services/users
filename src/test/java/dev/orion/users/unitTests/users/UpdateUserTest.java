@@ -31,7 +31,7 @@ class UpdateUserTest {
     private UpdateUserImpl updateUserUseCase;
 
     @BeforeEach
-    void setUp() {
+    void setup() {
         repository = mock(UserRepositoryImpl.class);
         updateUserUseCase = mock(UpdateUserImpl.class);
     }
