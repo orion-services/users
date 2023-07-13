@@ -51,6 +51,9 @@ public class UserRepositoryImpl implements UserRepository {
     /** E-mail column. */
     private static final String EMAIL = "email";
 
+    /** Password column. */
+    private static final String PASSWORD = "password";
+
     /**
      * Creates a user in the service.
      *
@@ -85,10 +88,11 @@ public class UserRepositoryImpl implements UserRepository {
      */
     @Override
     public Uni<UserEntity> authenticate(final UserEntity user) {
-        Map<String, Object> params = Parameters.with(EMAIL,
-                user.getEmail()).and("password", user.getPassword()).map();
+        Map<String, Object> params = Parameters.with(EMAIL, user.getEmail())
+                .and(PASSWORD, user.getPassword()).map();
         return find("email = :email and password = :password", params)
-                .firstResult();
+                .firstResult()
+                .onItem().ifNotNull().transform(loadedUser -> loadedUser);
     }
 
     /**
@@ -200,10 +204,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Uni<Void> deleteUser(final String email) {
         return checkEmail(email)
-                .onItem().ifNull()
-                .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-                .onItem().ifNotNull()
-                .transformToUni(user -> Panache.<Void>withTransaction(user::delete));
+            .onItem().ifNull().failWith(
+                new IllegalArgumentException(USER_NOT_FOUND_ERROR))
+            .onItem().ifNotNull().transformToUni(
+                user -> Panache.<Void>withTransaction(user::delete));
     }
 
     /**
@@ -321,7 +325,6 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public Uni<UserEntity> updateUser(UserEntity user) {
-
         return Panache.<UserEntity>withTransaction(user::persist);
     }
 }

@@ -47,12 +47,12 @@ public class CreateUserUC implements CreateUserUCI {
                 throw new IllegalArgumentException(
                         "Password less than eight characters");
             } else {
-                //String secretKey = twoFactorAuthHandler.generateSecretKey();
+                // String secretKey = twoFactorAuthHandler.generateSecretKey();
                 User user = new User();
-                //user.setSecret2FA(secretKey);
+                // user.setSecret2FA(secretKey);
                 user.setName(name);
                 user.setEmail(email);
-                user.setPassword(DigestUtils.sha256Hex(password));
+                user.setPassword(encryptPassword(password));
                 user.setEmailValid(false);
                 return user;
             }
@@ -80,6 +80,16 @@ public class CreateUserUC implements CreateUserUCI {
             user.setEmailValid(isEmailValid);
             return user;
         }
+    }
+
+    /**
+     * Encrypts the password with SHA-256.
+     *
+     * @param password : The password to be encrypted
+     * @return The encrypted password
+     */
+    private String encryptPassword(final String password) {
+        return DigestUtils.sha256Hex(password);
     }
 
 }

@@ -34,7 +34,7 @@ public class UsersTest {
             .param("name", "Orion")
             .param("email", "orion@test.com")
             .param("password", "12345678")
-            .post("/api/users/create")
+            .post("/users/create")
         .then()
             .statusCode(200)
             .body("name", is("Orion"),
@@ -48,7 +48,7 @@ public class UsersTest {
             .param("name", "Orion")
             .param("email", "orion@test.com")
             .param("password", "123")
-            .post("/api/users/create")
+            .post("/users/create")
         .then()
             .statusCode(400);
     }

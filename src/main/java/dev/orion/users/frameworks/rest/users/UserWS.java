@@ -20,29 +20,27 @@ import org.eclipse.microprofile.faulttolerance.Retry;
 
 import dev.orion.users.adapters.controllers.UserController;
 import dev.orion.users.frameworks.rest.ServiceException;
-import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.FormParam;
-import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 /**
  * Create a user endpoints.
  */
-@Path("/api/users")
+@Path("/users")
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
-public class CreateWS {
+public class UserWS {
 
     /** Business logic of the system. */
     @Inject
@@ -54,12 +52,11 @@ public class CreateWS {
     /**
      * Creates a user inside the service.
      *
-     * @param name     : The name of the user
-     * @param email    : The email of the user
-     * @param password : The password of the user
+     * @param name     The name of the user
+     * @param email    The email of the user
+     * @param password The password of the user
      * @return The user object in JSON format
-     * @throws ServiceException Returns a HTTP 409 if the e-mail already exists
-     * in the database or if the password is lower than eight characters
+     * @throws Bad request if the service was unable to create the user
      */
     @POST
     @Path("/create")
@@ -70,49 +67,40 @@ public class CreateWS {
             @FormParam("email") @NotEmpty @Email final String email,
             @FormParam("password") @NotEmpty final String password) {
 
-            return controller.createUser(name, email, password)
-                .log()
-                .onItem().ifNotNull()
-                .transform(user -> {
-                    return Response.ok(user).build();
-                })
-                .onFailure().transform(e -> {
-                    String message = e.getMessage();
-                    throw new ServiceException(message,
-                            Response.Status.BAD_REQUEST);
-                });
+        return controller.createUser(name, email, password)
+            .log()
+            .onItem().ifNotNull().transform(user -> Response.ok(user).build())
+            .onFailure().transform(e -> {
+                String message = e.getMessage();
+                throw new ServiceException(message,
+                        Response.Status.BAD_REQUEST);
+            });
     }
 
     /**
-     * Validates e-mail, this method is used to confirm the user's e-mail using
-     * a code.
+     * Deletes a user inside the service.
      *
-     * @param email : The e-mail of the user
-     * @param code  : The code sent to the user
-     * @return true if was possible to validate the e-mail and HTTP 400 (bad
-     * request) if the the em-mail or code is invalid.
+     * @param email    The email of the user
+     * @return A boolean
+     * @throws Bad request if the service was unable to create the user
      */
-    @GET
-    @PermitAll
-    @Path("/validateEmail")
-    @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
-    @WithSession
-    public Uni<Response> validateEmail(
-            @QueryParam("email") @NotEmpty final String email,
-            @QueryParam("code") @NotEmpty final String code) {
+    @POST
+    @Path("/delete")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @RolesAllowed("admin")
+    @Retry(maxRetries = 1, delay = DELAY)
+    public Uni<Response> delete(
+        @FormParam("email") @NotEmpty @Email final String email) {
 
-        return controller.validateEmail(email, code)
-            .onItem().ifNotNull().transform(user ->
-                Response.ok(true).build()
-            )
-            .onItem().ifNull().continueWith(() -> {
-                String message = "Invalid e-mail or code";
-                throw new ServiceException(message,Response.Status.BAD_REQUEST);
-            })
+        return controller.deleteUser(email)
+            .log()
+            .onItem().ifNotNull().transform(result ->
+                Response.ok(true).build())
             .onFailure().transform(e -> {
                 String message = e.getMessage();
-                throw new ServiceException(message,Response.Status.BAD_REQUEST);
+                throw new ServiceException(message,
+                        Response.Status.BAD_REQUEST);
             });
     }
 

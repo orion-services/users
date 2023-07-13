@@ -25,7 +25,7 @@ nav_order: 2
 
 ## HTTP(S) endpoints
 
-* /api/users/createAuthenticate
+* /users/createAuthenticate
   * HTTP method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
@@ -35,7 +35,7 @@ nav_order: 2
 
     ```shell
        curl -X 'POST' \
-            'http://localhost:8080/api/users/createAuthenticate' \
+            'http://localhost:8080/users/createAuthenticate' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'

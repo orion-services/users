@@ -14,7 +14,7 @@ nav_order: 8
 
 ## HTTP(S) endpoints
 
-* /api/users/update/password
+* /users/update/password
   * HTTP method: PUT
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
@@ -24,7 +24,7 @@ nav_order: 8
 
         ```shell
             curl -X PUT \
-            'http://localhost:8080/api/users/update/password' \
+            'http://localhost:8080/users/update/password' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

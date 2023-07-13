@@ -15,7 +15,7 @@ nav_order: 4
 
 ## HTTP(S) endpoints
 
-* /api/users/validateEmail
+* /users/validateEmail
   * HTTP method: GET
   * Consumes: text/plain
   * Produces: text/plain
@@ -25,7 +25,7 @@ nav_order: 4
 
         ```shell
            curl -X 'GET' \
-                'http://localhost:8080/api/users/validateEmail?code=d32c2a8e-ea4b-4260-b4d7-b3e62d8488e1&email=orion%40test.com' \
+                'http://localhost:8080/users/validateEmail?code=d32c2a8e-ea4b-4260-b4d7-b3e62d8488e1&email=orion%40test.com' \
                 -H 'accept: application/json'
         ```
 

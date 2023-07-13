@@ -29,7 +29,7 @@ nav_order: 3
 
 ### HTTP(S) endpoints
 
-* /api/users/create
+* /users/create
 * HTTP method: POST
 * Consumes: application/x-www-form-urlencoded
 * Produces: application/json
@@ -39,7 +39,7 @@ nav_order: 3
 
     ```shell
             curl -X 'POST' \
-            'http://localhost:8080/api/users/create' \
+            'http://localhost:8080/users/create' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'

@@ -3,8 +3,8 @@
 title Create User
 actor "User agent"
 
-' User agente sends a request to endpoint /api/users/create to create a user
-"User agent" -> WebService: @POST /api/users/create (name, email, password)
+' User agente sends a request to endpoint /users/create to create a user
+"User agent" -> WebService: @POST /users/create(name, email, password)
 activate WebService #F9F3FC
 WebService --> Controller : createUser(name, email, password)
 activate Controller #F9F3FC

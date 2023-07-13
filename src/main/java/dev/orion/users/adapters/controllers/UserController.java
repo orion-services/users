@@ -18,6 +18,7 @@ package dev.orion.users.adapters.controllers;
 
 import dev.orion.users.adapters.gateways.entities.UserEntity;
 import dev.orion.users.adapters.gateways.repository.UserRepository;
+import dev.orion.users.adapters.presenters.AuthenticationDTO;
 import dev.orion.users.application.interfaces.AuthenticateUCI;
 import dev.orion.users.application.interfaces.CreateUserUCI;
 import dev.orion.users.application.usecases.AuthenticateUC;
@@ -27,15 +28,19 @@ import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.validation.constraints.NotEmpty;
 
+/**
+ * The controller class.
+ */
 @ApplicationScoped
 @WithSession
-public class UserController extends Controller {
+public class UserController extends BasicController {
 
-    /** Use cases */
-    private CreateUserUCI  createUserUC = new CreateUserUC();
-    private AuthenticateUCI authUC = new AuthenticateUC();
+    /** Use cases for users */
+    private CreateUserUCI createUC = new CreateUserUC();
+
+    /** Use cases for authentication.*/
+    private AuthenticateUCI authenticationUC = new AuthenticateUC();
 
     /** Persistence layer */
     @Inject
@@ -50,12 +55,12 @@ public class UserController extends Controller {
      * @param password : The user password
      * @return : Returns a Uni<UserEntity> object
      */
-    public Uni<UserEntity> createUser(String name, String email, String pwd){
-        User user = createUserUC.createUser(name, email, pwd);
+    public Uni<UserEntity> createUser(String name, String email, String pwd) {
+        User user = createUC.createUser(name, email, pwd);
         UserEntity entity = mapper.map(user, UserEntity.class);
         return userRepository.createUser(entity)
-            .onItem().ifNotNull().transform(u -> u)
-            .onItem().ifNotNull().call(this::sendValidationEmail);
+                .onItem().ifNotNull().transform(u -> u)
+                .onItem().ifNotNull().call(this::sendValidationEmail);
     }
 
     /**
@@ -63,14 +68,67 @@ public class UserController extends Controller {
      *
      * @param email : The e-mail of the user
      * @param code  : The validation code
-     * @return      : Returns a Uni<UserEntity> object
+     * @return : Returns a Uni<UserEntity> object
      */
-    public Uni<UserEntity> validateEmail(@NotEmpty String email,
-        @NotEmpty String code) {
-            Uni<UserEntity> result = null;
-            if(Boolean.TRUE.equals(authUC.validateEmail(email, code))){
-                result = userRepository.validateEmail(email, code);
-            }
-            return result;
+    public Uni<UserEntity> validateEmail(final String email,
+        final String code) {
+        Uni<UserEntity> result = null;
+        if (Boolean.TRUE.equals(authenticationUC.validateEmail(email, code))) {
+            result = userRepository.validateEmail(email, code);
+        }
+        return result;
     }
+
+    /**
+     * Authenticates the user in the service.
+     *
+     * @param email    : The user e-mail
+     * @param password : The user password
+     * @return : Returns a JSON Web Token (JWT)
+     */
+    public Uni<String> authenticate(final String email, final String password) {
+        // Creates a user in the model to encrypts the password and
+        // converts it to an entity
+        UserEntity entity = mapper.map(
+                authenticationUC.authenticate(email, password),
+                UserEntity.class);
+
+        // Finds the user in the service through email and password and
+        // generates a JWT
+        return userRepository.authenticate(entity)
+                .onItem().ifNotNull()
+                .transform(this::generateJWT);
+    }
+
+    /**
+     * Creates a user, generates a Json Web Token and returns a
+     * AuthenticationDTO object.
+     *
+     * @param name      : The user name
+     * @param email     : The user e-mail
+     * @param password  : The user password
+     * @return A Uni<AuthenticationDTO> object
+     */
+    public Uni<AuthenticationDTO> createAuthenticate(final String name,
+        final String email, final String password) {
+
+        return this.createUser(name, email, password)
+            .onItem().ifNotNull().transform(user -> {
+                AuthenticationDTO dto = new AuthenticationDTO();
+                dto.setToken(this.generateJWT(user));
+                dto.setUser(user);
+                return dto;
+            });
+    }
+
+    /**
+     * Delete a user from the service.
+     *
+     * @param email The user's e-mail
+     * @return A Uni<Void> object
+     */
+    public Uni<Void> deleteUser(final String email) {
+        return userRepository.deleteUser(email);
+    }
+
 }
