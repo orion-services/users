@@ -1,5 +1,6 @@
 package dev.orion.users.data.handlers;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class AuthenticationHandler {
                 .groups(new HashSet<>(user.getRoleList()))
                 .claim(Claims.c_hash, user.getHash())
                 .claim(Claims.email, user.getEmail())
+                .expiresIn(Duration.ofDays(30L))
                 .sign();
     }
 
