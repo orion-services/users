@@ -44,6 +44,7 @@ public class SocialAuthenticationWS {
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;
 
+    /** Auth utilities. */
     @Inject
     protected AuthenticationHandler authHandler;
 

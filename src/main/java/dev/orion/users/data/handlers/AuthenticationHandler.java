@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class AuthenticationHandler {
+
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;
 
@@ -25,7 +26,8 @@ public class AuthenticationHandler {
     Optional<String> issuer;
 
     /** Set the validation url. */
-    @ConfigProperty(name = "users.email.validation.url", defaultValue = "http://localhost:8080/api/users/validateEmail")
+    @ConfigProperty(name = "users.email.validation.url",
+        defaultValue = "http://localhost:8080/api/users/validateEmail")
     String validateURL;
 
     /**

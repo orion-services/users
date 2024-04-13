@@ -35,6 +35,12 @@ public interface UserRepository extends PanacheRepository<User> {
      */
     Uni<User> createUser(User user);
 
+    /**
+     * Returns a user searching for email.
+     *
+     * @param email : The e-mail of the user
+     * @return A Uni<User> object
+     */
     Uni<User> findUserByEmail(String email);
 
     /**
@@ -55,6 +61,12 @@ public interface UserRepository extends PanacheRepository<User> {
      */
     Uni<User> updateEmail(String email, String newEmail);
 
+    /**
+     * Updates the user's data.
+     *
+     * @param user : The user object
+     * @return A Uni<User> object
+     */
     Uni<User> updateUser(User user);
 
     /**

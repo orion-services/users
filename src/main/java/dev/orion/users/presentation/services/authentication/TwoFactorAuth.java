@@ -52,16 +52,18 @@ public class TwoFactorAuth {
     protected TwoFactorAuthHandler twoFactorAuthHandler;
 
     /** Business logic */
-
     @Inject
     protected AuthenticateUser authenticateUserUseCase;
 
+    /** Business logic */
     @Inject
     protected UpdateUser updateUserUseCase;
 
     /**
      * Authenticate and returns a qrCode to two factor auth.
      *
+     * @param email    : The e-mail of the user
+     * @param password : The password of the user
      * @return The return is in image/png format
      * @throws UserWSException Returns a HTTP 401 if credentials not found
      */
@@ -94,8 +96,11 @@ public class TwoFactorAuth {
     }
 
     /**
-     * Validate two factor auth code
+     * Validate two factor auth code.
      *
+     * @param email    : The e-mail of the user
+     * @param password : The password of the user
+     * @param code     : The code sent to the user
      * @return The return is a string with token
      * @throws UserWSException Returns a HTTP 401 if credentials not found
      */
@@ -123,7 +128,8 @@ public class TwoFactorAuth {
                     return authHandler.generateJWT(user);
                 })
                 .onItem().ifNull()
-                .failWith(new UserWSException("Credentials not found or 2FAuth not activated",
+                .failWith(new UserWSException(
+                        "Credentials not found or 2FAuth not activated",
                         Response.Status.UNAUTHORIZED));
     }
 }

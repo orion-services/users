@@ -40,6 +40,10 @@ import dev.orion.users.domain.usecases.CreateUser;
 import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
+/**
+ * This class represents the web service for creating users.
+ * It provides an endpoint for creating new users.
+ */
 @Path("/api/users")
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,6 +52,7 @@ public class CreateWS {
     /** Fault tolerance default delay. */
     protected static final long DELAY = 2000;
 
+    /** Business logic. */
     @Inject
     protected AuthenticationHandler authHandler;
 
@@ -55,6 +60,7 @@ public class CreateWS {
     @Inject
     protected CreateUser createUserUseCase;
 
+    /** Business logic. */
     @Inject
     protected AuthenticateUser authenticateUserUseCase;
 

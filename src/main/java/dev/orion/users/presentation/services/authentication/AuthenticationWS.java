@@ -40,7 +40,8 @@ import io.quarkus.hibernate.reactive.panache.common.WithSession;
 import io.smallrye.mutiny.Uni;
 
 /**
- * User API.
+ * This class represents the web service for user authentication.
+ * It provides endpoints for authenticating users and creating new users.
  */
 @Path("/api/users")
 @PermitAll
@@ -55,9 +56,11 @@ public class AuthenticationWS {
     @Inject
     protected AuthenticationHandler authHandler;
 
+    /** Business logic. */
     @Inject
     protected AuthenticateUser authenticateUserUseCase;
 
+    /** Business logic. */
     @Inject
     protected CreateUser createUserUseCase;
 
@@ -100,6 +103,7 @@ public class AuthenticationWS {
      */
     @POST
     @Path("/createAuthenticate")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Retry(maxRetries = 1, delay = DELAY)
     @WithSession
     public Uni<AuthenticationDTO> createAuthenticate(

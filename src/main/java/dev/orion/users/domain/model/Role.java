@@ -45,10 +45,18 @@ public class Role extends PanacheEntityBase {
     @NotNull(message = "The name of the role can't be null")
     private String name;
 
+    /**
+     * Default constructor.
+     */
     public Role() {
     }
 
-    public Role(String name) {
+    /**
+     * Constructor with name.
+     *
+     * @param name : The name of the role
+     */
+    public Role(final String name) {
         this();
         this.name = name;
     }

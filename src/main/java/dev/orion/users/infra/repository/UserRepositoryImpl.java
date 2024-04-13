@@ -204,7 +204,8 @@ public class UserRepositoryImpl implements UserRepository {
                 .onItem().ifNull()
                 .failWith(new IllegalArgumentException(USER_NOT_FOUND_ERROR))
                 .onItem().ifNotNull()
-                .transformToUni(user -> Panache.<Void>withTransaction(user::delete));
+                .transformToUni(user ->
+                    Panache.<Void>withTransaction(user::delete));
     }
 
     /**
@@ -315,14 +316,25 @@ public class UserRepositoryImpl implements UserRepository {
         };
     }
 
+    /**
+     * Returns a user searching for email.
+     *
+     * @param email : The e-mail of the user
+     * @return A Uni<User> object
+     */
     @Override
-    public Uni<User> findUserByEmail(String email) {
+    public Uni<User> findUserByEmail(final String email) {
         return find(EMAIL, email).firstResult();
     }
 
+    /**
+     * Updates the user's data.
+     *
+     * @param user : The user object
+     * @return A Uni<User> object
+     */
     @Override
-    public Uni<User> updateUser(User user) {
-
+    public Uni<User> updateUser(final User user) {
         return Panache.<User>withTransaction(user::persist);
     }
 }

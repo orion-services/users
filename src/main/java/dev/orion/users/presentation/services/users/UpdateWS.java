@@ -55,9 +55,11 @@ public class UpdateWS {
         @Inject
         protected UpdateUser updateUserUseCase;
 
+        /** Business logic of the system. */
         @Inject
         protected AuthenticateUser authenticateUserUseCase;
 
+        /** Business logic of the system. */
         @Inject
         protected AuthenticationHandler authHandler;
 
@@ -75,9 +77,8 @@ public class UpdateWS {
          * @param newEmail : The new e-mail of the user
          * @return A new JWT
          * @throws UserWSException Returns a HTTP 400 if the current jwt is
-         *                         outdated or if there are other problems such as
-         *                         username not found
-         *                         or email already used
+         * outdated or if there are other problems such as username not found
+         * or email already used
          */
         @PUT
         @Path("/update/email")
@@ -86,22 +87,22 @@ public class UpdateWS {
         @Retry(maxRetries = 0, delay = DELAY)
         @WithSession
         public Uni<String> updateEmail(
-                        @FormParam("email") @NotEmpty @Email final String email,
-                        @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
-
+            @FormParam("email") @NotEmpty @Email final String email,
+            @FormParam("newEmail") @NotEmpty @Email final String newEmail) {
                 // Checks the e-mail of the token
                 authHandler.checkTokenEmail(email, jwtEmail);
 
                 Uni<User> uni = updateUserUseCase.updateEmail(email, newEmail)
-                                .log()
-                                .onItem().ifNotNull()
-                                .call(this::sendEmail)
-                                .onFailure()
-                                .transform(e -> {
-                                        throw new UserWSException(e.getMessage(),
-                                                        Response.Status.BAD_REQUEST);
-                                });
-                return uni.onItem().transform(user -> authHandler.generateJWT(user));
+                    .log()
+                    .onItem().ifNotNull()
+                    .call(this::sendEmail)
+                    .onFailure()
+                    .transform(e -> {
+                            throw new UserWSException(e.getMessage(),
+                                            Response.Status.BAD_REQUEST);
+                    });
+                return uni.onItem().transform(
+                    user -> authHandler.generateJWT(user));
         }
 
         /**

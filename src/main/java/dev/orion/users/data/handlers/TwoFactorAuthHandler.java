@@ -22,7 +22,7 @@ import com.google.zxing.common.BitMatrix;
 import de.taimos.totp.TOTP;
 
 /**
- * Google Utilities
+ * Google Utilities.
  */
 @ApplicationScoped
 public class TwoFactorAuthHandler {
@@ -31,10 +31,11 @@ public class TwoFactorAuthHandler {
     /**
      * Create Time-based one-time password.
      *
+     * @param secretKey : The secret key in String format
      * @return The Time-based one-time password code in String format
      * @throws IllegalArgumentException
      */
-    public String getTOTPCode(String secretKey) {
+    public String getTOTPCode(final String secretKey) {
         try {
             Base32 base32 = new Base32();
             byte[] bytes = base32.decode(secretKey);
@@ -52,7 +53,9 @@ public class TwoFactorAuthHandler {
      * @return The Google Bar Code in String format
      * @throws IllegalArgumentException
      */
-    public String getAutheticatorBarCode(String secretKey, String account, String issuer) {
+    public String getAutheticatorBarCode(final String secretKey,
+        final String account,
+        final String issuer) {
         try {
             return "otpauth://totp/"
                     + URLEncoder.encode(issuer + ":" + account, UTF_8).replace("+", "%20")
@@ -69,7 +72,7 @@ public class TwoFactorAuthHandler {
      * @return The QrCode with Google Bar Code in a array of byte format
      * @throws IllegalArgumentException
      */
-    public byte[] createQrCode(String barCodeData) {
+    public byte[] createQrCode(final String barCodeData) {
         try {
             BitMatrix matrix = new MultiFormatWriter().encode(barCodeData, BarcodeFormat.QR_CODE, 400, 400);
             BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);

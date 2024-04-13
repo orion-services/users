@@ -82,10 +82,10 @@ public class User extends PanacheEntityBase {
     @JsonIgnore
     private String emailValidationCode;
 
-    /** Stores if is using 2FA */
+    /** Stores if is using 2FA. */
     private boolean isUsing2FA;
 
-    /** Secret code to be used at 2FA validation */
+    /** Secret code to be used at 2FA validation. */
     private String secret2FA;
 
     /**

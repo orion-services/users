@@ -55,8 +55,14 @@ public class UpdateUserImpl implements UpdateUser {
         }
     }
 
+    /**
+     * Updates the user's data.
+     *
+     * @param user : The user object
+     * @return A Uni<User> object
+     */
     @Override
-    public Uni<User> updateUser(User user) {
+    public Uni<User> updateUser(final User user) {
         if (user == null) {
             throw new NotFoundException("User not found");
         }
