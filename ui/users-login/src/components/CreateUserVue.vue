@@ -58,8 +58,7 @@ export default {
       api: 'http://localhost:8080/api/users/createAuthenticate',
       name: '',
       email: '',
-      password: '',
-      authenticated: false
+      password: ''
     }
   },
   methods: {
