@@ -14,40 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.domain.usecases;
+package dev.orion.users.data.usecases;
 
+import java.util.List;
+
+import dev.orion.users.data.interfaces.UserRepository;
 import dev.orion.users.domain.model.User;
+import dev.orion.users.domain.usecases.ListUser;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 @ApplicationScoped
-public interface UpdateUser {
-    /**
-     * Updates the e-mail of the user.
-     *
-     * @param email    : Current user's e-mail
-     * @param newEmail : New e-mail
-     *
-     * @return An Uni<User> object
-     */
-    Uni<User> updateEmail(String email, String newEmail);
+public class ListUserImpl implements ListUser {
 
-    /**
-     * Updates the user's password.
-     *
-     * @param email       : User's email
-     * @param password    : Current password
-     * @param newPassword : New Password
-     *
-     * @return An Uni<User> object
-     */
-    Uni<User> updatePassword(String email, String password, String newPassword);
+    @Inject
+    protected UserRepository repository;
 
-    /**
-     * Updates a user.
-     *
-     * @param user A user object
-     * @return An Uni<User> object
-     */
-    Uni<User> updateUser(User user);
+    @Override
+    public Uni<List<User>> listAllUsers() {
+        return repository.listAllUsers();
+
+    }
+
 }

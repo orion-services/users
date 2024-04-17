@@ -16,38 +16,20 @@
  */
 package dev.orion.users.domain.usecases;
 
+import java.util.List;
+
 import dev.orion.users.domain.model.User;
 import io.smallrye.mutiny.Uni;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
-public interface UpdateUser {
-    /**
-     * Updates the e-mail of the user.
-     *
-     * @param email    : Current user's e-mail
-     * @param newEmail : New e-mail
-     *
-     * @return An Uni<User> object
-     */
-    Uni<User> updateEmail(String email, String newEmail);
+public interface ListUser {
 
     /**
-     * Updates the user's password.
+     * List all users in the service.
      *
-     * @param email       : User's email
-     * @param password    : Current password
-     * @param newPassword : New Password
-     *
-     * @return An Uni<User> object
+     * @return A list of Uni<User> objects
      */
-    Uni<User> updatePassword(String email, String password, String newPassword);
+    public Uni<List<User>> listAllUsers();
 
-    /**
-     * Updates a user.
-     *
-     * @param user A user object
-     * @return An Uni<User> object
-     */
-    Uni<User> updateUser(User user);
 }

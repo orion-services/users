@@ -17,6 +17,9 @@
 package dev.orion.users.data.interfaces;
 
 import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.List;
+
 import dev.orion.users.domain.model.User;
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import io.smallrye.mutiny.Uni;
@@ -26,6 +29,13 @@ import io.smallrye.mutiny.Uni;
  */
 @ApplicationScoped
 public interface UserRepository extends PanacheRepository<User> {
+
+    /**
+     * List all users in the service.
+     *
+     * @return A list of Uni<User> objects
+     */
+    Uni<List<User>> listAllUsers();
 
     /**
      * Creates a user in the service.

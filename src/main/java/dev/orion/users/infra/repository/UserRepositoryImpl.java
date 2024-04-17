@@ -17,6 +17,7 @@
 package dev.orion.users.infra.repository;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -337,4 +338,13 @@ public class UserRepositoryImpl implements UserRepository {
     public Uni<User> updateUser(final User user) {
         return Panache.<User>withTransaction(user::persist);
     }
+
+    /**
+     * List all users in the service.
+     */
+    @Override
+    public Uni<List<User>> listAllUsers() {
+        return listAll();
+    }
+
 }

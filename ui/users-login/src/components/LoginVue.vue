@@ -42,7 +42,6 @@
                   </span>
                   <span>Login</span>
                 </button>
-
               </form>
             </div>
           </div>

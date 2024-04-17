@@ -28,20 +28,7 @@
                     class="input mb-4"
                     type="email"
                     placeholder="Your e-mail"
-                    v-model="firstEmail"
-                    required
-                  />
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-envelope"></i>
-                  </span>
-                </div>
-
-                <div class="control has-icons-left">
-                  <input
-                    class="input mb-4"
-                    type="email"
-                    placeholder="Confirm your e-mail"
-                    v-model="secondEmail"
+                    v-model="email"
                     required
                   />
                   <span class="icon is-small is-left">
@@ -84,7 +71,7 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      api: 'http://localhost:8080/api/users/createAuthenticate',
+      url: 'http://localhost:8080/api/users/createAuthenticate',
       name: '',
       email: '',
       password: ''
@@ -98,7 +85,7 @@ export default {
       params.append('password', this.password)
 
       try {
-        let response = await axios.post(this.api, params)
+        let response = await axios.post(this.url, params)
         sessionStorage.setItem('users', JSON.stringify(response.data))
       } catch (error) {
         console.log(error)

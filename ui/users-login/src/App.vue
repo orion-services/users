@@ -1,43 +1,9 @@
 <template>
-  <template v-if="create">
-    <users-create></users-create>
-  </template>
-  <template v-else>
-    <users-login></users-login>
-  </template>
-  <div class="container">
-    <div class="columns is-centered">
-      <div class="column is-half">
-        <div class="content has-text-right">
-          <button class="button is-text" @click="change()">{{ buttonText }}</button>
-        </div>
-        <div class="content has-text-centered">
-          <button class="button is-text" @click="change()">Forgot password?</button>
-        </div>
-      </div>
-    </div>
-  </div>
+  <users-list></users-list>
+  <users-create></users-create>
+  <users-login></users-login>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      create: false,
-      buttonText: 'Create account'
-    }
-  },
-  methods: {
-    change() {
-      if (this.create) {
-        this.buttonText = 'Create account'
-      } else {
-        this.buttonText = 'Login'
-      }
-      this.create = !this.create
-    }
-  }
-}
-</script>
+<script></script>
 
 <style></style>
