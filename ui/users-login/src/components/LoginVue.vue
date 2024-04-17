@@ -9,31 +9,41 @@
                 <img class="is-rounded" src="../../assets/logo.png" alt="Logo" />
               </figure>
 
-              <div class="control has-icons-left">
-                <input class="input mb-3" type="text" placeholder="E-mail" />
-                <span class="icon is-small is-left">
-                  <i class="fas fa-envelope"></i>
-                </span>
-              </div>
+              <form>
+                <div class="control has-icons-left">
+                  <input
+                    class="input mb-3"
+                    type="email"
+                    placeholder="E-mail"
+                    required
+                    v-model="email"
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
 
-              <div class="control has-icons-left">
-                <input
-                  class="input mb-3"
-                  type="password"
-                  placeholder="Password"
-                  v-model="password"
-                />
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock"></i>
-                </span>
-              </div>
+                <div class="control has-icons-left">
+                  <input
+                    class="input mb-3"
+                    type="password"
+                    placeholder="Password"
+                    v-model="password"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
 
-              <button class="button is-rounded" @click="create()">
-                <span class="icon">
-                  <i class="fas fa-right-to-bracket"></i>
-                </span>
-                <span>Login</span>
-              </button>
+                <button class="button is-rounded" @click="create()">
+                  <span class="icon">
+                    <i class="fas fa-right-to-bracket"></i>
+                  </span>
+                  <span>Login</span>
+                </button>
+
+              </form>
             </div>
           </div>
         </div>

@@ -8,8 +8,11 @@
   <div class="container">
     <div class="columns is-centered">
       <div class="column is-half">
-        <div class="content has-text-right mt-1">
+        <div class="content has-text-right">
           <button class="button is-text" @click="change()">{{ buttonText }}</button>
+        </div>
+        <div class="content has-text-centered">
+          <button class="button is-text" @click="change()">Forgot password?</button>
         </div>
       </div>
     </div>

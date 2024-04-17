@@ -9,38 +9,67 @@
                 <img class="is-rounded" src="../../assets/logo.png" alt="Logo" />
               </figure>
 
-              <div class="control has-icons-left">
-                <input type="text" class="input mb-3" placeholder="Full name" v-model="name" />
-                <span class="icon is-small is-left">
-                  <i class="fas fa-user"></i>
-                </span>
-              </div>
+              <form>
+                <div class="control has-icons-left">
+                  <input
+                    type="text"
+                    class="input mb-4"
+                    placeholder="Full name"
+                    v-model="name"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-user"></i>
+                  </span>
+                </div>
 
-              <div class="control has-icons-left">
-                <input class="input mb-3" type="text" placeholder="E-mail" />
-                <span class="icon is-small is-left">
-                  <i class="fas fa-envelope"></i>
-                </span>
-              </div>
+                <div class="control has-icons-left">
+                  <input
+                    class="input mb-4"
+                    type="email"
+                    placeholder="Your e-mail"
+                    v-model="firstEmail"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
 
-              <div class="control has-icons-left">
-                <input
-                  class="input mb-3"
-                  type="password"
-                  placeholder="Password"
-                  v-model="password"
-                />
-                <span class="icon is-small is-left">
-                  <i class="fas fa-lock"></i>
-                </span>
-              </div>
+                <div class="control has-icons-left">
+                  <input
+                    class="input mb-4"
+                    type="email"
+                    placeholder="Confirm your e-mail"
+                    v-model="secondEmail"
+                    required
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-envelope"></i>
+                  </span>
+                </div>
 
-              <button class="button is-rounded" @click="create()">
-                <span class="icon">
-                  <i class="fas fa-plus"></i>
-                </span>
-                <span>Create</span>
-              </button>
+                <div class="control has-icons-left">
+                  <input
+                    class="input mb-4"
+                    type="password"
+                    placeholder="Choose a password"
+                    v-model="password"
+                    required
+                    minlength="8"
+                  />
+                  <span class="icon is-small is-left">
+                    <i class="fas fa-lock"></i>
+                  </span>
+                </div>
+
+                <button class="button is-rounded" @click="create()">
+                  <span class="icon">
+                    <i class="fas fa-plus"></i>
+                  </span>
+                  <span>Create</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>
