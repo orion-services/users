@@ -6,30 +6,17 @@
           <div class="card-content mt-6">
             <div class="content">
               <figure class="image is-64x64 mb-5">
-                <img class="is-rounded" src="../../assets/logo.png" alt="Logo" />
+                <img class="is-rounded" src="@/assets/logo.png" alt="Orion logo" />
               </figure>
 
               <form>
                 <div class="control has-icons-left">
                   <input
-                    type="text"
-                    class="input mb-4"
-                    placeholder="Full name"
-                    v-model="name"
-                    required
-                  />
-                  <span class="icon is-small is-left">
-                    <i class="fas fa-user"></i>
-                  </span>
-                </div>
-
-                <div class="control has-icons-left">
-                  <input
-                    class="input mb-4"
+                    class="input mb-3"
                     type="email"
-                    placeholder="Your e-mail"
-                    v-model="email"
+                    placeholder="E-mail"
                     required
+                    v-model="email"
                   />
                   <span class="icon is-small is-left">
                     <i class="fas fa-envelope"></i>
@@ -38,12 +25,11 @@
 
                 <div class="control has-icons-left">
                   <input
-                    class="input mb-4"
+                    class="input mb-3"
                     type="password"
-                    placeholder="Choose a password"
+                    placeholder="Password"
                     v-model="password"
                     required
-                    minlength="8"
                   />
                   <span class="icon is-small is-left">
                     <i class="fas fa-lock"></i>
@@ -52,9 +38,9 @@
 
                 <button class="button is-rounded" @click="create()">
                   <span class="icon">
-                    <i class="fas fa-plus"></i>
+                    <i class="fas fa-right-to-bracket"></i>
                   </span>
-                  <span>Create</span>
+                  <span>Login</span>
                 </button>
               </form>
             </div>
@@ -71,21 +57,19 @@ import axios from 'axios'
 export default {
   data() {
     return {
-      url: 'http://localhost:8080/api/users/createAuthenticate',
-      name: '',
+      api: 'http://localhost:8080/api/users/authenticate',
       email: '',
       password: ''
     }
   },
   methods: {
-    async create() {
+    async authenticate() {
       const params = new URLSearchParams()
-      params.append('name', this.name)
       params.append('email', this.email)
       params.append('password', this.password)
 
       try {
-        let response = await axios.post(this.url, params)
+        let response = await axios.post(this.api, params)
         sessionStorage.setItem('users', JSON.stringify(response.data))
       } catch (error) {
         console.log(error)
