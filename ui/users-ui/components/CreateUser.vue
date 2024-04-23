@@ -77,20 +77,23 @@ export default {
   methods: {
     async create() {
       try {
-        let response = await fetch(this.url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          // Convert the data to a URL-encoded query string
-          body: new URLSearchParams({
-            name: this.name,
-            email: this.email,
-            password: this.password,
-          }),
-        });
-        this.user = await response.json();
-        console.log(this.user);
+        if (this.name === "" || this.email === "" || this.password === "") {
+          alert("Please fill in all fields");
+          this.$router.push("/admin");
+        } else {
+          let response = await fetch(this.url, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: new URLSearchParams({
+              name: this.name,
+              email: this.email,
+              password: this.password,
+            }),
+          });
+          this.user = await response.json();
+        }
       } catch (error) {
         console.error(error);
       }
