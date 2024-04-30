@@ -14,7 +14,7 @@ Unlike feature-rich identity services like [keycloak](https://www.keycloak.org),
 Orion Users is intended to provide a small and generic set of features that
 developers can extends and customize freely.
 
-Orion Users is written in [Java/Quarkus](https://quarkus.io) through [reactive
+Orion Users is written in [Quarkus](https://quarkus.io) through [reactive
 programming](https://quarkus.io/guides/getting-started-reactive) and prepared to
 run with [native compilation](https://quarkus.io/guides/building-native-image),
 in other words, it is a code developed to run in cloud services with high
