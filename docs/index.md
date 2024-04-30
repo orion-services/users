@@ -6,6 +6,8 @@ nav_order: 1
 
 # Orion users documentation
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f305c108-5bfb-4aae-85f3-31d216ce2214/deploy-status)](https://app.netlify.com/sites/users-orion-services/deploys)
+
 Orion users is a small identity service intended for those who want to start a
 prototype or project without the need to implement basic features like
 managing and authenticating users.
