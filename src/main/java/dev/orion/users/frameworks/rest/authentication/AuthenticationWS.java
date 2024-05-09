@@ -68,6 +68,7 @@ public class AuthenticationWS {
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 1, delay = DELAY)
+    @Deprecated(since = "1.0.0", forRemoval = true)
     public Uni<String> authenticate(
             @RestForm @NotEmpty @Email final String email,
             @RestForm @NotEmpty final String password) {
