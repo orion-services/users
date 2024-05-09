@@ -3,7 +3,7 @@ left to right direction
 
 actor "Client" as client
 
-rectangle Users {
+rectangle Users{
     usecase "Authenticate" as UC1
     usecase "Create and Authenticate" as UC2
     usecase "Create User" as UC3

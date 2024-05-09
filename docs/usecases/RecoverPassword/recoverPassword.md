@@ -13,7 +13,7 @@ nav_order: 6
 
 ## HTTP(S) endpoints
 
-* /users/recoverPassword
+* api/users/recoverPassword
   * HTTP method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: HTTP 204 (Undocumented)
@@ -23,7 +23,7 @@ nav_order: 6
 
         ```shell
            curl -X 'POST' \
-                'http://localhost:8080/users/recoverPassword' \
+                'http://localhost:8080/api/users/recoverPassword' \
                 -H 'accept: */*' \
                 -H 'Content-Type: application/x-www-form-urlencoded' \
                 -d 'email=orion%40test.com'

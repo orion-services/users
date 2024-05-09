@@ -16,7 +16,7 @@ nav_order: 1
 
 ## HTTP(S) endpoints
 
-* /users/authenticate
+* /api/users/authenticate
   * HTTP method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
@@ -25,7 +25,7 @@ nav_order: 1
         * Example of request:
         ```shell
             curl -X POST \
-            'http://localhost:8080/users/authenticate' \
+            'http://localhost:8080/api/users/authenticate' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

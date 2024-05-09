@@ -13,10 +13,10 @@
     Repository --> Repository: findUserByEmail(email)
     activate Repository
 
-    Repository -->> UseCase: Uni<UserEntity>
+    Repository -->> UseCase: Uni<User>
     deactivate Repository
 
-    UseCase -->> Webservice : Uni<UserEntity>
+    UseCase -->> Webservice : Uni<User>
 
     WebService --> Webservice : secret = user.getSecret2FA()
     WebService --> GoogleUtils : getTOTPCode(secret)
