@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 /**
- * User.
+ * Represents a user in the system.
  */
 public class User {
 
@@ -48,14 +48,15 @@ public class User {
     /** The hash used to identify the user. */
     private String emailValidationCode;
 
-    /** Stores if is using 2FA */
+    /** Stores if is using 2FA. */
     private boolean isUsing2FA;
 
-    /** Secret code to be used at 2FA validation */
+    /** Secret code to be used at 2FA validation. */
     private String secret2FA;
 
     /**
-     * User constructor.
+     * User constructor. Initializes the user with a unique hash, an empty role
+     * list, and a random email validation code.
      */
     public User() {
         this.hash = UUID.randomUUID().toString();
@@ -64,19 +65,18 @@ public class User {
     }
 
     /**
-     * Add a role in a user.
+     * Add a role to the user.
      *
-     * @param role A role object.
+     * @param role The role to be added.
      */
     public void addRole(final Role role) {
         roles.add(role);
     }
 
     /**
-     * Transform the a list of object role to a list of String. The role "user"
-     * is the default role of the server
+     * Get the list of roles assigned to the user.
      *
-     * @return A list of roles in String format
+     * @return A list of roles in String format.
      */
     @JsonIgnore
     public List<String> getRoleList() {
@@ -92,88 +92,178 @@ public class User {
     }
 
     /**
-     * Generates a e-mail validation code to the user.
+     * Generates a new email validation code for the user.
      */
     public void setEmailValidationCode() {
         this.emailValidationCode = UUID.randomUUID().toString();
     }
 
     /**
-     * Removes all roles of the object.
+     * Removes all roles assigned to the user.
      */
     public void removeRoles() {
         this.roles.clear();
     }
 
+    /**
+     * Get the hash of the user.
+     *
+     * @return The hash of the user.
+     */
     public String getHash() {
         return hash;
     }
 
-    public void setHash(String hash) {
+    /**
+     * Set the hash of the user.
+     *
+     * @param hash The hash of the user.
+     */
+    public void setHash(final String hash) {
         this.hash = hash;
     }
 
+    /**
+     * Get the name of the user.
+     *
+     * @return The name of the user.
+     */
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    /**
+     * Set the name of the user.
+     *
+     * @param name The name of the user.
+     */
+    public void setName(final String name) {
         this.name = name;
     }
 
+    /**
+     * Get the email of the user.
+     *
+     * @return The email of the user.
+     */
     public String getEmail() {
         return email;
     }
 
-    public void setEmail(String email) {
+    /**
+     * Set the email of the user.
+     *
+     * @param email The email of the user.
+     */
+    public void setEmail(final String email) {
         this.email = email;
     }
 
+    /**
+     * Get the password of the user.
+     *
+     * @return The password of the user.
+     */
     public String getPassword() {
         return password;
     }
 
-    public void setPassword(String password) {
+    /**
+     * Set the password of the user.
+     *
+     * @param password The password of the user.
+     */
+    public void setPassword(final String password) {
         this.password = password;
     }
 
+    /**
+     * Get the list of roles assigned to the user.
+     *
+     * @return The list of roles assigned to the user.
+     */
     public List<Role> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<Role> roles) {
+    /**
+     * Set the list of roles assigned to the user.
+     *
+     * @param roles The list of roles assigned to the user.
+     */
+    public void setRoles(final List<Role> roles) {
         this.roles = roles;
     }
 
+    /**
+     * Check if the user's email is validated.
+     *
+     * @return True if the email is validated, false otherwise.
+     */
     public boolean isEmailValid() {
         return emailValid;
     }
 
-    public void setEmailValid(boolean emailValid) {
+    /**
+     * Set the email validation status of the user.
+     *
+     * @param emailValid True if the email is validated, false otherwise.
+     */
+    public void setEmailValid(final boolean emailValid) {
         this.emailValid = emailValid;
     }
 
+    /**
+     * Get the email validation code of the user.
+     *
+     * @return The email validation code of the user.
+     */
     public String getEmailValidationCode() {
         return emailValidationCode;
     }
 
-    public void setEmailValidationCode(String emailValidationCode) {
+    /**
+     * Set the email validation code of the user.
+     *
+     * @param emailValidationCode The email validation code of the user.
+     */
+    public void setEmailValidationCode(final String emailValidationCode) {
         this.emailValidationCode = emailValidationCode;
     }
 
+    /**
+     * Check if the user is using 2FA (Two-Factor Authentication).
+     *
+     * @return True if the user is using 2FA, false otherwise.
+     */
     public boolean isUsing2FA() {
         return isUsing2FA;
     }
 
-    public void setUsing2FA(boolean isUsing2FA) {
+    /**
+     * Set the 2FA status of the user.
+     *
+     * @param isUsing2FA True if the user is using 2FA, false otherwise.
+     */
+    public void setUsing2FA(final boolean isUsing2FA) {
         this.isUsing2FA = isUsing2FA;
     }
 
+    /**
+     * Get the secret code used for 2FA validation.
+     *
+     * @return The secret code used for 2FA validation.
+     */
     public String getSecret2FA() {
         return secret2FA;
     }
 
-    public void setSecret2FA(String secret2fa) {
+    /**
+     * Set the secret code used for 2FA validation.
+     *
+     * @param secret2fa The secret code used for 2FA validation.
+     */
+    public void setSecret2FA(final String secret2fa) {
         secret2FA = secret2fa;
     }
 

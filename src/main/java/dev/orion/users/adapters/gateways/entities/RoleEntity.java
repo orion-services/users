@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,10 +47,18 @@ public class RoleEntity extends PanacheEntityBase {
     @NotNull(message = "The name of the role can't be null")
     private String name;
 
+    /**
+     * Default constructor for RoleEntity.
+     */
     public RoleEntity() {
     }
 
-    public RoleEntity(String name) {
+    /**
+     * Constructor for RoleEntity with name parameter.
+     *
+     * @param name The name of the role.
+     */
+    public RoleEntity(final String name) {
         this();
         this.name = name;
     }

@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,6 @@ public class UpdateUserImpl implements UpdateUser {
         User user = null;
         if (email.isBlank() || newEmail.isBlank()) {
             throw new IllegalArgumentException(BLANK);
-        } else {
-            //user = repository.updateEmail(email, newEmail);
         }
         return user;
     }
@@ -56,14 +54,19 @@ public class UpdateUserImpl implements UpdateUser {
         if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
             throw new IllegalArgumentException(BLANK);
         } else {
-            // return repository.changePassword(DigestUtils.sha256Hex(password),
-            //         DigestUtils.sha256Hex(newPassword), email);
             return null;
         }
     }
 
+    /**
+     * Updates a user.
+     *
+     * @param user the user to be updated
+     * @return the updated user
+     * @throws IllegalArgumentException if the user is null
+     */
     @Override
-    public User updateUser(User user) {
+    public User updateUser(final User user) {
         if (user == null) {
             throw new IllegalArgumentException(BLANK);
         }

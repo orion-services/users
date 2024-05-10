@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ import io.smallrye.mutiny.Uni;
 import jakarta.ws.rs.core.Response;
 
 /**
- *  The controller class.
+ * The controller class.
  */
 public class BasicController {
 
@@ -57,30 +57,29 @@ public class BasicController {
 
     /** Configure the issuer for JWT generation. */
     @ConfigProperty(name = "users.issuer")
-    Optional<String> issuer;
+    protected Optional<String> issuer;
 
     /** Set the validation url. */
     @ConfigProperty(name = "users.email.validation.url",
         defaultValue = "http://localhost:8080/users/validateEmail")
-    String validateURL;
+    protected String validateURL;
 
     /** ModelMapper. */
-    ModelMapper mapper = new ModelMapper();
+    protected ModelMapper mapper = new ModelMapper();
 
     /**
      * Creates a JWT (JSON Web Token) to a user.
      *
      * @param user : The user object
-     *
      * @return Returns the JWT
      */
     public String generateJWT(final UserEntity user) {
         return Jwt.issuer(issuer.orElse("orion-users"))
-            .upn(user.getEmail())
-            .groups(new HashSet<>(user.getRoleList()))
-            .claim(Claims.c_hash, user.getHash())
-            .claim(Claims.email, user.getEmail())
-            .sign();
+                .upn(user.getEmail())
+                .groups(new HashSet<>(user.getRoleList()))
+                .claim(Claims.c_hash, user.getHash())
+                .claim(Claims.email, user.getEmail())
+                .sign();
     }
 
     /**
@@ -90,13 +89,14 @@ public class BasicController {
      * @param jwtEmail : JWT e-mail
      * @return true if the e-mails are the same
      * @throws ServiceException Throw an exception (HTTP 400) if the e-mails are
-     * different, indicating that possibly the JWT is outdated.
+     *                          different, indicating that possibly the JWT is
+     *                          outdated.
      */
     public boolean checkTokenEmail(final String email,
             final String jwtEmail) {
         if (!email.equals(jwtEmail)) {
             throw new ServiceException("JWT outdated",
-                Response.Status.BAD_REQUEST);
+                    Response.Status.BAD_REQUEST);
         }
         return true;
     }
@@ -121,13 +121,14 @@ public class BasicController {
                 .transform(item -> user);
     }
 
-     /**
+    /**
      * Create Time-based one-time password.
      *
+     * @param secretKey : The secret key
      * @return The Time-based one-time password code in String format
      * @throws IllegalArgumentException
      */
-    public String getTOTPCode(String secretKey) {
+    public String getTOTPCode(final String secretKey) {
         try {
             Base32 base32 = new Base32();
             byte[] bytes = base32.decode(secretKey);
@@ -141,15 +142,22 @@ public class BasicController {
     /**
      * Create Google Bar Code.
      *
+     * @param secretKey : The secret key
+     * @param account   : The account name
+     * @param issuer    : The issuer name
      * @return The Google Bar Code in String format
      * @throws IllegalArgumentException
      */
-    public String getAuthenticatorBarCode(String secretKey, String account, String issuer) {
+    public String getAuthenticatorBarCode(final String secretKey,
+            final String account, final String issuer) {
         try {
             return "otpauth://totp/"
-                    + URLEncoder.encode(issuer + ":" + account, UTF_8).replace("+", "%20")
-                    + "?secret=" + URLEncoder.encode(secretKey, UTF_8).replace("+", "%20")
-                    + "&issuer=" + URLEncoder.encode(issuer, UTF_8).replace("+", "%20");
+                    + URLEncoder.encode(issuer + ":" + account, UTF_8)
+                            .replace("+", "%20")
+                    + "?secret=" + URLEncoder.encode(secretKey, UTF_8)
+                            .replace("+", "%20")
+                    + "&issuer=" + URLEncoder.encode(issuer, UTF_8)
+                            .replace("+", "%20");
         } catch (UnsupportedEncodingException | NullPointerException e) {
             throw new IllegalStateException(e);
         }
@@ -158,12 +166,14 @@ public class BasicController {
     /**
      * Create QrCode.
      *
+     * @param barCodeData : The Google Bar Code
      * @return The QrCode with Google Bar Code in a array of byte format
      * @throws IllegalArgumentException
      */
-    public byte[] createQrCode(String barCodeData) {
+    public byte[] createQrCode(final String barCodeData) {
         try {
-            BitMatrix matrix = new MultiFormatWriter().encode(barCodeData, BarcodeFormat.QR_CODE, 400, 400);
+            BitMatrix matrix = new MultiFormatWriter().encode(barCodeData,
+                    BarcodeFormat.QR_CODE, 400, 400);
             BufferedImage image = MatrixToImageWriter.toBufferedImage(matrix);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             ImageIO.write(image, "png", baos);

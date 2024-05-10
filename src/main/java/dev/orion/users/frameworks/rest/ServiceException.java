@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 /**
- * Frameworks and Drivers layer of Clean Architecture
+ * Frameworks and Drivers layer of Clean Architecture.
  */
 public class ServiceException extends WebApplicationException {
 
@@ -48,13 +48,12 @@ public class ServiceException extends WebApplicationException {
      * @return A Response object
      */
     private static Response init(final String message, final Status status) {
-        List<Map<String,String>> violations = new ArrayList<>();
-        violations.add(Map.of("message",message));
+        List<Map<String, String>> violations = new ArrayList<>();
+        violations.add(Map.of("message", message));
 
         return Response
             .status(status)
             .entity(Map.of("violations", violations))
             .build();
     }
-
 }

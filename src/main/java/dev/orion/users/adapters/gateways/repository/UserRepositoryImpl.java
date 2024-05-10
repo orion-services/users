@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,9 @@ import io.quarkus.panache.common.Parameters;
 import io.smallrye.mutiny.Uni;
 
 /**
- * Implements the repository pattern for the user entity.
+ * Implementation of the UserRepository interface that provides methods for
+ * creating, authenticating, updating, and deleting user entities in the
+ * service.
  */
 @ApplicationScoped
 public class UserRepositoryImpl implements UserRepository {
@@ -133,7 +135,8 @@ public class UserRepositoryImpl implements UserRepository {
      * @return Uni<UserEntity> object
      */
     @Override
-    public Uni<UserEntity> validateEmail(final String email, final String code) {
+    public Uni<UserEntity> validateEmail(final String email,
+            final String code) {
         Map<String, Object> params = Parameters.with(EMAIL,
                 email).and("code", code).map();
         return find("email = :email and emailValidationCode = :code",
@@ -204,10 +207,10 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public Uni<Void> deleteUser(final String email) {
         return checkEmail(email)
-            .onItem().ifNull().failWith(
-                new IllegalArgumentException(USER_NOT_FOUND_ERROR))
-            .onItem().ifNotNull().transformToUni(
-                user -> Panache.<Void>withTransaction(user::delete));
+                .onItem().ifNull().failWith(
+                        new IllegalArgumentException(USER_NOT_FOUND_ERROR))
+                .onItem().ifNotNull().transformToUni(
+                        user -> Panache.<Void>withTransaction(user::delete));
     }
 
     /**
@@ -318,13 +321,26 @@ public class UserRepositoryImpl implements UserRepository {
         };
     }
 
+    /**
+     * Finds a user by their email address.
+     *
+     * @param email the email address of the user to find
+     * @return a Uni that emits the user entity if found, or completes empty if
+     * not found
+     */
     @Override
-    public Uni<UserEntity> findUserByEmail(String email) {
+    public Uni<UserEntity> findUserByEmail(final String email) {
         return find(EMAIL, email).firstResult();
     }
 
+    /**
+     * Updates a user entity in the repository.
+     *
+     * @param user The user entity to be updated.
+     * @return A Uni that emits the updated user entity.
+     */
     @Override
-    public Uni<UserEntity> updateUser(UserEntity user) {
+    public Uni<UserEntity> updateUser(final UserEntity user) {
         return Panache.<UserEntity>withTransaction(user::persist);
     }
 }

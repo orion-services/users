@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,10 +84,10 @@ public class UserEntity extends PanacheEntityBase {
     @JsonIgnore
     private String emailValidationCode;
 
-    /** Stores if is using 2FA */
+    /** Stores if is using 2FA. */
     private boolean isUsing2FA;
 
-    /** Secret code to be used at 2FA validation */
+    /** Secret code to be used at 2FA validation. */
     private String secret2FA;
 
     /**

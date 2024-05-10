@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -85,7 +85,8 @@ public interface UserRepository extends PanacheRepository<UserEntity> {
      * @param email       : User's email
      * @return A Uni<UserEntity> object
      */
-    Uni<UserEntity> changePassword(String password, String newPassword, String email);
+    Uni<UserEntity> changePassword(String password, String newPassword,
+        String email);
 
     /**
      * Generates a new password of a user.

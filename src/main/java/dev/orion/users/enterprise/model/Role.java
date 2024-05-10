@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://github.com/orion-services
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,25 +17,43 @@
 package dev.orion.users.enterprise.model;
 
 /**
- * Role.
+ * Represents a role in the system.
  */
 public class Role {
 
     /** The name of the role. */
     private String name;
 
-    public Role() {}
+    /**
+     * Constructs a new Role object.
+     */
+    public Role() { }
 
-    public Role(String name) {
+    /**
+     * Constructs a new Role object with the specified name.
+     *
+     * @param name the name of the role
+     */
+    public Role(final String name) {
         this();
         this.name = name;
     }
 
+    /**
+     * Returns the name of the role.
+     *
+     * @return the name of the role
+     */
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
+    /**
+     * Sets the name of the role.
+     *
+     * @param name the name of the role
+     */
+    public void setName(final String name) {
         this.name = name;
     }
 
