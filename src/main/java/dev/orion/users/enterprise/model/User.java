@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2024 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ public class User {
     private String emailValidationCode;
 
     /** Stores if is using 2FA. */
-    private boolean isUsing2FA;
+    private boolean using2FA;
 
     /** Secret code to be used at 2FA validation. */
     private String secret2FA;
@@ -237,7 +237,7 @@ public class User {
      * @return True if the user is using 2FA, false otherwise.
      */
     public boolean isUsing2FA() {
-        return isUsing2FA;
+        return using2FA;
     }
 
     /**
@@ -246,7 +246,7 @@ public class User {
      * @param isUsing2FA True if the user is using 2FA, false otherwise.
      */
     public void setUsing2FA(final boolean isUsing2FA) {
-        this.isUsing2FA = isUsing2FA;
+        this.using2FA = isUsing2FA;
     }
 
     /**

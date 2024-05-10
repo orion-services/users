@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2024 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ public class AuthenticateUC implements AuthenticateUCI {
      * @param code  : The validation code
      * @return true if the validation code is correct for the respective e-mail
      */
+    @Override
     public Boolean validateEmail(final String email, final String code) {
         if (email.isBlank() || code.isBlank()) {
             throw new IllegalArgumentException(BLANK);

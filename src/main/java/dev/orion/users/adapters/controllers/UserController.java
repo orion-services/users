@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2024 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,10 +37,10 @@ import jakarta.inject.Inject;
 public class UserController extends BasicController {
 
     /** Use cases for users. */
-    private CreateUserUCI createUC = new CreateUserUC();
+    private final CreateUserUCI createUC = new CreateUserUC();
 
     /** Use cases for authentication. */
-    private AuthenticateUCI authenticationUC = new AuthenticateUC();
+    private final AuthenticateUCI authenticationUC = new AuthenticateUC();
 
     /** Persistence layer. */
     @Inject
