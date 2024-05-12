@@ -14,10 +14,10 @@ nav_order: 7
   with a code to the user validates the new e-mail and generates a new access
   token to the user.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/update/email
-  * HTTP method: PUT
+* /users/update/email
+  * Method: PUT
   * Consumes: application/x-www-form-urlencoded
   * Produces: text/plain
   * Examples:
@@ -26,7 +26,7 @@ nav_order: 7
 
         ```shell
            curl -X PUT \
-                'http://localhost:8080/api/users/update/email' \
+                'http://localhost:8080/users/update/email' \
                 --header 'Accept: */*' \
                 --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
                 --header 'Authorization: Bearer eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.UbrbrSkwKUOPm12kdcrbwroXe8cwPRg9tLN0ovxEB89bm9LNPYTj6qATOAHrObG-jDf2CUK1m3C5cTZE5LAx-hFt7YgdjXC4qxx57GvyzNY6Dxg_lp-pM3fEvw3CBQujRD47Lr3KwjPilSrwhAvXv46mw78cPHkw3kuNerdNf00TyIBYFobKezFxqT-jTDAPmzFo4B2jwFDtzOKf61Jq30E8i6H8IIDQ7XohbGdotbqu6RdR5uzoaJqB8ylz1hNXGWaBFD3GrsyCeFX9G6zgs998BoIhceKOksEZYhR7TD9q8SIuZWQTeIcgtuLBNMeQ7PV04bvZAyNCcN45sD7QJw.rwzVRmyTL16f1s9i.JrGJwG-ANTLqKuaEFTk-IEO5sdhthG9Z5-DXcli39X3mJKPn2gYIZyO4yp6VlFVw_gRT7x_YwwnLM0UuTqfpdL7fgSCS20nhC1fJYd0fvZCPLHBtJUDdo7gkswmG6eb4M1QENDkK96biwRGq0sCG5dZPfkDp1PXJQyF63phEPEb9Bo6xVzoJjJl-9C25BQRRSBHrGzp9tzY3Bh2WMv1JGJGG2thhuh2L6ap4QvM1jdyS9ObeNL61al_4UIk8CesZ0a5enheICPaL5YfbMHpwCWd3PutmABr-o05jtw.7dE9ieDGe3qOooGWmR-jJg' \

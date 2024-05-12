@@ -55,12 +55,15 @@ public class AuthenticationWS {
     private UserController controller;
 
     /**
-     * Authenticates the user.
+     * @deprecated This method is deprecated and will be removed in a future
+     * release. Please, use the login method instead.
      *
-     * @param email    The e-mail of the user
+     * Authenticates a user.
+     *
+     * @param email    The email of the user
      * @param password The password of the user
-     * @return A JWT (JSON Web Token)
-     * @throws A Bad Request if the user is not found
+     * @return The JWT (JSON Web Token)
+     * @throws A ServiceException if the user is not found
      */
     @POST
     @Path("/authenticate")
@@ -78,6 +81,38 @@ public class AuthenticationWS {
             .onItem().ifNull()
             .failWith(new ServiceException("User not found",
                     Response.Status.UNAUTHORIZED));
+    }
+
+    /**
+     * Authenticates a user.
+     *
+     * @param email    The email of the user
+     * @param password The password of the user
+     * @return The JWT (JSON Web Token)
+     * @throws A ServiceException if the user is not found
+     */
+    @POST
+    @Path("/login")
+    @PermitAll
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = DELAY)
+    public Uni<Response> login(
+            @RestForm @NotEmpty @Email final String email,
+            @RestForm @NotEmpty final String password) {
+
+        return controller.login(email, password)
+            .log()
+            .onItem().ifNotNull()
+                .transform(dto -> Response.ok(dto).build())
+            .onItem().ifNull()
+                .failWith(new ServiceException("User not found",
+                        Response.Status.UNAUTHORIZED))
+            .onFailure().transform(e -> {
+                String message = e.getMessage();
+                throw new ServiceException(message,
+                        Response.Status.UNAUTHORIZED);
+            });
     }
 
     /**

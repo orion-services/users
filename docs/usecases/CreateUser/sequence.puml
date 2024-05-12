@@ -3,7 +3,7 @@
 title Create User
 actor "User agent"
 
-"User agent" -> WebService: @POST /api/users/create (name, email, password)
+"User agent" -> WebService: @POST /users/create (name, email, password)
 activate WebService #F9F3FC
 
 WebService --> UseCase : createUser(name, email, password)

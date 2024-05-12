@@ -91,14 +91,39 @@ public class UserController extends BasicController {
         // Creates a user in the model to encrypts the password and
         // converts it to an entity
         UserEntity entity = mapper.map(
-            authenticationUC.authenticate(email, password),
-            UserEntity.class);
+                authenticationUC.authenticate(email, password),
+                UserEntity.class);
 
         // Finds the user in the service through email and password and
         // generates a JWT
         return userRepository.authenticate(entity)
-            .onItem().ifNotNull()
-            .transform(this::generateJWT);
+                .onItem().ifNotNull()
+                .transform(this::generateJWT);
+    }
+
+    /**
+     * Authenticates a user with the provided email and password.
+     *
+     * @param email    the email of the user
+     * @param password the password of the user
+     * @return a Uni object that emits an AuthenticationDTO if the
+     * authentication is successful
+     */
+    public Uni<AuthenticationDTO> login(final String email,
+            final String password) {
+        // Creates a user in the model to encrypts the password and
+        // converts it to an entity
+        UserEntity entity = mapper.map(
+                authenticationUC.authenticate(email, password),
+                UserEntity.class);
+
+        return userRepository.authenticate(entity)
+            .onItem().ifNotNull().transform(user -> {
+                AuthenticationDTO dto = new AuthenticationDTO();
+                dto.setToken(this.generateJWT(user));
+                dto.setUser(user);
+                return dto;
+            });
     }
 
     /**
@@ -114,12 +139,12 @@ public class UserController extends BasicController {
             final String email, final String password) {
 
         return this.createUser(name, email, password)
-            .onItem().ifNotNull().transform(user -> {
-                AuthenticationDTO dto = new AuthenticationDTO();
-                dto.setToken(this.generateJWT(user));
-                dto.setUser(user);
-                return dto;
-            });
+                .onItem().ifNotNull().transform(user -> {
+                    AuthenticationDTO dto = new AuthenticationDTO();
+                    dto.setToken(this.generateJWT(user));
+                    dto.setUser(user);
+                    return dto;
+                });
     }
 
     /**

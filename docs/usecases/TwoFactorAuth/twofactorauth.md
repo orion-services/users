@@ -37,10 +37,10 @@ nav_order: 9
     </a>
 </center>
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/google/2FAuth/qrCode
-  * HTTP method: POST
+* /users/google/2FAuth/qrCode
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: image/png
   * Examples:
@@ -49,7 +49,7 @@ nav_order: 9
 
     ```shell
         curl -X POST \
-        'http://localhost:8080/api/users/google/2FAuth/qrCode' \
+        'http://localhost:8080/users/google/2FAuth/qrCode' \
         --header 'Accept: */*' \
         --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
         --header 'Content-Type: application/x-www-form-urlencoded' \
@@ -63,8 +63,8 @@ nav_order: 9
         ![QRCODE](https://t3.gstatic.com/licensed-image?q=tbn:ANd9GcSh-wrQu254qFaRcoYktJ5QmUhmuUedlbeMaQeaozAVD4lh4ICsGdBNubZ8UlMvWjKC)
     ```
 
-* /api/users/google/2FAuth/validate
-  * HTTP method: POST
+* /users/google/2FAuth/validate
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: image/png
   * Examples:
@@ -73,7 +73,7 @@ nav_order: 9
 
         ```shell
             curl -X POST \
-            'http://localhost:8080/api/users/google/2FAuth/qrCode' \
+            'http://localhost:8080/users/google/2FAuth/qrCode' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

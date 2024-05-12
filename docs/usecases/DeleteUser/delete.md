@@ -12,10 +12,10 @@ nav_order: 5
   system.
 * If the users exists, delete the user.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/delete
-  * HTTP method: DELETE
+* /users/delete
+  * Method: DELETE
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
   * Examples:
@@ -24,7 +24,7 @@ nav_order: 5
 
         ```shell
             curl -X DELETE \
-                'http://localhost:8080/api/users/delete' \
+                'http://localhost:8080/users/delete' \
                 --header 'Accept: */*' \
                 --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
                 --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJvcmlvbi11c2VycyIsInVwbi

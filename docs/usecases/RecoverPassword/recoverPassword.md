@@ -11,10 +11,10 @@ nav_order: 6
 * If the e-mail exists, the service generates and sends a new password to the
   user.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
 * api/users/recoverPassword
-  * HTTP method: POST
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: HTTP 204 (Undocumented)
   * Examples:
@@ -23,7 +23,7 @@ nav_order: 6
 
         ```shell
            curl -X 'POST' \
-                'http://localhost:8080/api/users/recoverPassword' \
+                'http://localhost:8080/users/recoverPassword' \
                 -H 'accept: */*' \
                 -H 'Content-Type: application/x-www-form-urlencoded' \
                 -d 'email=orion%40test.com'

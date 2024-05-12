@@ -26,7 +26,10 @@ import dev.orion.users.application.usecases.CreateUserUC;
 import dev.orion.users.enterprise.model.User;
 import io.smallrye.common.constraint.Assert;
 
-public class CreateUserUCTest {
+/**
+ * This class contains unit tests for the CreateUserUC class.
+ */
+class CreateUserUCTest {
 
     //** Use cases */
     CreateUserUCI uc = new CreateUserUC();
@@ -54,6 +57,5 @@ public class CreateUserUCTest {
             uc.createUser(name, email, password);
         });
     }
-
 
 }
