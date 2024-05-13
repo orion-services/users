@@ -21,11 +21,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import dev.orion.users.application.interfaces.AuthenticateUCI;
 import dev.orion.users.enterprise.model.User;
 
-
 public class AuthenticateUC implements AuthenticateUCI {
 
     /** Default blank arguments message. */
-    private static final String BLANK = "Blank Arguments";
+    private static final String BLANK = "Blank arguments";
+
+    /** Default invalid arguments message. */
+    private static final String INVALID = "Invalid arguments";
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
@@ -36,13 +38,15 @@ public class AuthenticateUC implements AuthenticateUCI {
      */
     @Override
     public User authenticate(final String email, final String password) {
-        if (email != null && password != null) {
+        // Check if the email and password are not null and bigger than 8
+        // characters
+        if (email != null && password != null && password.length() >= 8) {
             User user = new User();
             user.setEmail(email);
             user.setPassword(DigestUtils.sha256Hex(password));
             return user;
         } else {
-            throw new IllegalArgumentException("All arguments are required");
+            throw new IllegalArgumentException(INVALID);
         }
     }
 
@@ -74,7 +78,6 @@ public class AuthenticateUC implements AuthenticateUCI {
         if (email.isBlank()) {
             throw new IllegalArgumentException(BLANK);
         } else {
-            //return repository.recoverPassword(email);
             return null;
         }
     }

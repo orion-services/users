@@ -30,7 +30,7 @@ import io.restassured.response.ValidatableResponse;
  * This class contains test cases for the Users REST API.
  */
 @QuarkusTest
-class UsersTest {
+class UsersIT {
 
     /**
      * Represents the HTTP status code for a successful request.
