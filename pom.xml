@@ -246,7 +246,7 @@
           </execution>
           <execution>
             <id>verify</id>
-            <phase>verify</phase>
+            <phase>check</phase>
             <goals>
               <goal>report</goal>
             </goals>

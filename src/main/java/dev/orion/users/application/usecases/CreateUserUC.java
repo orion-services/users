@@ -38,8 +38,8 @@ public class CreateUserUC implements CreateUserUCI {
     @Override
     public User createUser(final String name, final String email,
             final String password) {
-        if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
-                || password.isBlank()) {
+        if (name.isEmpty() || !EmailValidator.getInstance().isValid(email)
+                || password.isEmpty()) {
             throw new IllegalArgumentException(
                     "Blank arguments or invalid e-mail");
         } else {

@@ -38,7 +38,7 @@ class AuthenticateUCTest {
     @DisplayName("Authenticates a user with valid arguments")
     @Order(1)
     void authenticate() {
-        String email = "orion@test.com";
+        String email = "orion@services.dev";
         String password = "12345678";
         User user = uc.authenticate(email, password);
         Assert.assertNotNull(user);
@@ -48,8 +48,32 @@ class AuthenticateUCTest {
     @DisplayName("Authenticates a user with valid arguments")
     @Order(2)
     void authenticateWithInValidPassword() {
-        String email = "orion@test.com";
+        String email = "orion@services.dev";
         String password = "123";
+        Assertions.assertThrows(IllegalArgumentException.class,
+        () -> {
+            uc.authenticate(email, password);
+        });
+    }
+
+    @Test
+    @DisplayName("Authenticates a empty e-mail")
+    @Order(3)
+    void authenticateWithNoEmail() {
+        String email = "";
+        String password = "12345678";
+        Assertions.assertThrows(IllegalArgumentException.class,
+        () -> {
+            uc.authenticate(email, password);
+        });
+    }
+
+    @Test
+    @DisplayName("Authenticates a empty password")
+    @Order(4)
+    void authenticateWithNoPassword() {
+        String email = "orion@services.dev";
+        String password = "";
         Assertions.assertThrows(IllegalArgumentException.class,
         () -> {
             uc.authenticate(email, password);

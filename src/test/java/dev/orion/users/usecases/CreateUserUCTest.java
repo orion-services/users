@@ -39,7 +39,7 @@ class CreateUserUCTest {
     @Order(1)
     void createUserWithValidArguments() {
         String name = "Orion";
-        String email = "orion@test.com";
+        String email = "orion@services.dev";
         String password = "12345678";
         User user = uc.createUser(name, email, password);
         Assert.assertNotNull(user);
@@ -47,11 +47,50 @@ class CreateUserUCTest {
 
     @Test
     @DisplayName("Create a user with invalid password")
-    @Order(1)
+    @Order(2)
     void createUserWithInValidPassword() {
         String name = "Orion";
-        String email = "orion@test.com";
+        String email = "orion@services.dev";
         String password = "123";
+        Assertions.assertThrows(IllegalArgumentException.class,
+        () -> {
+            uc.createUser(name, email, password);
+        });
+    }
+
+    @Test
+    @DisplayName("Create a user with no name")
+    @Order(3)
+    void createUserWithNoName() {
+        String name = "";
+        String email = "orion@services.dev";
+        String password = "12345678";
+        Assertions.assertThrows(IllegalArgumentException.class,
+        () -> {
+            uc.createUser(name, email, password);
+        });
+    }
+
+    @Test
+    @DisplayName("Create a user with no password")
+    @Order(4)
+    void createUserWithNoPassword() {
+        String name = "Orion";
+        String email = "orion@services.dev";
+        String password = "";
+        Assertions.assertThrows(IllegalArgumentException.class,
+        () -> {
+            uc.createUser(name, email, password);
+        });
+    }
+
+    @Test
+    @DisplayName("Create a user with incorrect e-mail")
+    @Order(5)
+    void createUserWithIncorrectEmail() {
+        String name = "Orion";
+        String email = "orionservices.dev";
+        String password = "12345678";
         Assertions.assertThrows(IllegalArgumentException.class,
         () -> {
             uc.createUser(name, email, password);

@@ -40,7 +40,8 @@ public class AuthenticateUC implements AuthenticateUCI {
     public User authenticate(final String email, final String password) {
         // Check if the email and password are not null and bigger than 8
         // characters
-        if (email != null && password != null && password.length() >= 8) {
+        if (!email.isEmpty() && !password.isEmpty()
+            && password.length() >= 8) {
             User user = new User();
             user.setEmail(email);
             user.setPassword(DigestUtils.sha256Hex(password));
