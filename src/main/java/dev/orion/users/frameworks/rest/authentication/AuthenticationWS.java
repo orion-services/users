@@ -111,7 +111,7 @@ public class AuthenticationWS {
             .onFailure().transform(e -> {
                 String message = e.getMessage();
                 throw new ServiceException(message,
-                        Response.Status.UNAUTHORIZED);
+                        Response.Status.BAD_REQUEST);
             });
     }
 
