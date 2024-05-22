@@ -12,10 +12,10 @@ nav_order: 8
   follow the password rules. Thus, update the user's password and return a
   User in JSON.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/update/password
-  * HTTP method: PUT
+* /users/update/password
+  * Method: PUT
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
   * Examples:
@@ -24,7 +24,7 @@ nav_order: 8
 
         ```shell
             curl -X PUT \
-            'http://localhost:8080/api/users/update/password' \
+            'http://localhost:8080/users/update/password' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
             --header 'Content-Type: application/x-www-form-urlencoded' \

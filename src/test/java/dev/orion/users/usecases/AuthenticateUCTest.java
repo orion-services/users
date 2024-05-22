@@ -21,79 +21,62 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
-import dev.orion.users.application.interfaces.CreateUserUCI;
-import dev.orion.users.application.usecases.CreateUserUC;
+import dev.orion.users.application.interfaces.AuthenticateUCI;
+import dev.orion.users.application.usecases.AuthenticateUC;
 import dev.orion.users.enterprise.model.User;
 import io.smallrye.common.constraint.Assert;
 
 /**
  * This class contains unit tests for the CreateUserUC class.
  */
-class CreateUserUCTest {
+class AuthenticateUCTest {
 
     //** Use cases */
-    CreateUserUCI uc = new CreateUserUC();
+    AuthenticateUCI uc = new AuthenticateUC();
 
     @Test
-    @DisplayName("Create a user with valid arguments")
+    @DisplayName("Authenticates a user with valid arguments")
     @Order(1)
-    void createUserWithValidArguments() {
-        String name = "Orion";
+    void authenticate() {
         String email = "orion@services.dev";
         String password = "12345678";
-        User user = uc.createUser(name, email, password);
+        User user = uc.authenticate(email, password);
         Assert.assertNotNull(user);
     }
 
     @Test
-    @DisplayName("Create a user with invalid password")
+    @DisplayName("Authenticates a user with valid arguments")
     @Order(2)
-    void createUserWithInValidPassword() {
-        String name = "Orion";
+    void authenticateWithInValidPassword() {
         String email = "orion@services.dev";
         String password = "123";
         Assertions.assertThrows(IllegalArgumentException.class,
         () -> {
-            uc.createUser(name, email, password);
+            uc.authenticate(email, password);
         });
     }
 
     @Test
-    @DisplayName("Create a user with no name")
+    @DisplayName("Authenticates a empty e-mail")
     @Order(3)
-    void createUserWithNoName() {
-        String name = "";
-        String email = "orion@services.dev";
+    void authenticateWithNoEmail() {
+        String email = "";
         String password = "12345678";
         Assertions.assertThrows(IllegalArgumentException.class,
         () -> {
-            uc.createUser(name, email, password);
+            uc.authenticate(email, password);
         });
     }
 
     @Test
-    @DisplayName("Create a user with no password")
+    @DisplayName("Authenticates a empty password")
     @Order(4)
-    void createUserWithNoPassword() {
-        String name = "Orion";
+    void authenticateWithNoPassword() {
         String email = "orion@services.dev";
         String password = "";
         Assertions.assertThrows(IllegalArgumentException.class,
         () -> {
-            uc.createUser(name, email, password);
-        });
-    }
-
-    @Test
-    @DisplayName("Create a user with incorrect e-mail")
-    @Order(5)
-    void createUserWithIncorrectEmail() {
-        String name = "Orion";
-        String email = "orionservices.dev";
-        String password = "12345678";
-        Assertions.assertThrows(IllegalArgumentException.class,
-        () -> {
-            uc.createUser(name, email, password);
+            uc.authenticate(email, password);
         });
     }
 

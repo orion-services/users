@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ import jakarta.inject.Inject;
 @WithSession
 public class UserController extends BasicController {
 
-    /** Use cases for users */
-    private CreateUserUCI createUC = new CreateUserUC();
+    /** Use cases for users. */
+    private final CreateUserUCI createUC = new CreateUserUC();
 
-    /** Use cases for authentication.*/
-    private AuthenticateUCI authenticationUC = new AuthenticateUC();
+    /** Use cases for authentication. */
+    private final AuthenticateUCI authenticationUC = new AuthenticateUC();
 
-    /** Persistence layer */
+    /** Persistence layer. */
     @Inject
     UserRepository userRepository;
 
@@ -55,8 +55,9 @@ public class UserController extends BasicController {
      * @param password : The user password
      * @return : Returns a Uni<UserEntity> object
      */
-    public Uni<UserEntity> createUser(String name, String email, String pwd) {
-        User user = createUC.createUser(name, email, pwd);
+    public Uni<UserEntity> createUser(final String name, final String email,
+            final String password) {
+        User user = createUC.createUser(name, email, password);
         UserEntity entity = mapper.map(user, UserEntity.class);
         return userRepository.createUser(entity)
                 .onItem().ifNotNull().transform(u -> u)
@@ -71,7 +72,7 @@ public class UserController extends BasicController {
      * @return : Returns a Uni<UserEntity> object
      */
     public Uni<UserEntity> validateEmail(final String email,
-        final String code) {
+            final String code) {
         Uni<UserEntity> result = null;
         if (Boolean.TRUE.equals(authenticationUC.validateEmail(email, code))) {
             result = userRepository.validateEmail(email, code);
@@ -101,24 +102,49 @@ public class UserController extends BasicController {
     }
 
     /**
-     * Creates a user, generates a Json Web Token and returns a
-     * AuthenticationDTO object.
+     * Authenticates a user with the provided email and password.
      *
-     * @param name      : The user name
-     * @param email     : The user e-mail
-     * @param password  : The user password
-     * @return A Uni<AuthenticationDTO> object
+     * @param email    the email of the user
+     * @param password the password of the user
+     * @return a Uni object that emits an AuthenticationDTO if the
+     * authentication is successful
      */
-    public Uni<AuthenticationDTO> createAuthenticate(final String name,
-        final String email, final String password) {
+    public Uni<AuthenticationDTO> login(final String email,
+            final String password) {
+        // Creates a user in the model to encrypts the password and
+        // converts it to an entity
+        UserEntity entity = mapper.map(
+                authenticationUC.authenticate(email, password),
+                UserEntity.class);
 
-        return this.createUser(name, email, password)
+        return userRepository.authenticate(entity)
             .onItem().ifNotNull().transform(user -> {
                 AuthenticationDTO dto = new AuthenticationDTO();
                 dto.setToken(this.generateJWT(user));
                 dto.setUser(user);
                 return dto;
             });
+    }
+
+    /**
+     * Creates a user, generates a Json Web Token and returns a
+     * AuthenticationDTO object.
+     *
+     * @param name     : The user name
+     * @param email    : The user e-mail
+     * @param password : The user password
+     * @return A Uni<AuthenticationDTO> object
+     */
+    public Uni<AuthenticationDTO> createAuthenticate(final String name,
+            final String email, final String password) {
+
+        return this.createUser(name, email, password)
+                .onItem().ifNotNull().transform(user -> {
+                    AuthenticationDTO dto = new AuthenticationDTO();
+                    dto.setToken(this.generateJWT(user));
+                    dto.setUser(user);
+                    return dto;
+                });
     }
 
     /**
@@ -130,5 +156,4 @@ public class UserController extends BasicController {
     public Uni<Void> deleteUser(final String email) {
         return userRepository.deleteUser(email);
     }
-
 }

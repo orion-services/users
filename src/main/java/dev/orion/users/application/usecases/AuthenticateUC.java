@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,11 +21,13 @@ import org.apache.commons.codec.digest.DigestUtils;
 import dev.orion.users.application.interfaces.AuthenticateUCI;
 import dev.orion.users.enterprise.model.User;
 
-
 public class AuthenticateUC implements AuthenticateUCI {
 
     /** Default blank arguments message. */
-    private static final String BLANK = "Blank Arguments";
+    private static final String BLANK = "Blank arguments";
+
+    /** Default invalid arguments message. */
+    private static final String INVALID = "Invalid arguments";
 
     /**
      * Authenticates the user in the service (UC: Authenticate).
@@ -36,13 +38,16 @@ public class AuthenticateUC implements AuthenticateUCI {
      */
     @Override
     public User authenticate(final String email, final String password) {
-        if (email != null && password != null) {
+        // Check if the email and password are not null and bigger than 8
+        // characters
+        if (!email.isEmpty() && !password.isEmpty()
+            && password.length() >= 8) {
             User user = new User();
             user.setEmail(email);
             user.setPassword(DigestUtils.sha256Hex(password));
             return user;
         } else {
-            throw new IllegalArgumentException("All arguments are required");
+            throw new IllegalArgumentException(INVALID);
         }
     }
 
@@ -53,6 +58,7 @@ public class AuthenticateUC implements AuthenticateUCI {
      * @param code  : The validation code
      * @return true if the validation code is correct for the respective e-mail
      */
+    @Override
     public Boolean validateEmail(final String email, final String code) {
         if (email.isBlank() || code.isBlank()) {
             throw new IllegalArgumentException(BLANK);
@@ -73,7 +79,6 @@ public class AuthenticateUC implements AuthenticateUCI {
         if (email.isBlank()) {
             throw new IllegalArgumentException(BLANK);
         } else {
-            //return repository.recoverPassword(email);
             return null;
         }
     }

@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2023 Orion Services @ https://github.com/orion-services
+ * Copyright 2024 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,8 +38,8 @@ public class CreateUserUC implements CreateUserUCI {
     @Override
     public User createUser(final String name, final String email,
             final String password) {
-        if (name.isBlank() || !EmailValidator.getInstance().isValid(email)
-                || password.isBlank()) {
+        if (name.isEmpty() || !EmailValidator.getInstance().isValid(email)
+                || password.isEmpty()) {
             throw new IllegalArgumentException(
                     "Blank arguments or invalid e-mail");
         } else {

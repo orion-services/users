@@ -27,34 +27,36 @@ nav_order: 3
     </a>
 </center>
 
-### HTTP(S) endpoints
+### HTTPS endpoints
 
-* /api/users/create
-* HTTP method: POST
+* /users/create
+* Method: POST
 * Consumes: application/x-www-form-urlencoded
 * Produces: application/json
 * Examples:
 
   * Example of request:
 
-    ```shell
-            curl -X 'POST' \
-            'http://localhost:8080/api/users/create' \
-            -H 'accept: application/json' \
-            -H 'Content-Type: application/x-www-form-urlencoded' \
-            -d 'name=Orion&email=orion%40test.com&password=12345678'
-    ```
+```shell
+  curl -X 'POST' \
+  'http://localhost:8080/users/create' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'name=Orion&email=orion%40services.dev&password=12345678'
+```
 
   * Example of response: User in JSON.
 
-    ```json
-        {
-            "hash": "7eba8ef2-426b-446a-9f05-4ab67e71383d",
-            "name": "Orion",
-            "email": "orion@test.com",
-            "emailValid": false
-        }
-    ```
+```json
+{
+  "hash": "08f9c3ca-e22e-457f-822a-2d8efafbc720",
+  "name": "Orion",
+  "email": "orion@oservices.dev",
+  "emailValid": false,
+  "secret2FA": null,
+  "using2FA": false
+}
+```
 
 ### Exceptions
 
