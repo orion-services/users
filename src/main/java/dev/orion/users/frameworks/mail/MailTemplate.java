@@ -42,3 +42,4 @@ public final class MailTemplate {
     public static native MailTemplateInstance validateEmail(String url);
 
 }
+
