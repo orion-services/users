@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2024 Orion Services @ https://orion-services.dev
+ * Copyright 2025 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,4 +41,3 @@ open class RoleEntity : PanacheEntityBase() {
     @NotNull(message = "The name of the role can't be null")
     var name: String? = null
 }
-

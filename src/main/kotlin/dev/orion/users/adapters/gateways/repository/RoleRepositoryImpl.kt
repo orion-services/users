@@ -14,17 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.adapters.presenters
+package dev.orion.users.adapters.gateways.repository
 
-import dev.orion.users.adapters.gateways.entities.UserEntity
+import dev.orion.users.adapters.gateways.entities.RoleEntity
+import io.smallrye.mutiny.Uni
+import jakarta.enterprise.context.ApplicationScoped
 
 /**
- * Authentication DTO.
+ * Implementation of the RoleRepository interface.
  */
-data class AuthenticationDTO(
-    /** The user object. */
-    var user: UserEntity? = null,
-    /** The authentication token (jwt). */
-    var token: String? = null
-)
+@ApplicationScoped
+class RoleRepositoryImpl : RoleRepository {
+    override fun findByName(name: String): Uni<RoleEntity> {
+        return find("name", name).firstResult<RoleEntity>()
+    }
+}
 

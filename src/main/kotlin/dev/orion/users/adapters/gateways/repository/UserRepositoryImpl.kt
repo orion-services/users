@@ -1,6 +1,6 @@
 /**
  * @License
- * Copyright 2024 Orion Services @ https://orion-services.dev
+ * Copyright 2025 Orion Services @ https://orion-services.dev
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ package dev.orion.users.adapters.gateways.repository
 import dev.orion.users.adapters.gateways.entities.RoleEntity
 import dev.orion.users.adapters.gateways.entities.UserEntity
 import io.quarkus.hibernate.reactive.panache.Panache
-import io.quarkus.hibernate.reactive.panache.PanacheEntityBase
 import io.quarkus.panache.common.Parameters
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import org.apache.commons.codec.digest.DigestUtils
 import org.passay.CharacterData
 import org.passay.CharacterRule
@@ -36,7 +36,9 @@ import java.io.IOException
  * service.
  */
 @ApplicationScoped
-class UserRepositoryImpl : UserRepository {
+class UserRepositoryImpl @Inject constructor(
+    private val roleRepository: RoleRepository
+) : UserRepository {
 
     /** Setting the default role name. */
     private val DEFAULT_ROLE_NAME = "user"
@@ -259,8 +261,7 @@ class UserRepositoryImpl : UserRepository {
      * @return The Uni<Role> object of "user" role.
      */
     private fun getDefaultRole(): Uni<RoleEntity> {
-        @Suppress("UNCHECKED_CAST")
-        return PanacheEntityBase.find<RoleEntity>("name", DEFAULT_ROLE_NAME).firstResult<RoleEntity>()
+        return roleRepository.findByName(DEFAULT_ROLE_NAME)
     }
 
     /**

@@ -14,17 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.adapters.presenters
+package dev.orion.users.adapters.gateways.repository
 
-import dev.orion.users.adapters.gateways.entities.UserEntity
+import dev.orion.users.adapters.gateways.entities.RoleEntity
+import io.quarkus.hibernate.reactive.panache.PanacheRepository
+import io.smallrye.mutiny.Uni
+import jakarta.enterprise.context.ApplicationScoped
 
 /**
- * Authentication DTO.
+ * Role repository interface.
  */
-data class AuthenticationDTO(
-    /** The user object. */
-    var user: UserEntity? = null,
-    /** The authentication token (jwt). */
-    var token: String? = null
-)
+@ApplicationScoped
+interface RoleRepository : PanacheRepository<RoleEntity> {
+    /**
+     * Finds a role by name.
+     *
+     * @param name The name of the role
+     * @return A Uni<RoleEntity> object
+     */
+    fun findByName(name: String): Uni<RoleEntity>
+}
 
