@@ -83,10 +83,11 @@ class AuthenticationWS {
 
     /**
      * Authenticates a user.
+     * If the user has 2FA enabled, returns a response indicating that 2FA code is required.
      *
      * @param email    The email of the user
      * @param password The password of the user
-     * @return The JWT (JSON Web Token)
+     * @return The LoginResponseDTO (may contain JWT or indicate 2FA is required)
      * @throws A ServiceException if the user is not found
      */
     @POST
@@ -102,12 +103,48 @@ class AuthenticationWS {
         return controller.login(email, password)
             .log()
             .onItem().ifNotNull()
-            .transform { dto -> Response.ok(dto).build() }
+            .transform { response ->
+                if (response.requires2FA) {
+                    // Return 200 OK but indicate 2FA is required
+                    Response.ok(response).status(Response.Status.OK).build()
+                } else {
+                    // Normal login response
+                    Response.ok(response.authentication).build()
+                }
+            }
             .onItem().ifNull()
             .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
+            }
+    }
+
+    /**
+     * Authenticates a user with 2FA code.
+     *
+     * @param email The email of the user
+     * @param code  The TOTP code
+     * @return The AuthenticationDTO with JWT token
+     * @throws A ServiceException if validation fails
+     */
+    @POST
+    @Path("/login/2fa")
+    @PermitAll
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun loginWith2FA(
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm @NotEmpty code: String
+    ): Uni<Response> {
+        return controller.validate2FACode(email, code)
+            .onItem().transform { dto ->
+                Response.ok(dto).build()
+            }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Invalid TOTP code"
+                throw ServiceException(message, Response.Status.UNAUTHORIZED)
             }
     }
 

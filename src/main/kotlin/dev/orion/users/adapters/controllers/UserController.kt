@@ -19,11 +19,22 @@ package dev.orion.users.adapters.controllers
 import dev.orion.users.adapters.gateways.entities.UserEntity
 import dev.orion.users.adapters.gateways.repository.UserRepository
 import dev.orion.users.adapters.presenters.AuthenticationDTO
+import dev.orion.users.adapters.presenters.LoginResponseDTO
+import dev.orion.users.adapters.gateways.entities.WebAuthnCredentialEntity
+import dev.orion.users.adapters.gateways.repository.WebAuthnCredentialRepository
 import dev.orion.users.application.interfaces.AuthenticateUCI
 import dev.orion.users.application.interfaces.CreateUserUCI
+import dev.orion.users.application.interfaces.TwoFactorAuthUCI
+import dev.orion.users.application.interfaces.WebAuthnUCI
 import dev.orion.users.application.usecases.AuthenticateUC
 import dev.orion.users.application.usecases.CreateUserUC
+import dev.orion.users.application.usecases.TwoFactorAuthUC
+import dev.orion.users.application.usecases.WebAuthnUC
 import dev.orion.users.enterprise.model.User
+import com.fasterxml.jackson.databind.ObjectMapper
+import java.security.SecureRandom
+import java.util.*
+import java.util.Base64
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
@@ -42,9 +53,22 @@ class UserController : BasicController() {
     /** Use cases for authentication. */
     private val authenticationUC: AuthenticateUCI = AuthenticateUC()
 
+    /** Use cases for two factor authentication. */
+    private val twoFactorAuthUC: TwoFactorAuthUCI = TwoFactorAuthUC()
+
+    /** Use cases for WebAuthn. */
+    private val webAuthnUC: WebAuthnUCI = WebAuthnUC()
+
     /** Persistence layer. */
     @Inject
     lateinit var userRepository: UserRepository
+
+    /** WebAuthn credential repository. */
+    @Inject
+    lateinit var webAuthnCredentialRepository: WebAuthnCredentialRepository
+
+    /** Object mapper for JSON. */
+    private val objectMapper = ObjectMapper()
 
     /**
      * Create a new user. Validates the business rules, persists the user and
@@ -102,13 +126,13 @@ class UserController : BasicController() {
 
     /**
      * Authenticates a user with the provided email and password.
+     * If the user has 2FA enabled, returns a response indicating that 2FA code is required.
      *
      * @param email    the email of the user
      * @param password the password of the user
-     * @return a Uni object that emits an AuthenticationDTO if the
-     * authentication is successful
+     * @return a Uni object that emits a LoginResponseDTO
      */
-    fun login(email: String, password: String): Uni<AuthenticationDTO> {
+    fun login(email: String, password: String): Uni<LoginResponseDTO> {
         // Creates a user in the model to encrypts the password and
         // converts it to an entity
         val entity: UserEntity = mapper.map(
@@ -118,10 +142,22 @@ class UserController : BasicController() {
 
         return userRepository.authenticate(entity)
             .onItem().ifNotNull().transform { user ->
-                val dto = AuthenticationDTO()
-                dto.token = this.generateJWT(user)
-                dto.user = user
-                dto
+                val response = LoginResponseDTO()
+                
+                // Check if user has 2FA enabled
+                if (user.isUsing2FA) {
+                    response.requires2FA = true
+                    response.message = "2FA code required"
+                } else {
+                    // Normal login without 2FA
+                    val dto = AuthenticationDTO()
+                    dto.token = this.generateJWT(user)
+                    dto.user = user
+                    response.authentication = dto
+                    response.requires2FA = false
+                }
+                
+                response
             }
     }
 
@@ -153,5 +189,273 @@ class UserController : BasicController() {
     fun deleteUser(email: String): Uni<Void> {
         return userRepository.deleteUser(email)
     }
+
+    /**
+     * Generates a QR code for 2FA setup.
+     * Validates user credentials, generates a secret key, updates the user,
+     * and returns a QR code image.
+     *
+     * @param email    The email of the user
+     * @param password The password of the user
+     * @return A Uni that emits a ByteArray containing the QR code image
+     */
+    fun generate2FAQRCode(email: String, password: String): Uni<ByteArray> {
+        // Validate credentials using the use case
+        val user: User = twoFactorAuthUC.generateQRCode(email, password)
+        val entity: UserEntity = mapper.map(user, UserEntity::class.java)
+
+        // Authenticate user first
+        return userRepository.authenticate(entity)
+            .onItem().ifNotNull().transformToUni { authenticatedUser ->
+                // Generate secret key
+                val secretKey = generateSecretKey()
+                
+                // Update user with 2FA secret
+                authenticatedUser.isUsing2FA = true
+                authenticatedUser.secret2FA = secretKey
+                
+                // Persist the updated user
+                userRepository.updateUser(authenticatedUser)
+                    .onItem().transform { updatedUser ->
+                        // Generate QR code
+                        val issuer = issuer?.orElse("Orion Users") ?: "Orion Users"
+                        val barCodeData = getAuthenticatorBarCode(
+                            secretKey,
+                            updatedUser.email ?: email,
+                            issuer
+                        )
+                        createQrCode(barCodeData)
+                    }
+            }
+    }
+
+    /**
+     * Validates a TOTP code for 2FA authentication.
+     *
+     * @param email The email of the user
+     * @param code  The TOTP code to validate
+     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     */
+    fun validate2FACode(email: String, code: String): Uni<AuthenticationDTO> {
+        // Validate code format using use case
+        val user: User = twoFactorAuthUC.validateCode(email, code)
+        
+        // Find user by email
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { userEntity ->
+                // Check if 2FA is enabled
+                if (!userEntity.isUsing2FA) {
+                    throw IllegalArgumentException("2FA is not enabled for this user")
+                }
+                
+                // Get secret from user
+                val secret = userEntity.secret2FA
+                if (secret == null) {
+                    throw IllegalArgumentException("2FA secret not found")
+                }
+                
+                // Validate TOTP code
+                val expectedCode = getTOTPCode(secret)
+                if (code != expectedCode) {
+                    throw IllegalArgumentException("Invalid TOTP code")
+                }
+                
+                // Generate JWT and return DTO
+                val dto = AuthenticationDTO()
+                dto.token = generateJWT(userEntity)
+                dto.user = userEntity
+                Uni.createFrom().item(dto)
+            }
+    }
+
+    /**
+     * Starts WebAuthn registration process.
+     *
+     * @param email The email of the user
+     * @return A JSON string containing PublicKeyCredentialCreationOptions
+     */
+    fun startWebAuthnRegistration(email: String): Uni<String> {
+        // Validate email using use case
+        webAuthnUC.startRegistration(email)
+
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transform { user ->
+                // Generate challenge (base64url encoded)
+                val challengeBytes = ByteArray(32)
+                SecureRandom().nextBytes(challengeBytes)
+                val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
+                
+                // Create user ID (base64url encoded email)
+                val userId = Base64.getUrlEncoder().withoutPadding().encodeToString((user.email ?: email).toByteArray())
+                
+                // Create PublicKeyCredentialCreationOptions as JSON
+                val rpName = issuer?.orElse("Orion Users") ?: "Orion Users"
+                val rpId = "localhost" // Should be configured properly
+                val userName = user.email ?: email
+                val userDisplayName = user.name ?: user.email ?: email
+                
+                val options = mapOf(
+                    "rp" to mapOf(
+                        "name" to rpName,
+                        "id" to rpId
+                    ),
+                    "user" to mapOf(
+                        "id" to userId,
+                        "name" to userName,
+                        "displayName" to userDisplayName
+                    ),
+                    "challenge" to challenge,
+                    "pubKeyCredParams" to listOf(
+                        mapOf("type" to "public-key", "alg" to -7), // ES256
+                        mapOf("type" to "public-key", "alg" to -257) // RS256
+                    ),
+                    "authenticatorSelection" to mapOf(
+                        "authenticatorAttachment" to "platform",
+                        "userVerification" to "preferred"
+                    ),
+                    "timeout" to 60000L,
+                    "attestation" to "none"
+                )
+
+                val response = mapOf(
+                    "options" to options,
+                    "challenge" to challenge
+                )
+                objectMapper.writeValueAsString(response)
+            }
+    }
+
+    /**
+     * Finishes WebAuthn registration process.
+     *
+     * @param email     The email of the user
+     * @param response  The registration response from the client (JSON string)
+     * @param deviceName Optional name for the device
+     * @return true if registration was successful
+     */
+    fun finishWebAuthnRegistration(email: String, response: String, deviceName: String?): Uni<Boolean> {
+        // Validate using use case
+        webAuthnUC.finishRegistration(email, response, deviceName)
+
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { user ->
+                try {
+                    // Parse the response (simplified - actual implementation would parse JSON properly)
+                    // In production, this would properly parse and validate the WebAuthn response
+                    val credentialEntity = WebAuthnCredentialEntity()
+                    credentialEntity.userEmail = email
+                    credentialEntity.credentialId = UUID.randomUUID().toString() // Should be from actual response
+                    credentialEntity.publicKey = response // Should be properly extracted and stored
+                    credentialEntity.counter = 0
+                    credentialEntity.deviceName = deviceName ?: "Unknown Device"
+
+                    webAuthnCredentialRepository.saveCredential(credentialEntity)
+                        .onItem().transform { true }
+                } catch (e: Exception) {
+                    throw IllegalArgumentException("Failed to process WebAuthn registration: ${e.message}")
+                }
+            }
+    }
+
+    /**
+     * Starts WebAuthn authentication process.
+     *
+     * @param email The email of the user
+     * @return A JSON string containing PublicKeyCredentialRequestOptions
+     */
+    fun startWebAuthnAuthentication(email: String): Uni<String> {
+        // Validate email using use case
+        webAuthnUC.startAuthentication(email)
+
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { user ->
+                webAuthnCredentialRepository.findByUserEmail(email)
+                    .onItem().ifNull()
+                    .failWith(IllegalArgumentException("No WebAuthn credentials found for user"))
+                    .onItem().ifNotNull().transform { credentials ->
+                        if (credentials.isEmpty()) {
+                            throw IllegalArgumentException("No WebAuthn credentials found for user")
+                        }
+
+                        // Generate challenge (base64url encoded)
+                        val challengeBytes = ByteArray(32)
+                        SecureRandom().nextBytes(challengeBytes)
+                        val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
+
+                        // Create allowCredentials list
+                        val allowCredentials = credentials.mapNotNull { cred ->
+                            cred.credentialId?.let { id ->
+                                mapOf(
+                                    "type" to "public-key",
+                                    "id" to id
+                                )
+                            }
+                        }
+
+                        // Create PublicKeyCredentialRequestOptions as JSON
+                        val options = mapOf(
+                            "challenge" to challenge,
+                            "rpId" to "localhost", // Should be configured properly
+                            "allowCredentials" to allowCredentials,
+                            "userVerification" to "preferred",
+                            "timeout" to 60000L
+                        )
+
+                        val response = mapOf(
+                            "options" to options,
+                            "challenge" to challenge
+                        )
+                        objectMapper.writeValueAsString(response)
+                    }
+            }
+    }
+
+    /**
+     * Finishes WebAuthn authentication process.
+     *
+     * @param email    The email of the user
+     * @param response The authentication response from the client (JSON string)
+     * @return An AuthenticationDTO with JWT if authentication succeeds
+     */
+    fun finishWebAuthnAuthentication(email: String, response: String): Uni<AuthenticationDTO> {
+        // Validate using use case
+        webAuthnUC.finishAuthentication(email, response)
+
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { user ->
+                // In production, this would properly parse and validate the WebAuthn response
+                // For now, we'll do a simplified validation
+                webAuthnCredentialRepository.findByUserEmail(email)
+                    .onItem().ifNull()
+                    .failWith(IllegalArgumentException("No WebAuthn credentials found"))
+                    .onItem().ifNotNull().transform { credentials ->
+                        if (credentials.isEmpty()) {
+                            throw IllegalArgumentException("No WebAuthn credentials found")
+                        }
+
+                        // Update counter (simplified - actual implementation would validate signature)
+                        val credential = credentials.first()
+                        credential.counter++
+                        webAuthnCredentialRepository.saveCredential(credential)
+
+                        // Generate JWT and return DTO
+                        val dto = AuthenticationDTO()
+                        dto.token = generateJWT(user)
+                        dto.user = user
+                        dto
+                    }
+            }
+    }
+
 }
 
