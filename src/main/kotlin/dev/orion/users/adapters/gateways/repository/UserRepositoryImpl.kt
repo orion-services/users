@@ -274,25 +274,30 @@ class UserRepositoryImpl @Inject constructor(
     private fun generateSecurePassword(): String {
         // Character rule for lower case characters
         val lcr = CharacterRule(EnglishCharacterData.LowerCase)
-        // Set the number of lower case characters
-        lcr.numberOfCharacters = 2
+        // Set the number of lower case characters (at least 1 required by frontend validation)
+        lcr.numberOfCharacters = 1
         // Character rule for uppercase characters.
         val ucr = CharacterRule(EnglishCharacterData.UpperCase)
-        // Set the number of upper case characters
-        ucr.numberOfCharacters = 2
+        // Set the number of upper case characters (at least 1 required by frontend validation)
+        ucr.numberOfCharacters = 1
 
         // Character rule for digit characters
         val dr = CharacterRule(EnglishCharacterData.Digit)
-        // Set the number of digit characters.
-        dr.numberOfCharacters = 2
+        // Set the number of digit characters (at least 1 required by frontend validation)
+        dr.numberOfCharacters = 1
 
         // Character rule for special characters
-        val special = defineSpecialChar("!@#$%^&*()_+")
+        // Using the same special characters accepted by frontend validation: !@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?
+        // Escaping special characters for Kotlin string literal
+        val specialChars = "!@#\$%^&*()_+-=\\[\\]{};':\"\\\\|,.<>/?"
+        val special = defineSpecialChar(specialChars)
         val sr = CharacterRule(special)
-        // Set the number of special characters
-        sr.numberOfCharacters = 2
+        // Set the number of special characters (at least 1 required by frontend validation)
+        sr.numberOfCharacters = 1
 
         val passGen = PasswordGenerator()
+        // Generate password with minimum 8 characters (as required by frontend validation)
+        // The generator will ensure at least the specified number of each character type
         return passGen.generatePassword(PASSWORD_LENGTH, sr, lcr, ucr, dr)
     }
 

@@ -111,64 +111,27 @@ class UserWS {
     }
 
     /**
-     * Updates the email of a user. Requires authentication via JWT token.
+     * Updates user information (email and/or password). Requires authentication via JWT token.
+     * At least one field (newEmail or newPassword) must be provided.
      *
-     * @param email    The current email of the user
-     * @param newEmail The new email address
-     * @return A new JWT token with the updated email
-     * @throws Bad request if the service was unable to update the email
+     * @param email       The current email of the user
+     * @param newEmail    The new email address (optional)
+     * @param password    The current password (required if updating password)
+     * @param newPassword The new password (optional)
+     * @return A LoginResponseDTO with AuthenticationDTO containing token and updated user
+     * @throws Bad request if the service was unable to update the user
      */
     @PUT
-    @Path("/update/email")
-    @RolesAllowed("user")
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.TEXT_PLAIN)
-    @Retry(maxRetries = 1, delay = 2000)
-    fun updateEmail(
-        @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty @Email newEmail: String
-    ): Uni<Response> {
-        // Extract email from JWT token
-        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
-            ?: jwt.getClaim<String>("email")
-            ?: throw ServiceException(
-                "Invalid token",
-                Response.Status.UNAUTHORIZED
-            )
-
-        return controller.updateEmail(email, newEmail, jwtEmail)
-            .log()
-            .onItem().transform { jwt -> Response.ok(jwt).build() }
-            .onFailure().transform { e ->
-                val message = e.message ?: "Unknown error"
-                val status = if (message.contains("Unauthorized") || message.contains("token")) {
-                    Response.Status.UNAUTHORIZED
-                } else {
-                    Response.Status.BAD_REQUEST
-                }
-                throw ServiceException(message, status)
-            }
-    }
-
-    /**
-     * Updates the password of a user. Requires authentication via JWT token.
-     *
-     * @param email       The email of the user
-     * @param password    The current password
-     * @param newPassword The new password
-     * @return The updated user object in JSON format
-     * @throws Bad request if the service was unable to update the password
-     */
-    @PUT
-    @Path("/update/password")
+    @Path("/update")
     @RolesAllowed("user")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
-    fun updatePassword(
+    fun updateUser(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty password: String,
-        @RestForm @NotEmpty newPassword: String
+        @RestForm newEmail: String?,
+        @RestForm password: String?,
+        @RestForm newPassword: String?
     ): Uni<Response> {
         // Extract email from JWT token
         val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
@@ -178,9 +141,8 @@ class UserWS {
                 Response.Status.UNAUTHORIZED
             )
 
-        return controller.updatePassword(email, password, newPassword, jwtEmail)
-            .log()
-            .onItem().transform { user -> Response.ok(user).build() }
+        return controller.updateUser(email, newEmail, password, newPassword, jwtEmail)
+            .onItem().transform { response -> Response.ok(response).build() }
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"
                 val status = if (message.contains("Unauthorized") || message.contains("token")) {

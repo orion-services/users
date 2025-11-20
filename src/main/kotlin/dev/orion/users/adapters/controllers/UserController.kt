@@ -42,6 +42,7 @@ import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
+import org.apache.commons.codec.digest.DigestUtils
 
 /**
  * The controller class.
@@ -149,7 +150,7 @@ class UserController : BasicController() {
         return userRepository.authenticate(entity)
             .onItem().ifNotNull().transform { user ->
                 val response = LoginResponseDTO()
-                
+
                 // Check if user has 2FA enabled
                 if (user.isUsing2FA) {
                     response.requires2FA = true
@@ -162,7 +163,7 @@ class UserController : BasicController() {
                     response.authentication = dto
                     response.requires2FA = false
                 }
-                
+
                 response
             }
     }
@@ -215,11 +216,11 @@ class UserController : BasicController() {
             .onItem().ifNotNull().transformToUni { authenticatedUser ->
                 // Generate secret key
                 val secretKey = generateSecretKey()
-                
+
                 // Update user with 2FA secret
                 authenticatedUser.isUsing2FA = true
                 authenticatedUser.secret2FA = secretKey
-                
+
                 // Persist the updated user
                 userRepository.updateUser(authenticatedUser)
                     .onItem().transform { updatedUser ->
@@ -245,7 +246,7 @@ class UserController : BasicController() {
     fun validate2FACode(email: String, code: String): Uni<AuthenticationDTO> {
         // Validate code format using use case
         val user: User = twoFactorAuthUC.validateCode(email, code)
-        
+
         // Find user by email
         return userRepository.findUserByEmail(email)
             .onItem().ifNull()
@@ -255,19 +256,19 @@ class UserController : BasicController() {
                 if (!userEntity.isUsing2FA) {
                     throw IllegalArgumentException("2FA is not enabled for this user")
                 }
-                
+
                 // Get secret from user
                 val secret = userEntity.secret2FA
                 if (secret == null) {
                     throw IllegalArgumentException("2FA secret not found")
                 }
-                
+
                 // Validate TOTP code
                 val expectedCode = getTOTPCode(secret)
                 if (code != expectedCode) {
                     throw IllegalArgumentException("Invalid TOTP code")
                 }
-                
+
                 // Generate JWT and return DTO
                 val dto = AuthenticationDTO()
                 dto.token = generateJWT(userEntity)
@@ -295,16 +296,16 @@ class UserController : BasicController() {
                 val challengeBytes = ByteArray(32)
                 SecureRandom().nextBytes(challengeBytes)
                 val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
-                
+
                 // Create user ID (base64url encoded email)
                 val userId = Base64.getUrlEncoder().withoutPadding().encodeToString((user.email ?: email).toByteArray())
-                
+
                 // Create PublicKeyCredentialCreationOptions as JSON
                 val rpName = issuer?.orElse("Orion Users") ?: "Orion Users"
                 val rpId = origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
                 val userName = user.email ?: email
                 val userDisplayName = user.name ?: user.email ?: email
-                
+
                 val options = mapOf(
                     "rp" to mapOf(
                         "name" to rpName,
@@ -412,7 +413,7 @@ class UserController : BasicController() {
 
                         // Extract rpId from stored origin to ensure consistency
                         val rpId = credentials.firstOrNull()?.origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
-                        
+
                         // Create PublicKeyCredentialRequestOptions as JSON
                         val options = mapOf(
                             "challenge" to challenge,
@@ -506,64 +507,85 @@ class UserController : BasicController() {
     }
 
     /**
-     * Updates the email of a user. Validates the token, updates the email,
-     * generates a new JWT, and sends a validation email to the new address.
+     * Updates user information (email and/or password). Validates the token,
+     * updates the fields, generates a new JWT, and sends a validation email if email was changed.
      *
-     * @param email    : The current email of the user
-     * @param newEmail : The new email address
-     * @param jwtEmail : The email from the JWT token (for validation)
-     * @return A Uni<String> that emits the new JWT token
+     * @param email       : The current email of the user
+     * @param newEmail    : The new email address (optional)
+     * @param password    : The current password (required if updating password)
+     * @param newPassword : The new password (optional)
+     * @param jwtEmail    : The email from the JWT token (for validation)
+     * @return A Uni<LoginResponseDTO> that emits the authentication response with token and user
      */
-    fun updateEmail(email: String, newEmail: String, jwtEmail: String): Uni<String> {
+    fun updateUser(
+        email: String,
+        newEmail: String?,
+        password: String?,
+        newPassword: String?,
+        jwtEmail: String
+    ): Uni<LoginResponseDTO> {
         // Validate using use case
-        val user: User = updateUserUC.updateEmail(email, newEmail)
-        
+        val user: User = updateUserUC.updateUser(email, newEmail, password, newPassword)
+
         // Validate that JWT email matches the current email
         checkTokenEmail(email, jwtEmail)
-        
-        // Update email in repository
-        return userRepository.updateEmail(email, newEmail)
-            .onItem().ifNotNull().call { updatedUser ->
-                // Send validation email to the new email address
-                sendValidationEmail(updatedUser)
-            }
-            .onItem().ifNotNull().transform { updatedUser ->
-                // Generate new JWT with updated email
-                generateJWT(updatedUser)
-            }
-    }
 
-    /**
-     * Updates the password of a user. Validates the current password and updates it.
-     *
-     * @param email       : The user's email
-     * @param password    : The current password
-     * @param newPassword : The new password
-     * @param jwtEmail    : The email from the JWT token (for validation)
-     * @return A Uni<UserEntity> that emits the updated user
-     */
-    fun updatePassword(email: String, password: String, newPassword: String, jwtEmail: String): Uni<UserEntity> {
-        // Validate using use case
-        val user: User = updateUserUC.updatePassword(email, password, newPassword)
-        
-        // Validate that JWT email matches the request email
-        checkTokenEmail(email, jwtEmail)
-        
-        // Find user by email
+        // Capture variables for use in lambdas
+        val emailUpdated = !newEmail.isNullOrBlank()
+        val passwordUpdate = !newPassword.isNullOrBlank() && !password.isNullOrBlank()
+        val currentEmail = email
+        val newEmailValue = newEmail
+        val currentPassword = password
+        val newPasswordValue = newPassword
+
+        // Start with finding the user
         return userRepository.findUserByEmail(email)
             .onItem().ifNull()
             .failWith(IllegalArgumentException("User not found"))
             .onItem().ifNotNull().transformToUni { userEntity ->
-                // Encrypt current password for comparison
-                val encryptedPassword = org.apache.commons.codec.digest.DigestUtils.sha256Hex(password)
-                
-                // Validate current password matches
-                if (encryptedPassword != userEntity.password) {
-                    throw IllegalArgumentException("Current password is incorrect")
+                // If updating password, validate current password
+                if (passwordUpdate) {
+                    val encryptedPassword = DigestUtils.sha256Hex(currentPassword!!)
+                    if (encryptedPassword != userEntity.password) {
+                        throw IllegalArgumentException("Current password is incorrect")
+                    }
                 }
-                
-                // Update password using repository
-                userRepository.changePassword(encryptedPassword, user.password ?: "", email)
+
+                // First update email if provided
+                if (emailUpdated) {
+                    userRepository.updateEmail(currentEmail, newEmailValue!!)
+                        .onItem().ifNotNull().call { updatedUser ->
+                            // Send validation email to the new email address
+                            sendValidationEmail(updatedUser)
+                        }
+                } else {
+                    Uni.createFrom().item(userEntity)
+                }
+            }
+            .onItem().ifNotNull().transformToUni { updatedUser ->
+                // Then update password if provided
+                if (passwordUpdate) {
+                    val encryptedPassword = DigestUtils.sha256Hex(currentPassword!!)
+                    val encryptedNewPassword = DigestUtils.sha256Hex(newPasswordValue!!)
+                    // Use the updated email if email was changed, otherwise use original email
+                    val emailForPasswordUpdate = if (emailUpdated) updatedUser.email ?: currentEmail else currentEmail
+                    userRepository.changePassword(encryptedPassword, encryptedNewPassword, emailForPasswordUpdate)
+                } else {
+                    Uni.createFrom().item(updatedUser)
+                }
+            }
+            .onItem().ifNotNull().transform { updatedUser ->
+                // Create LoginResponseDTO with AuthenticationDTO
+                val response = LoginResponseDTO()
+                val dto = AuthenticationDTO()
+
+                // Always generate a new JWT token
+                dto.token = generateJWT(updatedUser)
+                dto.user = updatedUser
+                response.authentication = dto
+                response.requires2FA = false
+
+                response
             }
     }
 

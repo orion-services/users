@@ -54,6 +54,16 @@
                 >
                   Login with WebAuthn
                 </v-btn>
+
+                <div class="text-center mt-4">
+                  <a
+                    href="#"
+                    @click.prevent="$router.push('/recover-password')"
+                    class="text-decoration-none text-body-2"
+                  >
+                    Forgot your password?
+                  </a>
+                </div>
               </v-form>
             </v-tabs-window-item>
 

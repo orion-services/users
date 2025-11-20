@@ -101,7 +101,6 @@ class AuthenticationWS {
         @RestForm @NotEmpty password: String
     ): Uni<Response> {
         return controller.login(email, password)
-            .log()
             .onItem().ifNotNull()
             .transform { response ->
                 if (response.requires2FA) {
@@ -169,7 +168,6 @@ class AuthenticationWS {
         @FormParam("password") @NotEmpty password: String
     ): Uni<Response> {
         return controller.createAuthenticate(name, email, password)
-            .log()
             .onItem().ifNotNull().transform { dto -> Response.ok(dto).build() }
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"

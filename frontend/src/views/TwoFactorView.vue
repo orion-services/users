@@ -122,7 +122,7 @@
                 variant="outlined"
                 @click="mode = 'setup'"
               >
-                Setup 2FA
+                Generate new QR Code
               </v-btn>
             </v-form>
           </div>

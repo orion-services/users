@@ -17,10 +17,10 @@
                 <strong>Name:</strong> {{ authStore.user?.name || 'N/A' }}
               </div>
               <div class="mb-2">
-                <strong>Email:</strong> {{ authStore.user?.email || 'N/A' }}
+                <strong>E-mail:</strong> {{ authStore.user?.email || 'N/A' }}
               </div>
               <div class="mb-2">
-                <strong>Email Validated:</strong>
+                <strong>E-mail Validated:</strong>
                 <v-chip
                   :color="authStore.user?.emailValid ? 'success' : 'warning'"
                   size="small"
@@ -46,14 +46,10 @@
           <v-card variant="outlined" class="mb-4">
             <v-card-title class="text-subtitle-1">
               <v-icon class="mr-2">mdi-shield-lock</v-icon>
-              Two-Factor Authentication (2FA)
+              Setup Two-Factor Authentication (2FA)
             </v-card-title>
             <v-card-text>
               <div v-if="!authStore.user?.using2FA">
-                <v-alert type="info" class="mb-4">
-                  Set up two-factor authentication.
-                </v-alert>
-
                 <v-form ref="setup2FAForm" v-model="setup2FAValid" @submit.prevent="setup2FA">
                   <v-text-field
                     v-model="setup2FAPassword"
@@ -129,38 +125,6 @@
             </v-card-text>
           </v-card>
 
-          <!-- Email Update -->
-          <v-card variant="outlined" class="mb-4">
-            <v-card-title class="text-subtitle-1">
-              <v-icon class="mr-2">mdi-email-edit</v-icon>
-              Update Email
-            </v-card-title>
-            <v-card-text>
-              <v-form ref="updateEmailForm" v-model="updateEmailValid" @submit.prevent="updateEmail">
-                <v-text-field
-                  v-model="updateEmailData.newEmail"
-                  label="New Email"
-                  type="email"
-                  :rules="emailRules"
-                  required
-                  prepend-inner-icon="mdi-email"
-                  variant="outlined"
-                  class="mb-4"
-                ></v-text-field>
-
-                <v-btn
-                  type="submit"
-                  color="primary"
-                  block
-                  :loading="updateEmailLoading"
-                  size="large"
-                >
-                  Update Email
-                </v-btn>
-              </v-form>
-            </v-card-text>
-          </v-card>
-
           <!-- Password Update -->
           <v-card variant="outlined" class="mb-4">
             <v-card-title class="text-subtitle-1">
@@ -220,11 +184,43 @@
             </v-card-text>
           </v-card>
 
+          <!-- Email Update -->
+          <v-card variant="outlined" class="mb-4">
+            <v-card-title class="text-subtitle-1">
+              <v-icon class="mr-2">mdi-email-edit</v-icon>
+              Update Email
+            </v-card-title>
+            <v-card-text>
+              <v-form ref="updateEmailForm" v-model="updateEmailValid" @submit.prevent="updateEmail">
+                <v-text-field
+                  v-model="updateEmailData.newEmail"
+                  label="New Email"
+                  type="email"
+                  :rules="emailRules"
+                  required
+                  prepend-inner-icon="mdi-email"
+                  variant="outlined"
+                  class="mb-4"
+                ></v-text-field>
+
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  block
+                  :loading="updateEmailLoading"
+                  size="large"
+                >
+                  Update Email
+                </v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+
           <!-- Quick Actions -->
           <v-card variant="outlined">
             <v-card-title class="text-subtitle-1">
               <v-icon class="mr-2">mdi-cog</v-icon>
-              Quick Actions
+              WebAuthn
             </v-card-title>
             <v-card-text>
               <v-btn
@@ -236,15 +232,6 @@
               >
                 <v-icon start>mdi-fingerprint</v-icon>
                 Setup WebAuthn
-              </v-btn>
-              <v-btn
-                color="secondary"
-                block
-                variant="outlined"
-                @click="logout"
-              >
-                <v-icon start>mdi-logout</v-icon>
-                Logout
               </v-btn>
             </v-card-text>
           </v-card>
@@ -380,14 +367,18 @@ const updateEmail = async () => {
 
   updateEmailLoading.value = true
   try {
-    const response = await userApi.updateEmail(
+    const response = await userApi.updateUser(
       authStore.user.email,
-      updateEmailData.value.newEmail
+      updateEmailData.value.newEmail,
+      null,
+      null
     )
     
-    // Update token in store
-    const newToken = response.data
-    authStore.setAuth(newToken, { ...authStore.user, email: updateEmailData.value.newEmail, emailValid: false })
+    // Update token and user in store from LoginResponseDTO
+    if (response.data?.authentication) {
+      const authData = response.data.authentication
+      authStore.setAuth(authData.token, authData.user)
+    }
     
     // Clear form
     updateEmailData.value.newEmail = ''
@@ -407,15 +398,17 @@ const updatePassword = async () => {
 
   updatePasswordLoading.value = true
   try {
-    const response = await userApi.updatePassword(
+    const response = await userApi.updateUser(
       authStore.user.email,
+      null,
       updatePasswordData.value.currentPassword,
       updatePasswordData.value.newPassword
     )
     
-    // Update user data in store
-    if (authStore.user && response.data) {
-      authStore.setAuth(authStore.token, { ...authStore.user, ...response.data })
+    // Update token and user in store from LoginResponseDTO
+    if (response.data?.authentication) {
+      const authData = response.data.authentication
+      authStore.setAuth(authData.token, authData.user)
     }
     
     // Clear form

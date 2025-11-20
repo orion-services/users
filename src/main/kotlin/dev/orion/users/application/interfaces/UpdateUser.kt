@@ -20,32 +20,16 @@ import dev.orion.users.enterprise.model.User
 
 interface UpdateUser {
     /**
-     * Updates the e-mail of the user.
+     * Updates user information (email and/or password).
+     * At least one field must be provided for update.
      *
-     * @param email    : Current user's e-mail
-     * @param newEmail : New e-mail
-     *
-     * @return An User object
+     * @param email       : Current user's email
+     * @param newEmail    : New email (optional)
+     * @param password    : Current password (required if updating password)
+     * @param newPassword : New password (optional)
+     * @return An User object with updated fields
+     * @throws IllegalArgumentException if no fields are provided for update or validation fails
      */
-    fun updateEmail(email: String, newEmail: String): User
-
-    /**
-     * Updates the user's password.
-     *
-     * @param email       : User's email
-     * @param password    : Current password
-     * @param newPassword : New Password
-     *
-     * @return An User object
-     */
-    fun updatePassword(email: String, password: String, newPassword: String): User
-
-    /**
-     * Updates a user.
-     *
-     * @param user A user object
-     * @return An User object
-     */
-    fun updateUser(user: User): User
+    fun updateUser(email: String, newEmail: String?, password: String?, newPassword: String?): User
 }
 

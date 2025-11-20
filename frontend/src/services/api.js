@@ -149,19 +149,19 @@ export const userApi = {
     })
   },
 
-  // Email Update
-  updateEmail: (email, newEmail) => {
-    return api.put('/users/update/email', toFormData({ email, newEmail }), {
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      responseType: 'text'
-    })
+  // Password Recovery
+  recoverPassword: (email) => {
+    return api.post('/users/recoverPassword', toFormData({ email }))
   },
 
-  // Password Update
-  updatePassword: (email, password, newPassword) => {
-    return api.put('/users/update/password', toFormData({ email, password, newPassword }), {
+  // User Update (email and/or password)
+  updateUser: (email, newEmail, password, newPassword) => {
+    const data = { email }
+    if (newEmail) data.newEmail = newEmail
+    if (password) data.password = password
+    if (newPassword) data.newPassword = newPassword
+    
+    return api.put('/users/update', toFormData(data), {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       }

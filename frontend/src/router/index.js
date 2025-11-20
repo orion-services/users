@@ -3,6 +3,7 @@ import LoginView from '../views/LoginView.vue'
 import TwoFactorView from '../views/TwoFactorView.vue'
 import WebAuthnView from '../views/WebAuthnView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import RecoverPasswordView from '../views/RecoverPasswordView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
@@ -26,6 +27,11 @@ const routes = [
     name: 'dashboard',
     component: DashboardView,
     meta: { requiresAuth: true }
+  },
+  {
+    path: '/recover-password',
+    name: 'recover-password',
+    component: RecoverPasswordView
   }
 ]
 

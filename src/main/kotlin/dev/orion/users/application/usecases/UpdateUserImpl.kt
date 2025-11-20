@@ -29,50 +29,53 @@ class UpdateUserImpl : UpdateUser {
     private val BLANK = "Blank Arguments"
 
     /**
-     * Updates the e-mail of the user.
+     * Updates user information (email and/or password).
+     * At least one field must be provided for update.
      *
-     * @param email    : Current user's e-mail
-     * @param newEmail : New e-mail
-     * @return An User object
+     * @param email       : Current user's email
+     * @param newEmail    : New email (optional)
+     * @param password    : Current password (required if updating password)
+     * @param newPassword : New password (optional)
+     * @return An User object with updated fields
+     * @throws IllegalArgumentException if no fields are provided for update or validation fails
      */
-    override fun updateEmail(email: String, newEmail: String): User {
-        if (email.isBlank() || newEmail.isBlank()) {
+    override fun updateUser(email: String, newEmail: String?, password: String?, newPassword: String?): User {
+        if (email.isBlank()) {
             throw IllegalArgumentException(BLANK)
         }
         
+        // Validate that at least one field is being updated
+        if (newEmail.isNullOrBlank() && newPassword.isNullOrBlank()) {
+            throw IllegalArgumentException("At least one field (newEmail or newPassword) must be provided for update")
+        }
+        
+        // Validate current email format
         if (!EmailValidator.getInstance().isValid(email)) {
             throw IllegalArgumentException("Invalid current email format")
         }
         
-        if (!EmailValidator.getInstance().isValid(newEmail)) {
-            throw IllegalArgumentException("Invalid new email format")
-        }
-        
-        val user = User()
-        user.email = newEmail
-        user.emailValid = false
-        return user
-    }
-
-    /**
-     * Changes User password.
-     *
-     * @param password    : Actual password
-     * @param newPassword : New Password
-     * @param email       : User's email
-     * @return Returns a user asynchronously
-     */
-    override fun updatePassword(email: String, password: String, newPassword: String): User {
-        if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-        
-        // Validate new password requirements
-        PasswordValidator.validatePasswordOrThrow(newPassword)
-        
         val user = User()
         user.email = email
-        user.password = encryptPassword(newPassword)
+        
+        // Update email if provided
+        if (!newEmail.isNullOrBlank()) {
+            if (!EmailValidator.getInstance().isValid(newEmail)) {
+                throw IllegalArgumentException("Invalid new email format")
+            }
+            user.email = newEmail
+            user.emailValid = false
+        }
+        
+        // Update password if provided
+        if (!newPassword.isNullOrBlank()) {
+            if (password.isNullOrBlank()) {
+                throw IllegalArgumentException("Current password is required when updating password")
+            }
+            // Validate new password requirements
+            PasswordValidator.validatePasswordOrThrow(newPassword)
+            user.password = encryptPassword(newPassword)
+        }
+        
         return user
     }
 
@@ -84,19 +87,6 @@ class UpdateUserImpl : UpdateUser {
      */
     private fun encryptPassword(password: String): String {
         return DigestUtils.sha256Hex(password)
-    }
-
-    /**
-     * Updates a user.
-     *
-     * @param user the user to be updated
-     * @return the updated user
-     * @throws IllegalArgumentException if the user is null
-     */
-    override fun updateUser(user: User): User {
-        // In Kotlin, non-nullable types can't be null, so this check is not needed
-        // but keeping for consistency with original code
-        return user
     }
 }
 
