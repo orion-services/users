@@ -166,6 +166,15 @@ export const userApi = {
         'Content-Type': 'application/x-www-form-urlencoded'
       }
     })
+  },
+
+  // Social Auth
+  loginWithGoogle: (idToken) => {
+    return api.post('/users/login/google', toFormData({ idToken }))
+  },
+
+  loginWithApple: (idToken) => {
+    return api.post('/users/login/apple', toFormData({ idToken }))
   }
 }
 

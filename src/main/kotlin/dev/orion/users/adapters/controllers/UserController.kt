@@ -24,11 +24,13 @@ import dev.orion.users.adapters.gateways.entities.WebAuthnCredentialEntity
 import dev.orion.users.adapters.gateways.repository.WebAuthnCredentialRepository
 import dev.orion.users.application.interfaces.AuthenticateUCI
 import dev.orion.users.application.interfaces.CreateUserUCI
+import dev.orion.users.application.interfaces.SocialAuthUCI
 import dev.orion.users.application.interfaces.TwoFactorAuthUCI
 import dev.orion.users.application.interfaces.UpdateUser
 import dev.orion.users.application.interfaces.WebAuthnUCI
 import dev.orion.users.application.usecases.AuthenticateUC
 import dev.orion.users.application.usecases.CreateUserUC
+import dev.orion.users.application.usecases.SocialAuthUC
 import dev.orion.users.application.usecases.TwoFactorAuthUC
 import dev.orion.users.application.usecases.UpdateUserImpl
 import dev.orion.users.application.usecases.WebAuthnUC
@@ -56,6 +58,9 @@ class UserController : BasicController() {
 
     /** Use cases for authentication. */
     private val authenticationUC: AuthenticateUCI = AuthenticateUC()
+
+    /** Use cases for social authentication. */
+    private val socialAuthUC: SocialAuthUCI = SocialAuthUC()
 
     /** Use cases for two factor authentication. */
     private val twoFactorAuthUC: TwoFactorAuthUCI = TwoFactorAuthUC()
@@ -184,6 +189,43 @@ class UserController : BasicController() {
                 dto.token = this.generateJWT(user)
                 dto.user = user
                 dto
+            }
+    }
+
+    /**
+     * Authenticates a user with a social provider (Google or Apple).
+     * If the user doesn't exist, creates it automatically.
+     *
+     * @param email    The email from the social provider
+     * @param name     The name from the social provider
+     * @param provider The provider name ("google" or "apple")
+     * @return A Uni<AuthenticationDTO> object with user and JWT token
+     */
+    fun loginWithSocialProvider(email: String, name: String, provider: String): Uni<AuthenticationDTO> {
+        // Validate social auth data using use case
+        val user: User = socialAuthUC.validateSocialAuth(email, name, provider)
+        val entity: UserEntity = mapper.map(user, UserEntity::class.java)
+
+        // Try to find existing user by email
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNotNull().transform { existingUser ->
+                // User exists, generate JWT and return
+                val dto = AuthenticationDTO()
+                dto.token = this.generateJWT(existingUser)
+                dto.user = existingUser
+                dto
+            }
+            .onItem().ifNull().switchTo {
+                // User doesn't exist, create it
+                // Generate a secure password (user won't use it, but DB requires it)
+                entity.password = DigestUtils.sha256Hex(UUID.randomUUID().toString())
+                userRepository.createUser(entity)
+                    .onItem().ifNotNull().transform { newUser ->
+                        val dto = AuthenticationDTO()
+                        dto.token = this.generateJWT(newUser)
+                        dto.user = newUser
+                        dto
+                    }
             }
     }
 

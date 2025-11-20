@@ -51,6 +51,58 @@ curl  -X POST \
 }
 ```
 
+## Social Authentication
+
+The system also supports authentication via social providers (Google and Apple).
+
+### Google Login
+
+* Endpoint: `/users/login/google`
+* Method: POST
+* Consumes: application/x-www-form-urlencoded
+* Produces: application/json
+
+* Request:
+
+```shell
+curl -X POST \
+  'http://localhost:8080/users/login/google' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'idToken=GOOGLE_ID_TOKEN'
+```
+
+* Response: Same as normal login - AuthenticationDTO with user and token.
+
+### Apple Login
+
+* Endpoint: `/users/login/apple`
+* Method: POST
+* Consumes: application/x-www-form-urlencoded
+* Produces: application/json
+
+* Request:
+
+```shell
+curl -X POST \
+  'http://localhost:8080/users/login/apple' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'idToken=APPLE_ID_TOKEN'
+```
+
+* Response: Same as normal login - AuthenticationDTO with user and token.
+
+### Social Authentication Flow
+
+1. User clicks "Login with Google" or "Login with Apple" in the frontend
+2. Frontend initiates OAuth2 flow with the provider
+3. Provider returns an ID token (JWT)
+4. Frontend sends the ID token to the backend endpoint
+5. Backend validates the token and extracts user information (email, name)
+6. Backend searches for user by email
+7. If user doesn't exist, backend creates it automatically
+8. Backend generates a JWT token for the system
+9. Backend returns AuthenticationDTO with user and token
+
 ## Exceptions
 
 RESTful Web Service layer will return a HTTP 401 (Unauthorized) if the user

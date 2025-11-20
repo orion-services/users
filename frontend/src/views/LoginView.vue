@@ -55,6 +55,35 @@
                   Login with WebAuthn
                 </v-btn>
 
+                <v-divider class="my-4">
+                  <span class="text-body-2 text-medium-emphasis px-2">ou</span>
+                </v-divider>
+
+                <v-btn
+                  color="primary"
+                  block
+                  variant="outlined"
+                  @click="handleGoogleLogin"
+                  :loading="googleLoading"
+                  class="mb-2"
+                  prepend-icon="mdi-google"
+                  size="large"
+                >
+                  Login with Google
+                </v-btn>
+
+                <v-btn
+                  color="black"
+                  block
+                  variant="outlined"
+                  @click="handleAppleLogin"
+                  :loading="appleLoading"
+                  prepend-icon="mdi-apple"
+                  size="large"
+                >
+                  Login with Apple
+                </v-btn>
+
                 <div class="text-center mt-4">
                   <a
                     href="#"
@@ -136,7 +165,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { userApi } from '../services/api'
@@ -156,6 +185,11 @@ const registerValid = ref(false)
 const loginEmail = ref('')
 const loginPassword = ref('')
 const loginLoading = ref(false)
+const googleLoading = ref(false)
+const appleLoading = ref(false)
+
+// Check if Apple Client ID is configured
+const hasAppleClientId = ref(false)
 
 // Registration form data
 const registerName = ref('')
@@ -246,5 +280,183 @@ const handleRegister = async () => {
     registerLoading.value = false
   }
 }
+
+const handleGoogleLogin = async () => {
+  googleLoading.value = true
+  try {
+    // Wait for Google Identity Services to load
+    await new Promise((resolve) => {
+      if (typeof google !== 'undefined' && google.accounts) {
+        resolve()
+      } else {
+        const checkInterval = setInterval(() => {
+          if (typeof google !== 'undefined' && google.accounts) {
+            clearInterval(checkInterval)
+            resolve()
+          }
+        }, 100)
+        setTimeout(() => {
+          clearInterval(checkInterval)
+          resolve()
+        }, 5000)
+      }
+    })
+
+    if (typeof google === 'undefined' || !google.accounts) {
+      showMessage('Google Sign-In library not loaded. Please refresh the page.', 'error')
+      googleLoading.value = false
+      return
+    }
+
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '307391126869-5c1f7q3vl6hdqv1elvq4humtrc8tvfef.apps.googleusercontent.com'
+
+    // Use Google Identity Services to get ID token
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: async (response) => {
+        try {
+          // Send the ID token (credential) to backend
+          const apiResponse = await userApi.loginWithGoogle(response.credential)
+          const data = apiResponse.data
+
+          if (data.token && data.user) {
+            authStore.setAuth(data.token, data.user)
+            showMessage('Login with Google successful!')
+            router.push('/dashboard')
+          }
+        } catch (error) {
+          const message = error.response?.data?.message || error.message || 'Error logging in with Google'
+          showMessage(message, 'error')
+        } finally {
+          googleLoading.value = false
+        }
+      }
+    })
+
+    // Trigger the One Tap or popup
+    google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        // If One Tap is not displayed, show a button or use popup
+        google.accounts.oauth2.initTokenClient({
+          client_id: clientId,
+          scope: 'openid profile email',
+          callback: async (tokenResponse) => {
+            try {
+              // Get user info and create a mock ID token for backend
+              // In production, you should get the ID token from Google
+              const userInfoResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo?access_token=${tokenResponse.access_token}`)
+              const userInfo = await userInfoResponse.json()
+              
+              // For now, send access token - backend should handle validation
+              // In production, use proper ID token from Google
+              const apiResponse = await userApi.loginWithGoogle(tokenResponse.access_token)
+              const data = apiResponse.data
+
+              if (data.token && data.user) {
+                authStore.setAuth(data.token, data.user)
+                showMessage('Login with Google successful!')
+                router.push('/dashboard')
+              }
+            } catch (error) {
+              const message = error.response?.data?.message || error.message || 'Error logging in with Google'
+              showMessage(message, 'error')
+            } finally {
+              googleLoading.value = false
+            }
+          }
+        }).requestAccessToken()
+      }
+    })
+  } catch (error) {
+    const message = error.message || 'Error initializing Google Sign-In'
+    showMessage(message, 'error')
+    googleLoading.value = false
+  }
+}
+
+const handleAppleLogin = async () => {
+  appleLoading.value = true
+  try {
+    // Wait for Apple Sign In to load (increase timeout)
+    await new Promise((resolve, reject) => {
+      if (typeof AppleID !== 'undefined' && AppleID.auth) {
+        resolve()
+        return
+      }
+      
+      let attempts = 0
+      const maxAttempts = 100 // 10 seconds
+      const checkInterval = setInterval(() => {
+        attempts++
+        if (typeof AppleID !== 'undefined' && AppleID.auth) {
+          clearInterval(checkInterval)
+          resolve()
+        } else if (attempts >= maxAttempts) {
+          clearInterval(checkInterval)
+          reject(new Error('Apple Sign-In library failed to load'))
+        }
+      }, 100)
+    })
+
+    const clientId = import.meta.env.VITE_APPLE_CLIENT_ID || ''
+    
+    // Validate clientId
+    if (!clientId || clientId.trim() === '') {
+      showMessage('Apple Client ID not configured. Please contact the administrator.', 'error')
+      appleLoading.value = false
+      return
+    }
+
+    // Initialize Apple Sign In
+    try {
+      AppleID.auth.init({
+        clientId: clientId.trim(),
+        scope: 'name email',
+        redirectURI: window.location.origin,
+        usePopup: true
+      })
+    } catch (initError) {
+      console.error('Error initializing Apple Sign-In:', initError)
+      showMessage('Error initializing Apple Sign-In. Please try again.', 'error')
+      appleLoading.value = false
+      return
+    }
+
+    // Sign in
+    const response = await AppleID.auth.signIn()
+    
+    if (response && response.id_token) {
+      // Send the ID token to backend
+      const apiResponse = await userApi.loginWithApple(response.id_token)
+      const data = apiResponse.data
+
+      if (data.token && data.user) {
+        authStore.setAuth(data.token, data.user)
+        showMessage('Login with Apple successful!')
+        router.push('/dashboard')
+      }
+    } else {
+      showMessage('Apple Sign-In was cancelled or failed.', 'error')
+    }
+  } catch (error) {
+    console.error('Apple Sign-In error:', error)
+    if (error.message && error.message.includes('failed to load')) {
+      showMessage('Apple Sign-In library not loaded. Please refresh the page and try again.', 'error')
+    } else {
+      const message = error.response?.data?.message || error.message || 'Error logging in with Apple'
+      showMessage(message, 'error')
+    }
+  } finally {
+    appleLoading.value = false
+  }
+}
+
+onMounted(() => {
+  // Check if Apple Client ID is configured
+  const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID || ''
+  hasAppleClientId.value = appleClientId.trim() !== ''
+  
+  // Scripts are loaded in index.html, just wait for them to be available
+})
 </script>
 

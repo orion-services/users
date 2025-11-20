@@ -10,9 +10,10 @@ rectangle Users{
     usecase "Validate E-mail" as UC4
     usecase "Delete User" as UC5
     usecase "Recover Password" as UC6
-    usecase "Update Email" as UC7
-    usecase "Update Password" as UC8
-    usecase "Two Factor Authenticate" as UC9
+    usecase "Update User" as UC7
+    usecase "Two Factor Authenticate" as UC8
+    usecase "Social Authentication" as UC9
+    usecase "WebAuthn Authentication" as UC10
 }
 
 client -->  UC1
@@ -24,5 +25,6 @@ client -->  UC6
 client -->  UC7
 client -->  UC8
 client -->  UC9
+client -->  UC10
 
 @enduml
