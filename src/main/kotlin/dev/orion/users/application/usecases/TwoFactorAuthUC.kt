@@ -20,6 +20,7 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.validator.routines.EmailValidator
 
 import dev.orion.users.application.interfaces.TwoFactorAuthUCI
+import dev.orion.users.application.utils.PasswordValidator
 import dev.orion.users.enterprise.model.User
 
 /**
@@ -32,9 +33,6 @@ class TwoFactorAuthUC : TwoFactorAuthUCI {
 
     /** Default invalid arguments message. */
     private val INVALID = "Invalid arguments"
-
-    /** Minimum password length. */
-    private val MIN_PASSWORD_LENGTH = 8
 
     /**
      * Generates a QR code for 2FA setup.
@@ -52,9 +50,9 @@ class TwoFactorAuthUC : TwoFactorAuthUCI {
         if (!EmailValidator.getInstance().isValid(email)) {
             throw IllegalArgumentException(INVALID)
         }
-        if (password.length < MIN_PASSWORD_LENGTH) {
-            throw IllegalArgumentException("Password must be at least $MIN_PASSWORD_LENGTH characters")
-        }
+        
+        // Validate password requirements
+        PasswordValidator.validatePasswordOrThrow(password)
 
         val user = User()
         user.email = email

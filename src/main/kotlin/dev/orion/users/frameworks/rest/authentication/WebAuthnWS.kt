@@ -65,9 +65,10 @@ class WebAuthnWS {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     fun startRegistration(
-        @RestForm @NotEmpty @Email email: String
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm origin: String?
     ): Uni<Response> {
-        return controller.startWebAuthnRegistration(email)
+        return controller.startWebAuthnRegistration(email, origin)
             .onItem().transform { optionsJson ->
                 Response.ok(optionsJson).build()
             }
@@ -82,6 +83,7 @@ class WebAuthnWS {
      *
      * @param email     The email of the user
      * @param response  The registration response from the client (JSON string)
+     * @param origin    The origin (complete site address) where the device was registered
      * @param deviceName Optional name for the device
      * @return true if registration was successful
      * @throws ServiceException if registration fails
@@ -95,9 +97,10 @@ class WebAuthnWS {
     fun finishRegistration(
         @RestForm @NotEmpty @Email email: String,
         @RestForm @NotEmpty response: String,
+        @RestForm @NotEmpty origin: String,
         @RestForm deviceName: String?
     ): Uni<Response> {
-        return controller.finishWebAuthnRegistration(email, response, deviceName)
+        return controller.finishWebAuthnRegistration(email, response, origin, deviceName)
             .onItem().transform { success ->
                 val result = mapOf("success" to success, "message" to "WebAuthn credential registered successfully")
                 Response.ok(result).build()

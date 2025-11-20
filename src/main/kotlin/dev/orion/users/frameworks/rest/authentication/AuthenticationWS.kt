@@ -214,5 +214,31 @@ class AuthenticationWS {
             Uni.createFrom().item(Response.status(Response.Status.BAD_REQUEST).build())
         }
     }
+
+    /**
+     * Recovers the password of a user. Generates a new password and sends it via email.
+     *
+     * @param email The e-mail of the user
+     * @return HTTP 204 (No Content) if successful
+     * @throws Bad request if the email is invalid or user not found
+     */
+    @POST
+    @PermitAll
+    @Path("/recoverPassword")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun recoverPassword(
+        @RestForm @NotEmpty @Email email: String
+    ): Uni<Response> {
+        return controller.recoverPassword(email)
+            .onItem().transform {
+                Response.noContent().build()
+            }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                throw ServiceException(message, Response.Status.BAD_REQUEST)
+            }
+    }
 }
 

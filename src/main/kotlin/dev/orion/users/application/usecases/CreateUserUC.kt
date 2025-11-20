@@ -20,12 +20,10 @@ import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.validator.routines.EmailValidator
 
 import dev.orion.users.application.interfaces.CreateUserUCI
+import dev.orion.users.application.utils.PasswordValidator
 import dev.orion.users.enterprise.model.User
 
 class CreateUserUC : CreateUserUCI {
-
-    /** The minimum size of the password required. */
-    private val SIZE_PASSWORD = 8
 
     /**
      * Creates a user in the service (UC: Create the user).
@@ -38,18 +36,17 @@ class CreateUserUC : CreateUserUCI {
     override fun createUser(name: String, email: String, password: String): User {
         if (name.isEmpty() || !EmailValidator.getInstance().isValid(email) || password.isEmpty()) {
             throw IllegalArgumentException("Blank arguments or invalid e-mail")
-        } else {
-            if (password.length < SIZE_PASSWORD) {
-                throw IllegalArgumentException("Password less than eight characters")
-            } else {
-                val user = User()
-                user.name = name
-                user.email = email
-                user.password = encryptPassword(password)
-                user.emailValid = false
-                return user
-            }
         }
+        
+        // Validate password requirements
+        PasswordValidator.validatePasswordOrThrow(password)
+        
+        val user = User()
+        user.name = name
+        user.email = email
+        user.password = encryptPassword(password)
+        user.emailValid = false
+        return user
     }
 
     /**

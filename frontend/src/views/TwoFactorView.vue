@@ -3,14 +3,14 @@
     <v-col cols="12" sm="8" md="6" lg="4">
       <v-card>
         <v-card-title class="text-h5 text-center pa-4">
-          Autenticação em Dois Fatores
+          Two-Factor Authentication
         </v-card-title>
 
         <v-card-text>
-          <!-- Modo: Configurar 2FA -->
+          <!-- Mode: Setup 2FA -->
           <div v-if="mode === 'setup'">
             <v-alert type="info" class="mb-4">
-              Configure a autenticação em dois fatores escaneando o QR code com seu aplicativo autenticador.
+              Set up two-factor authentication by scanning the QR code with your authenticator app.
             </v-alert>
 
             <v-form ref="setupForm" v-model="setupValid" @submit.prevent="generateQRCode">
@@ -27,14 +27,19 @@
 
               <v-text-field
                 v-model="setupPassword"
-                label="Senha"
+                label="Password"
                 type="password"
                 :rules="passwordRules"
                 required
                 prepend-inner-icon="mdi-lock"
                 variant="outlined"
-                class="mb-4"
+                class="mb-2"
               ></v-text-field>
+
+              <PasswordStrengthIndicator
+                :password="setupPassword"
+                class="mb-4"
+              />
 
               <v-btn
                 type="submit"
@@ -44,11 +49,11 @@
                 size="large"
                 class="mb-4"
               >
-                Gerar QR Code
+                Generate QR Code
               </v-btn>
             </v-form>
 
-            <!-- Exibir QR Code -->
+            <!-- Display QR Code -->
             <div v-if="qrCodeUrl" class="text-center mt-4">
               <v-img
                 :src="qrCodeUrl"
@@ -57,7 +62,7 @@
                 contain
               ></v-img>
               <v-alert type="success" class="mb-4">
-                Escaneie o QR code com seu aplicativo autenticador (Google Authenticator, Authy, etc.)
+                Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
               </v-alert>
               <v-btn
                 color="success"
@@ -65,15 +70,15 @@
                 @click="mode = 'validate'"
                 size="large"
               >
-                Já escaneei, validar código
+                Already scanned, validate code
               </v-btn>
             </div>
           </div>
 
-          <!-- Modo: Validar código 2FA -->
+          <!-- Mode: Validate 2FA code -->
           <div v-if="mode === 'validate'">
             <v-alert type="info" class="mb-4">
-              Digite o código de 6 dígitos do seu aplicativo autenticador.
+              Enter the 6-digit code from your authenticator app.
             </v-alert>
 
             <v-form ref="validateForm" v-model="validateValid" @submit.prevent="handleValidateCode">
@@ -90,7 +95,7 @@
 
               <v-text-field
                 v-model="validateCode"
-                label="Código de 6 dígitos"
+                label="6-digit code"
                 :rules="codeRules"
                 required
                 prepend-inner-icon="mdi-shield-lock"
@@ -108,7 +113,7 @@
                 size="large"
                 class="mb-4"
               >
-                Validar Código
+                Validate Code
               </v-btn>
 
               <v-btn
@@ -117,13 +122,13 @@
                 variant="outlined"
                 @click="mode = 'setup'"
               >
-                Configurar 2FA
+                Setup 2FA
               </v-btn>
             </v-form>
           </div>
         </v-card-text>
 
-        <!-- Snackbar para mensagens -->
+        <!-- Snackbar for messages -->
         <v-snackbar
           v-model="snackbar.show"
           :color="snackbar.color"
@@ -142,6 +147,8 @@ import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { userApi } from '../services/api'
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator.vue'
+import { getPasswordRules } from '../utils/passwordValidation'
 
 const route = useRoute()
 const router = useRouter()
@@ -153,13 +160,13 @@ const validateForm = ref(null)
 const setupValid = ref(false)
 const validateValid = ref(false)
 
-// Dados para configuração
+// Data for setup
 const setupEmail = ref('')
 const setupPassword = ref('')
 const qrLoading = ref(false)
 const qrCodeUrl = ref(null)
 
-// Dados para validação
+// Data for validation
 const validateEmail = ref('')
 const validateCode = ref('')
 const validateLoading = ref(false)
@@ -171,25 +178,22 @@ const snackbar = ref({
   color: 'success'
 })
 
-// Regras de validação
+// Validation rules
 const emailRules = [
-  v => !!v || 'Email é obrigatório',
-  v => /.+@.+\..+/.test(v) || 'Email deve ser válido'
+  v => !!v || 'Email is required',
+  v => /.+@.+\..+/.test(v) || 'Email must be valid'
 ]
 
-const passwordRules = [
-  v => !!v || 'Senha é obrigatória',
-  v => (v && v.length >= 8) || 'Senha deve ter no mínimo 8 caracteres'
-]
+const passwordRules = getPasswordRules()
 
 const codeRules = [
-  v => !!v || 'Código é obrigatório',
-  v => (v && v.length === 6) || 'Código deve ter 6 dígitos',
-  v => /^\d{6}$/.test(v) || 'Código deve conter apenas números'
+  v => !!v || 'Code is required',
+  v => (v && v.length === 6) || 'Code must have 6 digits',
+  v => /^\d{6}$/.test(v) || 'Code must contain only numbers'
 ]
 
 onMounted(() => {
-  // Se veio do login, usar o email pendente
+  // If coming from login, use pending email
   const pendingEmail = localStorage.getItem('pending_email')
   if (pendingEmail) {
     validateEmail.value = pendingEmail
@@ -213,9 +217,9 @@ const generateQRCode = async () => {
     const blob = new Blob([response.data], { type: 'image/png' })
     qrCodeUrl.value = URL.createObjectURL(blob)
     validateEmail.value = setupEmail.value
-    showMessage('QR Code gerado com sucesso!')
+    showMessage('QR Code generated successfully!')
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Erro ao gerar QR code'
+    const message = error.response?.data?.message || error.message || 'Error generating QR code'
     showMessage(message, 'error')
   } finally {
     qrLoading.value = false
@@ -233,11 +237,11 @@ const handleValidateCode = async () => {
     if (data.token && data.user) {
       authStore.setAuth(data.token, data.user)
       localStorage.removeItem('pending_email')
-      showMessage('Autenticação realizada com sucesso!')
+      showMessage('Authentication successful!')
       router.push('/dashboard')
     }
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Código inválido'
+    const message = error.response?.data?.message || error.message || 'Invalid code'
     showMessage(message, 'error')
   } finally {
     validateLoading.value = false

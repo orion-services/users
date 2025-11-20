@@ -25,12 +25,15 @@ import dev.orion.users.adapters.gateways.repository.WebAuthnCredentialRepository
 import dev.orion.users.application.interfaces.AuthenticateUCI
 import dev.orion.users.application.interfaces.CreateUserUCI
 import dev.orion.users.application.interfaces.TwoFactorAuthUCI
+import dev.orion.users.application.interfaces.UpdateUser
 import dev.orion.users.application.interfaces.WebAuthnUCI
 import dev.orion.users.application.usecases.AuthenticateUC
 import dev.orion.users.application.usecases.CreateUserUC
 import dev.orion.users.application.usecases.TwoFactorAuthUC
+import dev.orion.users.application.usecases.UpdateUserImpl
 import dev.orion.users.application.usecases.WebAuthnUC
 import dev.orion.users.enterprise.model.User
+import dev.orion.users.frameworks.mail.MailTemplate
 import com.fasterxml.jackson.databind.ObjectMapper
 import java.security.SecureRandom
 import java.util.*
@@ -43,8 +46,8 @@ import jakarta.inject.Inject
 /**
  * The controller class.
  */
-@ApplicationScoped
 @WithSession
+@ApplicationScoped
 class UserController : BasicController() {
 
     /** Use cases for users. */
@@ -58,6 +61,9 @@ class UserController : BasicController() {
 
     /** Use cases for WebAuthn. */
     private val webAuthnUC: WebAuthnUCI = WebAuthnUC()
+
+    /** Use cases for updating user. */
+    private val updateUserUC: UpdateUser = UpdateUserImpl()
 
     /** Persistence layer. */
     @Inject
@@ -274,9 +280,10 @@ class UserController : BasicController() {
      * Starts WebAuthn registration process.
      *
      * @param email The email of the user
+     * @param origin Optional origin URL to extract rpId from
      * @return A JSON string containing PublicKeyCredentialCreationOptions
      */
-    fun startWebAuthnRegistration(email: String): Uni<String> {
+    fun startWebAuthnRegistration(email: String, origin: String? = null): Uni<String> {
         // Validate email using use case
         webAuthnUC.startRegistration(email)
 
@@ -294,7 +301,7 @@ class UserController : BasicController() {
                 
                 // Create PublicKeyCredentialCreationOptions as JSON
                 val rpName = issuer?.orElse("Orion Users") ?: "Orion Users"
-                val rpId = "localhost" // Should be configured properly
+                val rpId = origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
                 val userName = user.email ?: email
                 val userDisplayName = user.name ?: user.email ?: email
                 
@@ -334,12 +341,13 @@ class UserController : BasicController() {
      *
      * @param email     The email of the user
      * @param response  The registration response from the client (JSON string)
+     * @param origin    The origin (complete site address) where the device was registered
      * @param deviceName Optional name for the device
      * @return true if registration was successful
      */
-    fun finishWebAuthnRegistration(email: String, response: String, deviceName: String?): Uni<Boolean> {
+    fun finishWebAuthnRegistration(email: String, response: String, origin: String, deviceName: String?): Uni<Boolean> {
         // Validate using use case
-        webAuthnUC.finishRegistration(email, response, deviceName)
+        webAuthnUC.finishRegistration(email, response, origin, deviceName)
 
         return userRepository.findUserByEmail(email)
             .onItem().ifNull()
@@ -353,7 +361,9 @@ class UserController : BasicController() {
                     credentialEntity.credentialId = UUID.randomUUID().toString() // Should be from actual response
                     credentialEntity.publicKey = response // Should be properly extracted and stored
                     credentialEntity.counter = 0
-                    credentialEntity.deviceName = deviceName ?: "Unknown Device"
+                    credentialEntity.origin = origin
+                    credentialEntity.notes = deviceName ?: "Unknown Device"
+                    credentialEntity.deviceName = deviceName ?: "Unknown Device" // Keep for compatibility
 
                     webAuthnCredentialRepository.saveCredential(credentialEntity)
                         .onItem().transform { true }
@@ -400,10 +410,13 @@ class UserController : BasicController() {
                             }
                         }
 
+                        // Extract rpId from stored origin to ensure consistency
+                        val rpId = credentials.firstOrNull()?.origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
+                        
                         // Create PublicKeyCredentialRequestOptions as JSON
                         val options = mapOf(
                             "challenge" to challenge,
-                            "rpId" to "localhost", // Should be configured properly
+                            "rpId" to rpId,
                             "allowCredentials" to allowCredentials,
                             "userVerification" to "preferred",
                             "timeout" to 60000L
@@ -455,6 +468,123 @@ class UserController : BasicController() {
                         dto
                     }
             }
+    }
+
+    /**
+     * Recovers the password of a user. Generates a new password, updates it in the database,
+     * and sends it via email.
+     *
+     * @param email : The e-mail of the user
+     * @return A Uni<Void> that completes when the password is recovered and email is sent
+     */
+    fun recoverPassword(email: String): Uni<Void> {
+        // Validate email using use case
+        authenticationUC.recoverPassword(email)
+
+        // Generate new password and update user in repository
+        return userRepository.recoverPassword(email)
+            .onItem().ifNotNull().call { newPassword ->
+                // Send email with new password
+                sendRecoveryEmail(email, newPassword)
+            }
+            .onItem().transform { null }
+    }
+
+    /**
+     * Sends a recovery password email to the user.
+     *
+     * @param email    : The user's email
+     * @param password : The new password
+     * @return A Uni<Void> that completes when the email is sent
+     */
+    private fun sendRecoveryEmail(email: String, password: String): Uni<Void> {
+        return MailTemplate.recoverPwd(password)
+            .to(email)
+            .subject("Recuperação de senha")
+            .send()
+            .onItem().transform { null }
+    }
+
+    /**
+     * Updates the email of a user. Validates the token, updates the email,
+     * generates a new JWT, and sends a validation email to the new address.
+     *
+     * @param email    : The current email of the user
+     * @param newEmail : The new email address
+     * @param jwtEmail : The email from the JWT token (for validation)
+     * @return A Uni<String> that emits the new JWT token
+     */
+    fun updateEmail(email: String, newEmail: String, jwtEmail: String): Uni<String> {
+        // Validate using use case
+        val user: User = updateUserUC.updateEmail(email, newEmail)
+        
+        // Validate that JWT email matches the current email
+        checkTokenEmail(email, jwtEmail)
+        
+        // Update email in repository
+        return userRepository.updateEmail(email, newEmail)
+            .onItem().ifNotNull().call { updatedUser ->
+                // Send validation email to the new email address
+                sendValidationEmail(updatedUser)
+            }
+            .onItem().ifNotNull().transform { updatedUser ->
+                // Generate new JWT with updated email
+                generateJWT(updatedUser)
+            }
+    }
+
+    /**
+     * Updates the password of a user. Validates the current password and updates it.
+     *
+     * @param email       : The user's email
+     * @param password    : The current password
+     * @param newPassword : The new password
+     * @param jwtEmail    : The email from the JWT token (for validation)
+     * @return A Uni<UserEntity> that emits the updated user
+     */
+    fun updatePassword(email: String, password: String, newPassword: String, jwtEmail: String): Uni<UserEntity> {
+        // Validate using use case
+        val user: User = updateUserUC.updatePassword(email, password, newPassword)
+        
+        // Validate that JWT email matches the request email
+        checkTokenEmail(email, jwtEmail)
+        
+        // Find user by email
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { userEntity ->
+                // Encrypt current password for comparison
+                val encryptedPassword = org.apache.commons.codec.digest.DigestUtils.sha256Hex(password)
+                
+                // Validate current password matches
+                if (encryptedPassword != userEntity.password) {
+                    throw IllegalArgumentException("Current password is incorrect")
+                }
+                
+                // Update password using repository
+                userRepository.changePassword(encryptedPassword, user.password ?: "", email)
+            }
+    }
+
+    /**
+     * Extracts the rpId (Relying Party ID) from an origin URL.
+     * The rpId is the hostname without protocol and port.
+     * This ensures consistency between registration and authentication.
+     *
+     * @param origin The origin URL (e.g., "http://localhost:8080" or "https://example.com")
+     * @return The rpId (e.g., "localhost" or "example.com")
+     */
+    private fun extractRpIdFromOrigin(origin: String): String {
+        return try {
+            val url = java.net.URL(origin)
+            url.host ?: "localhost"
+        } catch (e: Exception) {
+            // If parsing fails, try to extract manually
+            origin.replace(Regex("^https?://"), "")
+                .replace(Regex(":\\d+$"), "")
+                .takeIf { it.isNotBlank() } ?: "localhost"
+        }
     }
 
 }

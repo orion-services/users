@@ -10,7 +10,7 @@ const api = axios.create({
   }
 })
 
-// Interceptor para adicionar token JWT nas requisições e logar requisições
+// Interceptor to add JWT token to requests and log requests
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token')
@@ -18,12 +18,12 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`
     }
     
-    // Log da requisição
+    // Log the request
     try {
       const debugStore = useDebugStore()
       debugStore.addLog(config, null, null)
     } catch (e) {
-      // Store pode não estar inicializado ainda, ignorar erro
+      // Store may not be initialized yet, ignore error
       console.warn('Debug store not available:', e)
     }
     
@@ -40,13 +40,13 @@ api.interceptors.request.use(
   }
 )
 
-// Interceptor para tratar erros de resposta e logar respostas
+// Interceptor to handle response errors and log responses
 api.interceptors.response.use(
   (response) => {
-    // Log da resposta bem-sucedida
+    // Log successful response
     try {
       const debugStore = useDebugStore()
-      // Criar uma cópia da resposta para log (sem o blob se for blob)
+      // Create a copy of the response for logging (without blob if it's a blob)
       const logResponse = {
         ...response,
         data: response.config.responseType === 'blob' 
@@ -60,7 +60,7 @@ api.interceptors.response.use(
     return response
   },
   (error) => {
-    // Log do erro
+    // Log the error
     try {
       const debugStore = useDebugStore()
       debugStore.addLog(error.config || {}, null, error)
@@ -76,7 +76,7 @@ api.interceptors.response.use(
   }
 )
 
-// Função auxiliar para converter objeto em FormData
+// Helper function to convert object to FormData
 const toFormData = (data) => {
   const formData = new URLSearchParams()
   Object.keys(data).forEach(key => {
@@ -88,7 +88,7 @@ const toFormData = (data) => {
 }
 
 export const userApi = {
-  // Cadastro
+  // Registration
   createUser: (name, email, password) => {
     return api.post('/users/create', toFormData({ name, email, password }))
   },
@@ -118,14 +118,18 @@ export const userApi = {
   },
 
   // WebAuthn
-  startWebAuthnRegistration: (email) => {
-    return api.post('/users/webauthn/register/start', toFormData({ email }))
+  startWebAuthnRegistration: (email, origin) => {
+    return api.post('/users/webauthn/register/start', toFormData({ 
+      email,
+      origin: origin || null
+    }))
   },
 
-  finishWebAuthnRegistration: (email, response, deviceName) => {
+  finishWebAuthnRegistration: (email, response, origin, deviceName) => {
     return api.post('/users/webauthn/register/finish', toFormData({ 
       email, 
       response, 
+      origin,
       deviceName: deviceName || null 
     }))
   },
@@ -138,10 +142,29 @@ export const userApi = {
     return api.post('/users/webauthn/authenticate/finish', toFormData({ email, response }))
   },
 
-  // Validação de Email
+  // Email Validation
   validateEmail: (email, code) => {
     return api.get('/users/validateEmail', {
       params: { email, code }
+    })
+  },
+
+  // Email Update
+  updateEmail: (email, newEmail) => {
+    return api.put('/users/update/email', toFormData({ email, newEmail }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      responseType: 'text'
+    })
+  },
+
+  // Password Update
+  updatePassword: (email, password, newPassword) => {
+    return api.put('/users/update/password', toFormData({ email, password, newPassword }), {
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      }
     })
   }
 }

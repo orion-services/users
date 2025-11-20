@@ -16,7 +16,11 @@
  */
 package dev.orion.users.application.usecases
 
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.validator.routines.EmailValidator
+
 import dev.orion.users.application.interfaces.UpdateUser
+import dev.orion.users.application.utils.PasswordValidator
 import dev.orion.users.enterprise.model.User
 
 class UpdateUserImpl : UpdateUser {
@@ -35,9 +39,19 @@ class UpdateUserImpl : UpdateUser {
         if (email.isBlank() || newEmail.isBlank()) {
             throw IllegalArgumentException(BLANK)
         }
-        // This method returns null in the original implementation
-        // Keeping the same behavior
-        throw UnsupportedOperationException("Not implemented")
+        
+        if (!EmailValidator.getInstance().isValid(email)) {
+            throw IllegalArgumentException("Invalid current email format")
+        }
+        
+        if (!EmailValidator.getInstance().isValid(newEmail)) {
+            throw IllegalArgumentException("Invalid new email format")
+        }
+        
+        val user = User()
+        user.email = newEmail
+        user.emailValid = false
+        return user
     }
 
     /**
@@ -51,11 +65,25 @@ class UpdateUserImpl : UpdateUser {
     override fun updatePassword(email: String, password: String, newPassword: String): User {
         if (password.isBlank() || newPassword.isBlank() || email.isBlank()) {
             throw IllegalArgumentException(BLANK)
-        } else {
-            // This method returns null in the original implementation
-            // Keeping the same behavior
-            throw UnsupportedOperationException("Not implemented")
         }
+        
+        // Validate new password requirements
+        PasswordValidator.validatePasswordOrThrow(newPassword)
+        
+        val user = User()
+        user.email = email
+        user.password = encryptPassword(newPassword)
+        return user
+    }
+
+    /**
+     * Encrypts the password with SHA-256.
+     *
+     * @param password : The password to be encrypted
+     * @return The encrypted password
+     */
+    private fun encryptPassword(password: String): String {
+        return DigestUtils.sha256Hex(password)
     }
 
     /**

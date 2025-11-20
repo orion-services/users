@@ -27,11 +27,15 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.FormParam
 import jakarta.ws.rs.POST
+import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.faulttolerance.Retry
+import org.eclipse.microprofile.jwt.Claims
+import org.eclipse.microprofile.jwt.JsonWebToken
+import org.jboss.resteasy.reactive.RestForm
 
 /**
  * Create a user endpoints.
@@ -44,6 +48,10 @@ class UserWS {
     /** Business logic of the system. */
     @Inject
     lateinit var controller: UserController
+
+    /** JWT token for authentication. */
+    @Inject
+    lateinit var jwt: JsonWebToken
 
     /** Fault tolerance default delay. */
     protected val DELAY: Long = 2000
@@ -99,6 +107,88 @@ class UserWS {
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
+            }
+    }
+
+    /**
+     * Updates the email of a user. Requires authentication via JWT token.
+     *
+     * @param email    The current email of the user
+     * @param newEmail The new email address
+     * @return A new JWT token with the updated email
+     * @throws Bad request if the service was unable to update the email
+     */
+    @PUT
+    @Path("/update/email")
+    @RolesAllowed("user")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.TEXT_PLAIN)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun updateEmail(
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm @NotEmpty @Email newEmail: String
+    ): Uni<Response> {
+        // Extract email from JWT token
+        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
+            ?: jwt.getClaim<String>("email")
+            ?: throw ServiceException(
+                "Invalid token",
+                Response.Status.UNAUTHORIZED
+            )
+
+        return controller.updateEmail(email, newEmail, jwtEmail)
+            .log()
+            .onItem().transform { jwt -> Response.ok(jwt).build() }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                val status = if (message.contains("Unauthorized") || message.contains("token")) {
+                    Response.Status.UNAUTHORIZED
+                } else {
+                    Response.Status.BAD_REQUEST
+                }
+                throw ServiceException(message, status)
+            }
+    }
+
+    /**
+     * Updates the password of a user. Requires authentication via JWT token.
+     *
+     * @param email       The email of the user
+     * @param password    The current password
+     * @param newPassword The new password
+     * @return The updated user object in JSON format
+     * @throws Bad request if the service was unable to update the password
+     */
+    @PUT
+    @Path("/update/password")
+    @RolesAllowed("user")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun updatePassword(
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm @NotEmpty password: String,
+        @RestForm @NotEmpty newPassword: String
+    ): Uni<Response> {
+        // Extract email from JWT token
+        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
+            ?: jwt.getClaim<String>("email")
+            ?: throw ServiceException(
+                "Invalid token",
+                Response.Status.UNAUTHORIZED
+            )
+
+        return controller.updatePassword(email, password, newPassword, jwtEmail)
+            .log()
+            .onItem().transform { user -> Response.ok(user).build() }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                val status = if (message.contains("Unauthorized") || message.contains("token")) {
+                    Response.Status.UNAUTHORIZED
+                } else {
+                    Response.Status.BAD_REQUEST
+                }
+                throw ServiceException(message, status)
             }
     }
 }

@@ -1,6 +1,6 @@
 <template>
   <div v-if="logs.length === 0" class="text-center pa-8 text-grey">
-    Nenhum log disponível
+    No logs available
   </div>
 
   <v-expansion-panels v-else multiple>
@@ -29,25 +29,25 @@
 
       <v-expansion-panel-text>
         <v-tabs v-model="logTabs[log.id]">
-          <v-tab value="request">Requisição</v-tab>
-          <v-tab value="response" v-if="log.response">Resposta</v-tab>
-          <v-tab value="error" v-if="log.error">Erro</v-tab>
+          <v-tab value="request">Request</v-tab>
+          <v-tab value="response" v-if="log.response">Response</v-tab>
+          <v-tab value="error" v-if="log.error">Error</v-tab>
         </v-tabs>
 
         <v-tabs-window v-model="logTabs[log.id]" class="mt-4">
-          <!-- Aba Requisição -->
+          <!-- Request Tab -->
           <v-tabs-window-item value="request">
             <v-card variant="outlined">
               <v-card-text>
                 <div class="mb-2">
-                  <strong>Método:</strong> {{ log.request.method }}
+                  <strong>Method:</strong> {{ log.request.method }}
                 </div>
                 <div class="mb-2">
                   <strong>URL:</strong> {{ log.request.baseURL }}{{ log.request.url }}
                 </div>
                 <div v-if="log.request.data" class="mb-2">
                   <div class="d-flex justify-space-between align-center mb-1">
-                    <strong>Dados:</strong>
+                    <strong>Data:</strong>
                     <v-btn
                       icon="mdi-content-copy"
                       size="x-small"
@@ -66,7 +66,7 @@
             </v-card>
           </v-tabs-window-item>
 
-          <!-- Aba Resposta -->
+          <!-- Response Tab -->
           <v-tabs-window-item value="response" v-if="log.response">
             <v-card variant="outlined">
               <v-card-text>
@@ -78,7 +78,7 @@
                 </div>
                 <div v-if="log.response.data">
                   <div class="d-flex justify-space-between align-center mb-1">
-                    <strong>Dados:</strong>
+                    <strong>Data:</strong>
                     <v-btn
                       icon="mdi-content-copy"
                       size="x-small"
@@ -97,12 +97,12 @@
             </v-card>
           </v-tabs-window-item>
 
-          <!-- Aba Erro -->
+          <!-- Error Tab -->
           <v-tabs-window-item value="error" v-if="log.error">
             <v-card variant="outlined" color="error">
               <v-card-text>
                 <div class="mb-2">
-                  <strong>Mensagem:</strong> {{ log.error.message }}
+                  <strong>Message:</strong> {{ log.error.message }}
                 </div>
                 <div v-if="log.error.response">
                   <strong>Status:</strong> 
@@ -112,7 +112,7 @@
                 </div>
                 <div v-if="log.error.response?.data">
                   <div class="d-flex justify-space-between align-center mb-1">
-                    <strong>Dados do Erro:</strong>
+                    <strong>Error Data:</strong>
                     <v-btn
                       icon="mdi-content-copy"
                       size="x-small"
@@ -147,14 +147,14 @@ const logTabs = ref({})
 const copyToClipboard = async (text) => {
   try {
     await navigator.clipboard.writeText(text)
-    // Você pode adicionar uma notificação aqui se quiser
+    // You can add a notification here if you want
   } catch (err) {
-    console.error('Erro ao copiar:', err)
+    console.error('Error copying:', err)
   }
 }
 
 onMounted(() => {
-  // Inicializar tabs para cada log
+  // Initialize tabs for each log
   props.logs.forEach(log => {
     if (!logTabs.value[log.id]) {
       logTabs.value[log.id] = 'request'
@@ -173,17 +173,17 @@ const formatData = (data) => {
   }
   
   if (typeof data === 'string') {
-    // Tentar fazer parse de JSON
+    // Try to parse JSON
     try {
       const parsed = JSON.parse(data)
       return JSON.stringify(parsed, null, 2)
     } catch {
-      // Se não for JSON, retornar como está
+      // If not JSON, return as is
       return data
     }
   }
   
-  // Se for URLSearchParams ou FormData, converter para objeto
+  // If it's URLSearchParams or FormData, convert to object
   if (data instanceof URLSearchParams) {
     const obj = {}
     data.forEach((value, key) => {
@@ -200,7 +200,7 @@ const formatData = (data) => {
     return JSON.stringify(obj, null, 2)
   }
   
-  // Tentar serializar como JSON
+  // Try to serialize as JSON
   try {
     return JSON.stringify(data, null, 2)
   } catch (e) {
@@ -217,12 +217,12 @@ const getStatusColor = (log) => {
 
 const getStatusText = (log) => {
   if (log.error) {
-    return log.error.response?.status || 'Erro'
+    return log.error.response?.status || 'Error'
   }
   if (log.response) {
     return `${log.response.status} ${log.response.statusText}`
   }
-  return 'Pendente'
+  return 'Pending'
 }
 
 const getLogClass = (log) => {

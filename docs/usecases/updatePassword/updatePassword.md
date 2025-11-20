@@ -7,10 +7,10 @@ nav_order: 8
 
 ## Normal flow
 
-* A client sends user's e-mail, the current and the new password.
-* The service check to see if the user's e-mail exists and if the given password
-  follow the password rules. Thus, update the user's password and return a
-  User in JSON.
+* A client sends user's e-mail, the current and the new password along with an access token.
+* The service validates the access token and the current e-mail to check
+  if the user exists in the service. If the user exists, validates the current password
+  and if it matches, updates the user's password and returns a User in JSON.
 
 ## HTTPS endpoints
 
@@ -27,6 +27,7 @@ nav_order: 8
             'http://localhost:8080/users/update/password' \
             --header 'Accept: */*' \
             --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
+            --header 'Authorization: Bearer eyJhbGciOiJSU0EtT0FFUCIsImVuYyI6IkEyNTZHQ00ifQ.UbrbrSkwKUOPm12kdcrbwroXe8cwPRg9tLN0ovxEB89bm9LNPYTj6qATOAHrObG-jDf2CUK1m3C5cTZE5LAx-hFt7YgdjXC4qxx57GvyzNY6Dxg_lp-pM3fEvw3CBQujRD47Lr3KwjPilSrwhAvXv46mw78cPHkw3kuNerdNf00TyIBYFobKezFxqT-jTDAPmzFo4B2jwFDtzOKf61Jq30E8i6H8IIDQ7XohbGdotbqu6RdR5uzoaJqB8ylz1hNXGWaBFD3GrsyCeFX9G6zgs998BoIhceKOksEZYhR7TD9q8SIuZWQTeIcgtuLBNMeQ7PV04bvZAyNCcN45sD7QJw.rwzVRmyTL16f1s9i.JrGJwG-ANTLqKuaEFTk-IEO5sdhthG9Z5-DXcli39X3mJKPn2gYIZyO4yp6VlFVw_gRT7x_YwwnLM0UuTqfpdL7fgSCS20nhC1fJYd0fvZCPLHBtJUDdo7gkswmG6eb4M1QENDkK96biwRGq0sCG5dZPfkDp1PXJQyF63phEPEb9Bo6xVzoJjJl-9C25BQRRSBHrGzp9tzY3Bh2WMv1JGJGG2thhuh2L6ap4QvM1jdyS9ObeNL61al_4UIk8CesZ0a5enheICPaL5YfbMHpwCWd3PutmABr-o05jtw.7dE9ieDGe3qOooGWmR-jJg' \
             --header 'Content-Type: application/x-www-form-urlencoded' \
             --data-urlencode 'email=orion@test.com' \
             --data-urlencode 'password=12345678' \
@@ -48,4 +49,5 @@ nav_order: 8
 
 In the use case layer, exceptions related with arguments will be
 IllegalArgumentException. However, in the RESTful Web Service layer will be
-transformed to Bad Request (HTTP 400).
+transformed to Bad Request (HTTP 400). If the access token is invalid or missing,
+the service will return Unauthorized (HTTP 401).

@@ -10,55 +10,54 @@
         <v-divider></v-divider>
 
         <v-card-text class="pa-6">
-          <!-- Informações do Usuário -->
+          <!-- User Information -->
           <v-card variant="outlined" class="mb-4">
-            <v-card-title class="text-subtitle-1">Informações do Usuário</v-card-title>
             <v-card-text>
               <div class="mb-2">
-                <strong>Nome:</strong> {{ authStore.user?.name || 'N/A' }}
+                <strong>Name:</strong> {{ authStore.user?.name || 'N/A' }}
               </div>
               <div class="mb-2">
                 <strong>Email:</strong> {{ authStore.user?.email || 'N/A' }}
               </div>
               <div class="mb-2">
-                <strong>Email Validado:</strong>
+                <strong>Email Validated:</strong>
                 <v-chip
                   :color="authStore.user?.emailValid ? 'success' : 'warning'"
                   size="small"
                   class="ml-2"
                 >
-                  {{ authStore.user?.emailValid ? 'Sim' : 'Não' }}
+                  {{ authStore.user?.emailValid ? 'Yes' : 'No' }}
                 </v-chip>
               </div>
               <div>
-                <strong>2FA Habilitado:</strong>
+                <strong>2FA Enabled:</strong>
                 <v-chip
                   :color="authStore.user?.using2FA ? 'success' : 'default'"
                   size="small"
                   class="ml-2"
                 >
-                  {{ authStore.user?.using2FA ? 'Sim' : 'Não' }}
+                  {{ authStore.user?.using2FA ? 'Yes' : 'No' }}
                 </v-chip>
               </div>
             </v-card-text>
           </v-card>
 
-          <!-- Configuração de 2FA -->
+          <!-- 2FA Setup -->
           <v-card variant="outlined" class="mb-4">
             <v-card-title class="text-subtitle-1">
               <v-icon class="mr-2">mdi-shield-lock</v-icon>
-              Autenticação em Dois Fatores (2FA)
+              Two-Factor Authentication (2FA)
             </v-card-title>
             <v-card-text>
               <div v-if="!authStore.user?.using2FA">
                 <v-alert type="info" class="mb-4">
-                  Configure a autenticação em dois fatores para aumentar a segurança da sua conta.
+                  Set up two-factor authentication.
                 </v-alert>
 
                 <v-form ref="setup2FAForm" v-model="setup2FAValid" @submit.prevent="setup2FA">
                   <v-text-field
                     v-model="setup2FAPassword"
-                    label="Confirme sua senha"
+                    label="Confirm your password"
                     type="password"
                     :rules="passwordRules"
                     required
@@ -74,11 +73,11 @@
                     :loading="setup2FALoading"
                     size="large"
                   >
-                    Configurar 2FA
+                    Setup 2FA
                   </v-btn>
                 </v-form>
 
-                <!-- Exibir QR Code -->
+                <!-- Display QR Code -->
                 <div v-if="qrCodeUrl" class="text-center mt-4">
                   <v-img
                     :src="qrCodeUrl"
@@ -87,10 +86,10 @@
                     contain
                   ></v-img>
                   <v-alert type="success" class="mb-4">
-                    Escaneie o QR code com seu aplicativo autenticador (Google Authenticator, Authy, etc.)
+                    Scan the QR code with your authenticator app (Google Authenticator, Authy, etc.)
                   </v-alert>
                   <v-alert type="warning" class="mb-4">
-                    <strong>Importante:</strong> Após escanear o QR code, você precisará usar o código do aplicativo para fazer login nas próximas vezes.
+                    <strong>Important:</strong> After scanning the QR code, you will need to use the app code to log in next time.
                   </v-alert>
                   <v-btn
                     color="success"
@@ -99,7 +98,7 @@
                     size="large"
                     class="mb-2"
                   >
-                    Já escaneei, testar código
+                    Already scanned, test code
                   </v-btn>
                   <v-btn
                     color="secondary"
@@ -108,14 +107,14 @@
                     @click="qrCodeUrl = null"
                     size="large"
                   >
-                    Cancelar
+                    Cancel
                   </v-btn>
                 </div>
               </div>
 
               <div v-else>
                 <v-alert type="success" class="mb-4">
-                  <strong>2FA está habilitado!</strong> Você precisará fornecer um código do seu aplicativo autenticador sempre que fizer login.
+                  <strong>2FA is enabled!</strong> You will need to provide a code from your authenticator app every time you log in.
                 </v-alert>
                 <v-btn
                   color="info"
@@ -124,17 +123,108 @@
                   @click="goToValidate2FA"
                   size="large"
                 >
-                  Testar Código 2FA
+                  Test 2FA Code
                 </v-btn>
               </div>
             </v-card-text>
           </v-card>
 
-          <!-- Ações Rápidas -->
+          <!-- Email Update -->
+          <v-card variant="outlined" class="mb-4">
+            <v-card-title class="text-subtitle-1">
+              <v-icon class="mr-2">mdi-email-edit</v-icon>
+              Update Email
+            </v-card-title>
+            <v-card-text>
+              <v-form ref="updateEmailForm" v-model="updateEmailValid" @submit.prevent="updateEmail">
+                <v-text-field
+                  v-model="updateEmailData.newEmail"
+                  label="New Email"
+                  type="email"
+                  :rules="emailRules"
+                  required
+                  prepend-inner-icon="mdi-email"
+                  variant="outlined"
+                  class="mb-4"
+                ></v-text-field>
+
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  block
+                  :loading="updateEmailLoading"
+                  size="large"
+                >
+                  Update Email
+                </v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+
+          <!-- Password Update -->
+          <v-card variant="outlined" class="mb-4">
+            <v-card-title class="text-subtitle-1">
+              <v-icon class="mr-2">mdi-lock-reset</v-icon>
+              Update Password
+            </v-card-title>
+            <v-card-text>
+              <v-form ref="updatePasswordForm" v-model="updatePasswordValid" @submit.prevent="updatePassword">
+                <v-text-field
+                  v-model="updatePasswordData.currentPassword"
+                  label="Current Password"
+                  type="password"
+                  :rules="passwordRules"
+                  required
+                  prepend-inner-icon="mdi-lock"
+                  variant="outlined"
+                  class="mb-4"
+                ></v-text-field>
+
+                <v-text-field
+                  v-model="updatePasswordData.newPassword"
+                  label="New Password"
+                  type="password"
+                  :rules="newPasswordRules"
+                  required
+                  prepend-inner-icon="mdi-lock-outline"
+                  variant="outlined"
+                  class="mb-2"
+                ></v-text-field>
+
+                <PasswordStrengthIndicator
+                  :password="updatePasswordData.newPassword"
+                  class="mb-4"
+                />
+
+                <v-text-field
+                  v-model="updatePasswordData.confirmPassword"
+                  label="Confirm New Password"
+                  type="password"
+                  :rules="confirmPasswordRules"
+                  required
+                  prepend-inner-icon="mdi-lock-check"
+                  variant="outlined"
+                  class="mb-4"
+                ></v-text-field>
+
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  block
+                  :loading="updatePasswordLoading"
+                  size="large"
+                >
+                  Update Password
+                </v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+
+          <!-- Quick Actions -->
           <v-card variant="outlined">
             <v-card-title class="text-subtitle-1">
               <v-icon class="mr-2">mdi-cog</v-icon>
-              Ações Rápidas
+              Quick Actions
             </v-card-title>
             <v-card-text>
               <v-btn
@@ -145,7 +235,7 @@
                 class="mb-2"
               >
                 <v-icon start>mdi-fingerprint</v-icon>
-                Configurar WebAuthn
+                Setup WebAuthn
               </v-btn>
               <v-btn
                 color="secondary"
@@ -154,13 +244,13 @@
                 @click="logout"
               >
                 <v-icon start>mdi-logout</v-icon>
-                Sair
+                Logout
               </v-btn>
             </v-card-text>
           </v-card>
         </v-card-text>
 
-        <!-- Snackbar para mensagens -->
+        <!-- Snackbar for messages -->
         <v-snackbar
           v-model="snackbar.show"
           :color="snackbar.color"
@@ -179,6 +269,8 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { userApi } from '../services/api'
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator.vue'
+import { getPasswordRules } from '../utils/passwordValidation'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -189,6 +281,24 @@ const setup2FAPassword = ref('')
 const setup2FALoading = ref(false)
 const qrCodeUrl = ref(null)
 
+// Email Update
+const updateEmailForm = ref(null)
+const updateEmailValid = ref(false)
+const updateEmailData = ref({
+  newEmail: ''
+})
+const updateEmailLoading = ref(false)
+
+// Password Update
+const updatePasswordForm = ref(null)
+const updatePasswordValid = ref(false)
+const updatePasswordData = ref({
+  currentPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const updatePasswordLoading = ref(false)
+
 // Snackbar
 const snackbar = ref({
   show: false,
@@ -196,10 +306,33 @@ const snackbar = ref({
   color: 'success'
 })
 
-// Regras de validação
+// Validation rules
 const passwordRules = [
-  v => !!v || 'Senha é obrigatória',
-  v => (v && v.length >= 8) || 'Senha deve ter no mínimo 8 caracteres'
+  v => !!v || 'Password is required',
+  v => (v && v.length >= 8) || 'Password must be at least 8 characters'
+]
+
+const emailRules = [
+  v => !!v || 'Email is required',
+  v => /.+@.+\..+/.test(v) || 'Email must be valid'
+]
+
+const newPasswordRules = [
+  ...getPasswordRules().map(rule => {
+    // Customize messages for "New password"
+    return (v) => {
+      const result = rule(v)
+      if (typeof result === 'string' && result.includes('Password')) {
+        return result.replace('Password', 'New password')
+      }
+      return result
+    }
+  })
+]
+
+const confirmPasswordRules = [
+  v => !!v || 'Password confirmation is required',
+  v => v === updatePasswordData.value.newPassword || 'Passwords do not match'
 ]
 
 const showMessage = (message, color = 'success') => {
@@ -223,14 +356,14 @@ const setup2FA = async () => {
     qrCodeUrl.value = URL.createObjectURL(blob)
     setup2FAPassword.value = ''
     
-    // Atualizar o status do 2FA no store (o backend já habilita ao gerar o QR code)
+    // Update 2FA status in store (backend already enables it when generating QR code)
     if (authStore.user) {
       authStore.user.using2FA = true
     }
     
-    showMessage('QR Code gerado com sucesso! Escaneie com seu aplicativo autenticador.')
+    showMessage('QR Code generated successfully! Scan it with your authenticator app.')
   } catch (error) {
-    const message = error.response?.data?.message || error.message || 'Erro ao gerar QR code'
+    const message = error.response?.data?.message || error.message || 'Error generating QR code'
     showMessage(message, 'error')
   } finally {
     setup2FALoading.value = false
@@ -240,6 +373,66 @@ const setup2FA = async () => {
 const goToValidate2FA = () => {
   localStorage.setItem('pending_email', authStore.user.email)
   router.push('/2fa?mode=validate')
+}
+
+const updateEmail = async () => {
+  if (!updateEmailValid.value) return
+
+  updateEmailLoading.value = true
+  try {
+    const response = await userApi.updateEmail(
+      authStore.user.email,
+      updateEmailData.value.newEmail
+    )
+    
+    // Update token in store
+    const newToken = response.data
+    authStore.setAuth(newToken, { ...authStore.user, email: updateEmailData.value.newEmail, emailValid: false })
+    
+    // Clear form
+    updateEmailData.value.newEmail = ''
+    updateEmailForm.value?.reset()
+    
+    showMessage('Email updated successfully! A validation email has been sent to the new address.', 'success')
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || 'Error updating email'
+    showMessage(message, 'error')
+  } finally {
+    updateEmailLoading.value = false
+  }
+}
+
+const updatePassword = async () => {
+  if (!updatePasswordValid.value) return
+
+  updatePasswordLoading.value = true
+  try {
+    const response = await userApi.updatePassword(
+      authStore.user.email,
+      updatePasswordData.value.currentPassword,
+      updatePasswordData.value.newPassword
+    )
+    
+    // Update user data in store
+    if (authStore.user && response.data) {
+      authStore.setAuth(authStore.token, { ...authStore.user, ...response.data })
+    }
+    
+    // Clear form
+    updatePasswordData.value = {
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }
+    updatePasswordForm.value?.reset()
+    
+    showMessage('Password updated successfully!', 'success')
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || 'Error updating password'
+    showMessage(message, 'error')
+  } finally {
+    updatePasswordLoading.value = false
+  }
 }
 
 const logout = () => {

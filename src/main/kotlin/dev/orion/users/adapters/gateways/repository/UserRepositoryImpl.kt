@@ -179,12 +179,14 @@ class UserRepositoryImpl @Inject constructor(
      */
     override fun recoverPassword(email: String): Uni<String> {
         val password = generateSecurePassword()
+        val hashedPassword = DigestUtils.sha256Hex(password)
         return checkEmail(email)
             .onItem().ifNull()
             .failWith(IllegalArgumentException("E-mail not found"))
             .onItem().ifNotNull()
             .transformToUni { user ->
-                changePassword(user.password ?: "", DigestUtils.sha256Hex(password), email)
+                user.password = hashedPassword
+                Panache.withTransaction { user.persist() }
                     .onItem().transform { password }
             }
     }

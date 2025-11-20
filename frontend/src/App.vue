@@ -3,7 +3,7 @@
     <v-app-bar color="primary" prominent>
       <v-app-bar-title>
         <router-link to="/" style="text-decoration: none; color: inherit;">
-          Orion Users
+          Orion Users Playground
         </router-link>
       </v-app-bar-title>
       <v-spacer></v-spacer>
@@ -30,7 +30,7 @@
         @click="logout"
         variant="text"
       >
-        Sair
+        Logout
       </v-btn>
     </v-app-bar>
 

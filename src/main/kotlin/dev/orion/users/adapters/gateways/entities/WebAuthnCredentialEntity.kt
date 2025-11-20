@@ -62,5 +62,13 @@ class WebAuthnCredentialEntity : PanacheEntityBase() {
     /** The name/description of the device. */
     @Column(name = "device_name", length = 256)
     var deviceName: String? = null
+
+    /** The origin (complete site address) where the device was registered. */
+    @Column(name = "origin", length = 512)
+    var origin: String? = null
+
+    /** Notes field to store device name or other information. */
+    @Column(name = "notes", length = 512)
+    var notes: String? = null
 }
 

@@ -2,7 +2,7 @@
   <v-dialog v-model="debugStore.showModal" max-width="90%" scrollable>
     <v-card>
       <v-card-title class="d-flex justify-space-between align-center">
-        <span>Debug - Logs de Requisições/Respostas</span>
+        <span>Debug - Request/Response Logs</span>
         <div>
           <v-btn
             icon="mdi-delete"
@@ -26,14 +26,14 @@
 
       <v-card-text style="max-height: 70vh">
         <v-tabs v-model="tab" class="mb-4">
-          <v-tab value="all">Todos</v-tab>
-          <v-tab value="success">Sucesso</v-tab>
-          <v-tab value="error">Erros</v-tab>
+          <v-tab value="all">All</v-tab>
+          <v-tab value="success">Success</v-tab>
+          <v-tab value="error">Errors</v-tab>
         </v-tabs>
 
         <v-tabs-window v-model="tab">
           <v-tabs-window-item value="all">
-            <LogList :logs="debugStore.logs" />
+            <LogList :logs="completedLogs" />
           </v-tabs-window-item>
           <v-tabs-window-item value="success">
             <LogList :logs="successLogs" />
@@ -49,7 +49,7 @@
       <v-card-actions>
         <v-spacer></v-spacer>
         <v-btn color="primary" @click="debugStore.toggleModal()">
-          Fechar
+          Close
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -63,6 +63,11 @@ import LogList from './LogList.vue'
 
 const debugStore = useDebugStore()
 const tab = ref('all')
+
+// Filter only completed logs (with response or error), excluding pending ones
+const completedLogs = computed(() => {
+  return debugStore.logs.filter(log => log.response || log.error)
+})
 
 const successLogs = computed(() => {
   return debugStore.logs.filter(log => !log.error && log.response)

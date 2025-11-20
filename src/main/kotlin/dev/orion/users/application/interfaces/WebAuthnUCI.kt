@@ -33,10 +33,11 @@ interface WebAuthnUCI {
      *
      * @param email    The email of the user
      * @param response The registration response from the client (JSON string)
+     * @param origin   The origin (complete site address) where the device was registered
      * @param deviceName Optional name for the device
      * @return true if registration was successful
      */
-    fun finishRegistration(email: String, response: String, deviceName: String?): Boolean
+    fun finishRegistration(email: String, response: String, origin: String, deviceName: String?): Boolean
 
     /**
      * Starts the WebAuthn authentication process.

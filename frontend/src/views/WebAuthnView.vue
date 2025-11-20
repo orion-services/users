@@ -8,15 +8,15 @@
 
         <v-card-text>
           <v-tabs v-model="tab" bg-color="primary" class="mb-4">
-            <v-tab value="register">Registrar Dispositivo</v-tab>
-            <v-tab value="authenticate">Autenticar</v-tab>
+            <v-tab value="register">Register Device</v-tab>
+            <v-tab value="authenticate">Authenticate</v-tab>
           </v-tabs>
 
           <v-tabs-window v-model="tab">
-            <!-- Aba de Registro -->
+            <!-- Register Tab -->
             <v-tabs-window-item value="register">
               <v-alert type="info" class="mb-4">
-                Registre seu dispositivo para usar autenticação biométrica ou chave de segurança.
+                Register your device to use biometric authentication or security key.
               </v-alert>
 
               <v-form ref="registerForm" v-model="registerValid" @submit.prevent="handleRegister">
@@ -33,7 +33,7 @@
 
                 <v-text-field
                   v-model="deviceName"
-                  label="Nome do Dispositivo (opcional)"
+                  label="Device Name (optional)"
                   prepend-inner-icon="mdi-devices"
                   variant="outlined"
                   class="mb-4"
@@ -47,7 +47,7 @@
                   size="large"
                   :disabled="!isWebAuthnSupported"
                 >
-                  Registrar Dispositivo
+                  Register Device
                 </v-btn>
 
                 <v-alert
@@ -55,15 +55,15 @@
                   type="warning"
                   class="mt-4"
                 >
-                  Seu navegador não suporta WebAuthn. Use um navegador moderno como Chrome, Firefox ou Edge.
+                  Your browser does not support WebAuthn. Use a modern browser like Chrome, Firefox or Edge.
                 </v-alert>
               </v-form>
             </v-tabs-window-item>
 
-            <!-- Aba de Autenticação -->
+            <!-- Authenticate Tab -->
             <v-tabs-window-item value="authenticate">
               <v-alert type="info" class="mb-4">
-                Autentique-se usando seu dispositivo registrado (biometria ou chave de segurança).
+                Authenticate using your registered device (biometrics or security key).
               </v-alert>
 
               <v-form ref="authForm" v-model="authValid" @submit.prevent="handleAuthenticate">
@@ -86,7 +86,7 @@
                   size="large"
                   :disabled="!isWebAuthnSupported"
                 >
-                  Autenticar com WebAuthn
+                  Authenticate with WebAuthn
                 </v-btn>
 
                 <v-alert
@@ -94,14 +94,14 @@
                   type="warning"
                   class="mt-4"
                 >
-                  Seu navegador não suporta WebAuthn. Use um navegador moderno como Chrome, Firefox ou Edge.
+                  Your browser does not support WebAuthn. Use a modern browser like Chrome, Firefox or Edge.
                 </v-alert>
               </v-form>
             </v-tabs-window-item>
           </v-tabs-window>
         </v-card-text>
 
-        <!-- Snackbar para mensagens -->
+        <!-- Snackbar for messages -->
         <v-snackbar
           v-model="snackbar.show"
           :color="snackbar.color"
@@ -130,12 +130,12 @@ const authForm = ref(null)
 const registerValid = ref(false)
 const authValid = ref(false)
 
-// Dados para registro
+// Data for registration
 const registerEmail = ref('')
 const deviceName = ref('')
 const registerLoading = ref(false)
 
-// Dados para autenticação
+// Data for authentication
 const authEmail = ref('')
 const authLoading = ref(false)
 
@@ -146,17 +146,17 @@ const snackbar = ref({
   color: 'success'
 })
 
-// Verificar suporte a WebAuthn
+// Check WebAuthn support
 const isWebAuthnSupported = computed(() => {
   return typeof window !== 'undefined' && 
          'PublicKeyCredential' in window &&
          typeof window.PublicKeyCredential !== 'undefined'
 })
 
-// Regras de validação
+// Validation rules
 const emailRules = [
-  v => !!v || 'Email é obrigatório',
-  v => /.+@.+\..+/.test(v) || 'Email deve ser válido'
+  v => !!v || 'Email is required',
+  v => /.+@.+\..+/.test(v) || 'Email must be valid'
 ]
 
 const showMessage = (message, color = 'success') => {
@@ -167,7 +167,7 @@ const showMessage = (message, color = 'success') => {
   }
 }
 
-// Função auxiliar para converter base64url para ArrayBuffer
+// Helper function to convert base64url to ArrayBuffer
 const base64UrlToArrayBuffer = (base64url) => {
   const base64 = base64url.replace(/-/g, '+').replace(/_/g, '/')
   const binary = atob(base64)
@@ -178,7 +178,7 @@ const base64UrlToArrayBuffer = (base64url) => {
   return bytes.buffer
 }
 
-// Função auxiliar para converter ArrayBuffer para base64url
+// Helper function to convert ArrayBuffer to base64url
 const arrayBufferToBase64Url = (buffer) => {
   const bytes = new Uint8Array(buffer)
   let binary = ''
@@ -193,21 +193,24 @@ const handleRegister = async () => {
 
   registerLoading.value = true
   try {
-    // 1. Iniciar registro no servidor
-    const startResponse = await userApi.startWebAuthnRegistration(registerEmail.value)
-    // O backend retorna uma string JSON, então precisamos fazer parse
+    // Capturar origin antes de iniciar para garantir consistência do rpId
+    const origin = window.location.origin
+    
+    // 1. Start registration on server
+    const startResponse = await userApi.startWebAuthnRegistration(registerEmail.value, origin)
+    // Backend returns a JSON string, so we need to parse it
     const responseData = typeof startResponse.data === 'string' 
       ? JSON.parse(startResponse.data) 
       : startResponse.data
     const { options, challenge } = responseData
 
-    // 2. Converter challenge de base64url para ArrayBuffer
+    // 2. Convert challenge from base64url to ArrayBuffer
     const challengeBuffer = base64UrlToArrayBuffer(challenge)
 
-    // 3. Converter user.id de base64url para ArrayBuffer
+    // 3. Convert user.id from base64url to ArrayBuffer
     const userIdBuffer = base64UrlToArrayBuffer(options.user.id)
 
-    // 4. Criar credencial no navegador
+    // 4. Create credential in browser
     const publicKeyCredentialCreationOptions = {
       challenge: challengeBuffer,
       rp: options.rp,
@@ -226,7 +229,7 @@ const handleRegister = async () => {
       publicKey: publicKeyCredentialCreationOptions
     })
 
-    // 5. Converter resposta para JSON
+    // 5. Convert response to JSON
     const response = {
       id: credential.id,
       rawId: arrayBufferToBase64Url(credential.rawId),
@@ -237,22 +240,23 @@ const handleRegister = async () => {
       }
     }
 
-    // 6. Finalizar registro no servidor
+    // 6. Finish registration on server
     await userApi.finishWebAuthnRegistration(
       registerEmail.value,
       JSON.stringify(response),
-      deviceName.value || 'Dispositivo WebAuthn'
+      origin,
+      deviceName.value || 'WebAuthn Device'
     )
 
-    showMessage('Dispositivo registrado com sucesso!')
+    showMessage('Device registered successfully!')
     tab.value = 'authenticate'
     authEmail.value = registerEmail.value
   } catch (error) {
-    let message = 'Erro ao registrar dispositivo'
+    let message = 'Error registering device'
     if (error.name === 'NotAllowedError') {
-      message = 'Registro cancelado pelo usuário'
+      message = 'Registration cancelled by user'
     } else if (error.name === 'InvalidStateError') {
-      message = 'Este dispositivo já está registrado'
+      message = 'This device is already registered'
     } else if (error.response?.data?.message) {
       message = error.response.data.message
     } else if (error.message) {
@@ -269,24 +273,24 @@ const handleAuthenticate = async () => {
 
   authLoading.value = true
   try {
-    // 1. Iniciar autenticação no servidor
+    // 1. Start authentication on server
     const startResponse = await userApi.startWebAuthnAuthentication(authEmail.value)
-    // O backend retorna uma string JSON, então precisamos fazer parse
+    // Backend returns a JSON string, so we need to parse it
     const responseData = typeof startResponse.data === 'string' 
       ? JSON.parse(startResponse.data) 
       : startResponse.data
     const { options, challenge } = responseData
 
-    // 2. Converter challenge de base64url para ArrayBuffer
+    // 2. Convert challenge from base64url to ArrayBuffer
     const challengeBuffer = base64UrlToArrayBuffer(challenge)
 
-    // 3. Converter allowCredentials IDs de base64url para ArrayBuffer
+    // 3. Convert allowCredentials IDs from base64url to ArrayBuffer
     const allowCredentials = options.allowCredentials.map(cred => ({
       ...cred,
       id: base64UrlToArrayBuffer(cred.id)
     }))
 
-    // 4. Autenticar no navegador
+    // 4. Authenticate in browser
     const publicKeyCredentialRequestOptions = {
       challenge: challengeBuffer,
       rpId: options.rpId,
@@ -299,7 +303,7 @@ const handleAuthenticate = async () => {
       publicKey: publicKeyCredentialRequestOptions
     })
 
-    // 5. Converter resposta para JSON
+    // 5. Convert response to JSON
     const response = {
       id: assertion.id,
       rawId: arrayBufferToBase64Url(assertion.rawId),
@@ -313,7 +317,7 @@ const handleAuthenticate = async () => {
       }
     }
 
-    // 6. Finalizar autenticação no servidor
+    // 6. Finish authentication on server
     const authResponse = await userApi.finishWebAuthnAuthentication(
       authEmail.value,
       JSON.stringify(response)
@@ -322,13 +326,13 @@ const handleAuthenticate = async () => {
     const data = authResponse.data
     if (data.token && data.user) {
       authStore.setAuth(data.token, data.user)
-      showMessage('Autenticação realizada com sucesso!')
+      showMessage('Authentication successful!')
       router.push('/')
     }
   } catch (error) {
-    let message = 'Erro ao autenticar'
+    let message = 'Error authenticating'
     if (error.name === 'NotAllowedError') {
-      message = 'Autenticação cancelada pelo usuário'
+      message = 'Authentication cancelled by user'
     } else if (error.response?.data?.message) {
       message = error.response.data.message
     } else if (error.message) {
