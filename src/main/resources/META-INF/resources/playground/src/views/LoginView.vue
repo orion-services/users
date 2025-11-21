@@ -308,7 +308,7 @@ const handleGoogleLogin = async () => {
       return
     }
 
-    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '307391126869-5c1f7q3vl6hdqv1elvq4humtrc8tvfef.apps.googleusercontent.com'
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '[Google Client ID]'
 
     // Use Google Identity Services to get ID token
     google.accounts.id.initialize({
