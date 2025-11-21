@@ -10,7 +10,48 @@ This document provides a comprehensive guide to using and developing the Orion U
 
 ## Overview
 
-The Orion Users frontend is a Vue 3 application built with Vuetify that provides a user interface for all user management and authentication features of the Orion Users service.
+The Orion Users frontend is a Vue 3 application built with Vuetify that provides a user interface for all user management and authentication features of the Orion Users service. The frontend application is located in the `playground` directory and is served by the Quarkus backend at the `/test` URL path.
+
+## Quick Start
+
+### Running the Playground
+
+The playground application is integrated with the Quarkus backend and is accessible at:
+
+**`http://localhost:8080/test`**
+
+To run the playground:
+
+1. **Start the Quarkus backend** (this will serve the compiled frontend):
+```bash
+./mvnw compile quarkus:dev
+```
+
+2. **Access the application**:
+   - Open your browser and navigate to: `http://localhost:8080/test`
+   - The application will be available at this URL
+
+### Development Mode
+
+For development with hot module replacement:
+
+1. **Start the Quarkus backend**:
+```bash
+./mvnw compile quarkus:dev
+```
+
+2. **In a separate terminal, start the Vite dev server**:
+```bash
+cd src/main/resources/META-INF/resources/playground
+npm install  # Only needed the first time
+npm run dev
+```
+
+3. **Access the application**:
+   - Development server: `http://localhost:3000/test`
+   - The Vite dev server proxies API requests to the Quarkus backend
+
+**Note**: After making changes, rebuild the application (`npm run build`) for the changes to be available when accessing via the Quarkus backend at `/test`.
 
 ## Features
 
@@ -30,11 +71,25 @@ The Orion Users frontend is a Vue 3 application built with Vuetify that provides
 - **npm** or **yarn**: Package manager
 - **Backend API**: The Orion Users backend service running (default: `http://localhost:8080`)
 
+## Location
+
+The frontend playground application is located at:
+```
+src/main/resources/META-INF/resources/playground/
+```
+
+When built, the compiled files are generated in:
+```
+src/main/resources/META-INF/resources/test/
+```
+
+The application is served by the Quarkus backend at: **`http://localhost:8080/test`**
+
 ## Installation
 
-1. Navigate to the frontend directory:
+1. Navigate to the playground directory:
 ```bash
-cd frontend
+cd src/main/resources/META-INF/resources/playground
 ```
 
 2. Install dependencies:
@@ -46,7 +101,7 @@ npm install
 
 ### Environment Variables
 
-Create a `.env` file in the `frontend/` directory root:
+Create a `.env` file in the `playground/` directory root:
 
 ```env
 # Backend API URL
@@ -71,30 +126,61 @@ The development server is configured in `vite.config.js`:
 
 ### Development Mode
 
+1. Start the Quarkus backend server:
 ```bash
+./mvnw compile quarkus:dev
+```
+
+2. In a separate terminal, navigate to the playground directory and start the Vite development server:
+```bash
+cd src/main/resources/META-INF/resources/playground
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`
+The Vite development server will be available at `http://localhost:3000/test` (note the `/test` base path).
+
+**Note**: In development mode, Vite runs on port 3000 with hot module replacement. The application is configured to use `/test` as the base path, and API requests to `/users` are automatically proxied to the Quarkus backend running on port 8080.
 
 ### Production Build
 
+1. Navigate to the playground directory:
+```bash
+cd src/main/resources/META-INF/resources/playground
+```
+
+2. Build the application:
 ```bash
 npm run build
 ```
 
-The built files will be generated in the `dist/` directory.
+The built files will be generated in `src/main/resources/META-INF/resources/test/` directory, which is automatically served by Quarkus.
+
+3. Start or restart the Quarkus backend:
+```bash
+./mvnw compile quarkus:dev
+```
+
+4. Access the application at:
+```
+http://localhost:8080/test
+```
+
+**Important**: The application is configured to be served at the `/test` URL path. Make sure to access it at `http://localhost:8080/test` (not at the root `/`).
 
 ### Preview Production Build
+
+To preview the production build locally with Vite:
 
 ```bash
 npm run preview
 ```
 
+This will serve the built files using Vite's preview server. However, for production-like testing, it's recommended to use the Quarkus backend as described above.
+
 ## Project Structure
 
 ```
-frontend/
+src/main/resources/META-INF/resources/playground/
 ├── src/
 │   ├── main.js                    # Vue app initialization and Vuetify setup
 │   ├── App.vue                    # Root component
@@ -103,7 +189,7 @@ frontend/
 │   │   ├── LogList.vue            # Request/response log viewer
 │   │   └── PasswordStrengthIndicator.vue  # Password strength meter
 │   ├── router/
-│   │   └── index.js               # Vue Router configuration
+│   │   └── index.js               # Vue Router configuration (base: /test)
 │   ├── services/
 │   │   └── api.js                 # Axios HTTP client and API methods
 │   ├── stores/                    # Pinia state management
@@ -119,7 +205,13 @@ frontend/
 │       └── RecoverPasswordView.vue # Password recovery
 ├── index.html                     # HTML template
 ├── package.json                   # Dependencies and scripts
-└── vite.config.js                # Vite configuration
+└── vite.config.js                # Vite configuration (base: /test/)
+
+# Build output directory (served by Quarkus at /test)
+src/main/resources/META-INF/resources/test/
+├── index.html                     # Compiled HTML
+├── assets/                        # Compiled JavaScript and CSS
+└── ...
 ```
 
 ## Usage Guide
@@ -438,11 +530,15 @@ The application uses Vue Router for navigation. Routes are defined in `src/route
 
 ### Available Routes
 
-- `/` - Login and registration page
-- `/dashboard` - User dashboard (requires authentication)
-- `/2fa` - Two-factor authentication setup and validation
-- `/webauthn` - WebAuthn device registration and authentication
-- `/recover-password` - Password recovery
+All routes are prefixed with `/test` when served by Quarkus:
+
+- `/test/` - Login and registration page
+- `/test/dashboard` - User dashboard (requires authentication)
+- `/test/2fa` - Two-factor authentication setup and validation
+- `/test/webauthn` - WebAuthn device registration and authentication
+- `/test/recover-password` - Password recovery
+
+**Note**: The Vue Router is configured with base path `/test`, so internal navigation will automatically include this prefix.
 
 ### Route Guards
 
@@ -493,10 +589,19 @@ const rules = getPasswordRules()
 
 ## Troubleshooting
 
+### Application Not Loading at /test
+
+- Ensure the application has been built: `npm run build` in the playground directory
+- Verify the built files exist in `src/main/resources/META-INF/resources/test/`
+- Make sure you're accessing the application at `http://localhost:8080/test` (not `/`)
+- Check that the Quarkus backend is running and serving static files from `META-INF/resources/`
+- Verify the `base: '/test/'` configuration in `vite.config.js`
+
 ### API Connection Issues
 
 - Verify the backend is running on `http://localhost:8080`
-- Check the `VITE_API_URL` in `.env`
+- Check the `VITE_API_URL` in `.env` (if using environment variables)
+- In development mode, verify the proxy configuration in `vite.config.js` is correctly forwarding `/users` requests
 - Check browser console for CORS errors
 - Verify network connectivity
 
@@ -548,25 +653,34 @@ Currently, the application relies on manual testing. Consider adding:
 
 ### Building for Production
 
+1. Navigate to the playground directory:
+```bash
+cd src/main/resources/META-INF/resources/playground
+```
+
+2. Build the application:
 ```bash
 npm run build
 ```
 
+3. The built files will be in `src/main/resources/META-INF/resources/test/`
+
+4. Package the Quarkus application:
+```bash
+./mvnw package
+```
+
+5. The frontend will be included in the Quarkus JAR and served at `/test` when the application runs.
+
 ### Environment Variables for Production
 
-Set environment variables in your hosting platform:
-- **Vercel**: Add in project settings
-- **Netlify**: Add in site settings
-- **Docker**: Add to `docker-compose.yml` or `.env`
+Since the frontend is bundled with the Quarkus backend, environment variables should be configured in the Quarkus `application.properties` file or as system properties when running the application.
 
-### Static Hosting
+### Deployment
 
-The built `dist/` folder can be served by any static hosting service:
-- Vercel
-- Netlify
-- GitHub Pages
-- AWS S3 + CloudFront
-- Any web server (nginx, Apache)
+The frontend is deployed together with the Quarkus backend as a single application. When you deploy the Quarkus application, the frontend will be automatically available at the `/test` path.
+
+**Important**: Ensure that your deployment environment allows serving static files from `META-INF/resources/` and that the `/test` path is accessible.
 
 ## Security Considerations
 

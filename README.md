@@ -31,6 +31,22 @@ You can run your application in dev mode that enables live coding using:
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
+## Frontend Playground
+
+The project includes a Vue 3 frontend playground application that provides a user interface for testing all features of the Orion Users service.
+
+**Access the playground**: After starting the application, navigate to `http://localhost:8080/test`
+
+The playground includes:
+- User registration and login
+- Social authentication (Google and Apple)
+- Two-factor authentication (2FA)
+- WebAuthn (biometric/security key authentication)
+- Password recovery
+- User profile management
+
+For detailed information about the frontend playground, including development setup and configuration, see the [Frontend Documentation](docs/frontend/Frontend.md).
+
 ## Packaging and running the application
 
 The application can be packaged using:

@@ -1,42 +1,37 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LoginView from '../views/LoginView.vue'
-import TwoFactorView from '../views/TwoFactorView.vue'
-import WebAuthnView from '../views/WebAuthnView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import RecoverPasswordView from '../views/RecoverPasswordView.vue'
 import { useAuthStore } from '../stores/auth'
 
 const routes = [
   {
     path: '/',
     name: 'login',
-    component: LoginView
+    component: () => import('../views/LoginView.vue')
   },
   {
     path: '/2fa',
     name: '2fa',
-    component: TwoFactorView
+    component: () => import('../views/TwoFactorView.vue')
   },
   {
     path: '/webauthn',
     name: 'webauthn',
-    component: WebAuthnView
+    component: () => import('../views/WebAuthnView.vue')
   },
   {
     path: '/dashboard',
     name: 'dashboard',
-    component: DashboardView,
+    component: () => import('../views/DashboardView.vue'),
     meta: { requiresAuth: true }
   },
   {
     path: '/recover-password',
     name: 'recover-password',
-    component: RecoverPasswordView
+    component: () => import('../views/RecoverPasswordView.vue')
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/test'),
   routes
 })
 
