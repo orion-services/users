@@ -175,20 +175,25 @@ class UserController : BasicController() {
 
     /**
      * Creates a user, generates a Json Web Token and returns a
-     * AuthenticationDTO object.
+     * LoginResponseDTO object.
      *
      * @param name     : The user name
      * @param email    : The user e-mail
      * @param password : The user password
-     * @return A Uni<AuthenticationDTO> object
+     * @return A Uni<LoginResponseDTO> object
      */
-    fun createAuthenticate(name: String, email: String, password: String): Uni<AuthenticationDTO> {
+    fun createAuthenticate(name: String, email: String, password: String): Uni<LoginResponseDTO> {
         return this.createUser(name, email, password)
             .onItem().ifNotNull().transform { user ->
-                val dto = AuthenticationDTO()
-                dto.token = this.generateJWT(user)
-                dto.user = user
-                dto
+                val authDto = AuthenticationDTO()
+                authDto.token = this.generateJWT(user)
+                authDto.user = user
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                response
             }
     }
 
@@ -298,9 +303,9 @@ class UserController : BasicController() {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validateSocialLogin2FA(email: String, code: String): Uni<AuthenticationDTO> {
+    fun validateSocialLogin2FA(email: String, code: String): Uni<LoginResponseDTO> {
         // Validate code format using use case
         val user: User = twoFactorAuthUC.validateCode(email, code)
 
@@ -332,10 +337,15 @@ class UserController : BasicController() {
                 }
 
                 // Generate JWT and return DTO
-                val dto = AuthenticationDTO()
-                dto.token = generateJWT(userEntity)
-                dto.user = userEntity
-                Uni.createFrom().item(dto)
+                val authDto = AuthenticationDTO()
+                authDto.token = generateJWT(userEntity)
+                authDto.user = userEntity
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                Uni.createFrom().item(response)
             }
     }
 
@@ -344,9 +354,9 @@ class UserController : BasicController() {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validate2FACode(email: String, code: String): Uni<AuthenticationDTO> {
+    fun validate2FACode(email: String, code: String): Uni<LoginResponseDTO> {
         // Validate code format using use case
         val user: User = twoFactorAuthUC.validateCode(email, code)
 
@@ -373,10 +383,15 @@ class UserController : BasicController() {
                 }
 
                 // Generate JWT and return DTO
-                val dto = AuthenticationDTO()
-                dto.token = generateJWT(userEntity)
-                dto.user = userEntity
-                Uni.createFrom().item(dto)
+                val authDto = AuthenticationDTO()
+                authDto.token = generateJWT(userEntity)
+                authDto.user = userEntity
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                Uni.createFrom().item(response)
             }
     }
 
@@ -540,9 +555,9 @@ class UserController : BasicController() {
      *
      * @param email    The email of the user
      * @param response The authentication response from the client (JSON string)
-     * @return An AuthenticationDTO with JWT if authentication succeeds
+     * @return A LoginResponseDTO with JWT if authentication succeeds
      */
-    fun finishWebAuthnAuthentication(email: String, response: String): Uni<AuthenticationDTO> {
+    fun finishWebAuthnAuthentication(email: String, response: String): Uni<LoginResponseDTO> {
         // Validate using use case
         webAuthnUC.finishAuthentication(email, response)
 
@@ -566,10 +581,15 @@ class UserController : BasicController() {
                         webAuthnCredentialRepository.saveCredential(credential)
 
                         // Generate JWT and return DTO
-                        val dto = AuthenticationDTO()
-                        dto.token = generateJWT(user)
-                        dto.user = user
-                        dto
+                        val authDto = AuthenticationDTO()
+                        authDto.token = generateJWT(user)
+                        authDto.user = user
+                        
+                        val loginResponse = LoginResponseDTO()
+                        loginResponse.authentication = authDto
+                        loginResponse.requires2FA = false
+                        
+                        loginResponse
                     }
             }
     }

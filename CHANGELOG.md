@@ -1,14 +1,20 @@
 # Users change Log
 
+## 0.0.6
+
+- LoginResponseDTO as a standard response object from all endpoints
+-
+
 ## 0.0.5
 
 - Port to Kotlin
+- webauthn (experimental)
 
 ## 0.0.4
 
-    - Clean Architecture
-    - Updated to Quarkus 3
-    - Updated to Java 20 Temurin
+- Clean Architecture
+- Updated to Quarkus 3
+- Updated to Java 20 Temurin
 
 ## 0.0.3
 

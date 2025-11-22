@@ -17,7 +17,7 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.AuthenticationDTO
+import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
@@ -142,7 +142,7 @@ class WebAuthnWS {
      *
      * @param email    The email of the user
      * @param response The authentication response from the client (JSON string)
-     * @return The AuthenticationDTO with JWT token
+     * @return The LoginResponseDTO with JWT token
      * @throws ServiceException if authentication fails
      */
     @POST
@@ -156,8 +156,8 @@ class WebAuthnWS {
         @RestForm @NotEmpty response: String
     ): Uni<Response> {
         return controller.finishWebAuthnAuthentication(email, response)
-            .onItem().transform { dto ->
-                Response.ok(dto).build()
+            .onItem().transform { loginResponse ->
+                Response.ok(loginResponse).build()
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Invalid WebAuthn authentication"
