@@ -23,10 +23,10 @@ nav_order: 2
 * If the user already exists, the service just return a a JSON with the user
   and a signed JWT.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/createAuthenticate
-  * HTTP method: POST
+* /users/createAuthenticate
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
   * Examples:
@@ -35,7 +35,7 @@ nav_order: 2
 
     ```shell
        curl -X 'POST' \
-            'http://localhost:8080/api/users/createAuthenticate' \
+            'http://localhost:8080/users/createAuthenticate' \
             -H 'accept: application/json' \
             -H 'Content-Type: application/x-www-form-urlencoded' \
             -d 'name=Orion&email=orion%40test.com&password=12345678'

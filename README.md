@@ -31,6 +31,22 @@ You can run your application in dev mode that enables live coding using:
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
+## Frontend Playground
+
+The project includes a Vue 3 frontend playground application that provides a user interface for testing all features of the Orion Users service.
+
+**Access the playground**: After starting the application, navigate to `http://localhost:8080/test`
+
+The playground includes:
+- User registration and login
+- Social authentication (Google)
+- Two-factor authentication (2FA)
+- WebAuthn (biometric/security key authentication)
+- Password recovery
+- User profile management
+
+For detailed information about the frontend playground, including development setup and configuration, see the [Frontend Documentation](docs/frontend/Frontend.md).
+
 ## Packaging and running the application
 
 The application can be packaged using:
@@ -64,6 +80,43 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 You can then execute your native executable with: `./target/users-0.0.1-runner`
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
+
+## API Endpoints
+
+The service provides the following main endpoints:
+
+- `POST /users/create` - Create a new user
+- `POST /users/login` - Authenticate a user (returns LoginResponseDTO)
+- `PUT /users/update` - Update user information (email and/or password). Requires JWT authentication. Returns LoginResponseDTO with updated token and user.
+- `POST /users/delete` - Delete a user (admin only)
+- `GET /users/validateEmail` - Validate user email with code
+- `POST /users/google/2FAuth/qrCode` - Generate 2FA QR code
+- `POST /users/google/2FAuth/validate` - Validate 2FA code
+
+For complete API documentation, see the [documentation site](https://users.orion-services.dev).
+
+## Update User Endpoint
+
+The `/users/update` endpoint allows updating user email and/or password in a single request:
+
+- **Method**: PUT
+- **Authentication**: Required (JWT token in Authorization header)
+- **Parameters**:
+  - `email` (required): Current user email
+  - `newEmail` (optional): New email address
+  - `password` (optional): Current password (required if updating password)
+  - `newPassword` (optional): New password
+- **Response**: LoginResponseDTO containing AuthenticationDTO with new JWT token and updated user information
+- **Note**: At least one of `newEmail` or `newPassword` must be provided
+
+Example:
+```bash
+curl -X PUT 'http://localhost:8080/users/update' \
+  --header 'Authorization: Bearer <token>' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'email=user@example.com' \
+  --data-urlencode 'newEmail=newuser@example.com'
+```
 
 ## Related Guides
 

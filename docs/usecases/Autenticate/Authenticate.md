@@ -7,38 +7,87 @@ nav_order: 1
 
 ## Authenticate
 
+This use case is responsible for authenticate a user in the system.
+
 ### Normal flow
 
-* A client sends a e-mail and password
+* A client sends a e-mail and password.
 * The service validates the input data and verifies if the users exists in the
-  system
-* If the users exists, authenticate the user and return a signed JWT
+  system. If the users exists, the service returns a JSON with the user data
+  and a signed JWT.
 
-## HTTP(S) endpoints
+## HTTPS endpoints
 
-* /api/users/authenticate
-  * HTTP method: POST
+* /users/login
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
-  * Examples:
 
-        * Example of request:
-        ```shell
-            curl -X POST \
-            'http://localhost:8080/api/users/authenticate' \
-            --header 'Accept: */*' \
-            --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
-            --header 'Content-Type: application/x-www-form-urlencoded' \
-            --data-urlencode 'email=orion@test.com' \
-            --data-urlencode 'password=12345678'
-        ```
-        * Example of response: an signed JWT:
-        ```txt
-        eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjgwODAiLCJ1cG4iOiJyb2RyaWdvQHRlc3RlLmNvbSIsImdyb3VwcyI6WyJ1c2VyIl0sImNfaGFzaCI6Ijc5NjBjMjk1LWQ0NmEtNGI2NC1hNGZiLTE2ZWQxNGYzZTk1NSIsImlhdCI6MTY1NzgzNzY1MCwiZXhwIjoxNjU3ODM3OTUwLCJqdGkiOiIzZjdlOThhMy1hMTAwLTQxOTQtODM0Ny0yMWQwZjRjNDJhYTgifQ.rsHHrOZ5LStCYXREGw0iN7_y7geraKtMYin2OGVchrFF0iX2Stu6m4KGRXVmd3vx_vU3l7RyBN9aFjAO0mm1ScJ-wzP8DQPsuSm1pgw2RBKtTitvi4M7XjsP9bZyuyzP-hWbB6KPhB3oZSzh91nyqqWTQUJrUDsXnuNP3XUX6YAwlXZd5SrxQeNfvcaJ9N2Cj85hw8L5Nm-20P7dt3yj4IZE5QvZ1JYLyNzWZWkYWyr9ffR9v1q83dbxJMaABL8R1sSFZjBTwsQSQOBNSwkCF1U_x2tqj0aZW1w4cqQnpHYAY32AtgmrDHVfdjyQld1g7Qx42C2AoP_ZTWpxZ9vwDg
-        ```
+* Request:
+
+```shell
+curl  -X POST \
+  'http://localhost:8080/users/login' \
+  --header 'Accept: */*' \
+  --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'email=orion@services.dev' \
+  --data-urlencode 'password=12345678'
+```
+
+* Response:
+
+```json
+{
+"user": {
+  "hash": "53012a1a-b8ec-40f4-a81e-bc8b97ddab75",
+  "name": "Orion",
+  "email": "orion@services.dev",
+  "emailValid": false,
+  "secret2FA": null,
+  "using2FA": false
+},
+"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJvcmlvbi11c2VycyIsInVwbiI6Im9yaW9uQHNlcnZpY2VzLmRldiIsImdyb3VwcyI6WyJ1c2VyIl0sImNfaGFzaCI6IjUzMDEyYTFhLWI4ZWMtNDBmNC1hODFlLWJjOGI5N2RkYWI3NSIsImVtYWlsIjoib3Jpb25Ac2VydmljZXMuZGV2IiwiaWF0IjoxNzE1Mzk0NzA0LCJleHAiOjE3MTUzOTUwMDQsImp0aSI6ImMzYjZkZmFkLTAyMDAtNDc3YS05MDJmLTU0ZDg5YjdiMTUzYyJ9.I93SpcxIm31wfMQeiFLuUuuWuwlG-C0aGascSEDseRueILn9Tf5shEyNDMLQr6QRNhQbNjRjnCwe_quenVfjBEF_BLgtDDq7maoqpzDdrnDoKxtxex0dIXmRg2ABZoktB-jBo8yJcflandp1FUe7hG1VduE2E8D6WqvUQiNrhhCiiEZ4d5Moc1H11S3YGg3X1U-QnWUGx70FYQG4Qo-1Ini7T6miC0xCxSJRxumXKKtBRLYMDizp5qPIVoVIatJUu4WgoVZWliStmE7wBu6X_La7z4rAddgIlGRiqLZPkaSruzO2PP3i_T1Ezupcw9ol6LP_nlPaOQHeAjJ7aSQMyA"
+}
+```
+
+## Social Authentication
+
+The system also supports authentication via social providers (Google).
+
+### Google Login
+
+* Endpoint: `/users/login/google`
+* Method: POST
+* Consumes: application/x-www-form-urlencoded
+* Produces: application/json
+
+* Request:
+
+```shell
+curl -X POST \
+  'http://localhost:8080/users/login/google' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'idToken=GOOGLE_ID_TOKEN'
+```
+
+* Response: Same as normal login - AuthenticationDTO with user and token.
+
+### Social Authentication Flow
+
+1. User clicks "Login with Google" in the frontend
+2. Frontend initiates OAuth2 flow with the provider
+3. Provider returns an ID token (JWT)
+4. Frontend sends the ID token to the backend endpoint
+5. Backend validates the token and extracts user information (email, name)
+6. Backend searches for user by email
+7. If user doesn't exist, backend creates it automatically
+8. Backend generates a JWT token for the system
+9. Backend returns AuthenticationDTO with user and token
 
 ## Exceptions
 
-In the use case layer, exceptions related with arguments will be
-IllegalArgumentException. However, in the RESTful Web Service layer will be
-transformed to Bad Request (HTTP 400).
+RESTful Web Service layer will return a HTTP 401 (Unauthorized) if the user
+does not exist or the password is incorrect. If the request is invalid, for
+example, without the required parameters, the service will return a HTTP 400
+(Bad Request).
