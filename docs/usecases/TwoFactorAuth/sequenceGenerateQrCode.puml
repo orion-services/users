@@ -3,33 +3,37 @@
     actor "User agent" as user
     autonumber
 
-    user -> WebService: @POST /api/user/google/2FAuth/qrCode (email,password)
+    user -> WebService: @POST /users/google/2FAuth/qrCode (email,password)
     activate WebService
 
-    WebService -> UseCase: authenticate(email,password)
+    WebService -> UseCase: generateQRCode(email,password)
     activate UseCase
 
-    UseCase --> UseCase : autheticate(email,password)
-    UseCase -->> WebService : Uni<User>
+    UseCase -> UseCase: validateCode(email,code)
+    UseCase -->> WebService: User
 
-    WebService -> WebService : user.setUsing2FA(true)
-    WebService -> UseCase: updateUser(user)
+    WebService -> Repository: authenticate(email,password)
+    activate Repository
+    Repository --> Repository: authenticate(email,password)
+    Repository -->> WebService: Uni<User>
+    deactivate Repository
 
-    UseCase --> UseCase : updateUser(user)
-    UseCase -->> WebService: Uni<User>
+    WebService -> WebService: secretKey = generateSecretKey()
+    WebService -> WebService: user.setUsing2FA(true)
+    WebService -> WebService: user.setSecret2FA(secretKey)
+    WebService -> Repository: updateUser(user)
+    Repository -->> WebService: Uni<User>
     deactivate UseCase
 
-    WebService -> WebService : secret = user.GetSecret2FA()
-    WebService -> WebService : userEmail = user.GetSecret2FA()
-    WebService -> GoogleUtils : getGoogleAuthenticatorBarCode(secret,userEmail, issuer)
+    WebService -> GoogleUtils: getGoogleAuthenticatorBarCode(secretKey,userEmail, issuer)
     activate GoogleUtils
-    GoogleUtils --> GoogleUtils : getgetGoogleAuthenticatorBarCode(secret,userEmail, issuer)
-    GoogleUtils -->> WebService : String barCodeData
-    WebService --> GoogleUtils : createQrCode(barCodeData)
-    GoogleUtils --> GoogleUtils : createQrCode(barCodeData)
-    GoogleUtils -->> WebService : byte[] qrCode
+    GoogleUtils --> GoogleUtils: getGoogleAuthenticatorBarCode(secretKey,userEmail, issuer)
+    GoogleUtils -->> WebService: String barCodeData
+    WebService -> GoogleUtils: createQrCode(barCodeData)
+    GoogleUtils --> GoogleUtils: createQrCode(barCodeData)
+    GoogleUtils -->> WebService: byte[] qrCode
     deactivate GoogleUtils
 
-    WebService -->> user : QrCode Image
+    WebService -->> user: QrCode Image (image/png)
     deactivate WebService
 @enduml

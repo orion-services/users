@@ -31,9 +31,11 @@ You can run your application in dev mode that enables live coding using:
 
 > **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at http://localhost:8080/q/dev/.
 
-## Frontend Playground
+For comprehensive instructions on running the service in development, production with containers (JVM and native compilation), configuration, and troubleshooting, see the [Running the Service Documentation](docs/running/Running.md).
 
-The project includes a Vue 3 frontend playground application that provides a user interface for testing all features of the Orion Users service.
+## Playground
+
+The project includes a Vue 3 playground application that provides a user interface for testing and experimenting with all features of the Orion Users service.
 
 **Access the playground**: After starting the application, navigate to `http://localhost:8080/test`
 
@@ -45,7 +47,7 @@ The playground includes:
 - Password recovery
 - User profile management
 
-For detailed information about the frontend playground, including development setup and configuration, see the [Frontend Documentation](docs/frontend/Frontend.md).
+For detailed information about the playground, including how to run it in development and production modes, social login configuration, and user guide, see the [Playground Documentation](docs/playground/Playground.md).
 
 ## Packaging and running the application
 
@@ -54,7 +56,7 @@ The application can be packaged using:
 ./mvnw package
 ```
 It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
+Be aware that it's not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
 
 The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
 
@@ -77,7 +79,9 @@ Or, if you don't have GraalVM installed, you can run the native executable build
 ./mvnw package -Pnative -Dquarkus.native.container-build=true
 ```
 
-You can then execute your native executable with: `./target/users-0.0.1-runner`
+You can then execute your native executable with: `./target/users-0.0.6-runner`
+
+For detailed instructions on building and running containers (JVM and native), see the [Running the Service Documentation](docs/running/Running.md).
 
 If you want to learn more about building native executables, please consult https://quarkus.io/guides/maven-tooling.
 
@@ -92,6 +96,8 @@ The service provides the following main endpoints:
 - `GET /users/validateEmail` - Validate user email with code
 - `POST /users/google/2FAuth/qrCode` - Generate 2FA QR code
 - `POST /users/google/2FAuth/validate` - Validate 2FA code
+- `POST /users/login/2fa` - Login with 2FA code
+- `POST /users/login/google` - Social authentication with Google
 
 For complete API documentation, see the [documentation site](https://users.orion-services.dev).
 
