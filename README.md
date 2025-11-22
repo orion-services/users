@@ -39,7 +39,7 @@ The project includes a Vue 3 frontend playground application that provides a use
 
 The playground includes:
 - User registration and login
-- Social authentication (Google and Apple)
+- Social authentication (Google)
 - Two-factor authentication (2FA)
 - WebAuthn (biometric/security key authentication)
 - Password recovery

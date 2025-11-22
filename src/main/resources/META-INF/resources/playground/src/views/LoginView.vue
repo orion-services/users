@@ -72,18 +72,6 @@
                   Login with Google
                 </v-btn>
 
-                <v-btn
-                  color="black"
-                  block
-                  variant="outlined"
-                  @click="handleAppleLogin"
-                  :loading="appleLoading"
-                  prepend-icon="mdi-apple"
-                  size="large"
-                >
-                  Login with Apple
-                </v-btn>
-
                 <div class="text-center mt-4">
                   <a
                     href="#"
@@ -186,10 +174,6 @@ const loginEmail = ref('')
 const loginPassword = ref('')
 const loginLoading = ref(false)
 const googleLoading = ref(false)
-const appleLoading = ref(false)
-
-// Check if Apple Client ID is configured
-const hasAppleClientId = ref(false)
 
 // Registration form data
 const registerName = ref('')
@@ -374,88 +358,7 @@ const handleGoogleLogin = async () => {
   }
 }
 
-const handleAppleLogin = async () => {
-  appleLoading.value = true
-  try {
-    // Wait for Apple Sign In to load (increase timeout)
-    await new Promise((resolve, reject) => {
-      if (typeof AppleID !== 'undefined' && AppleID.auth) {
-        resolve()
-        return
-      }
-      
-      let attempts = 0
-      const maxAttempts = 100 // 10 seconds
-      const checkInterval = setInterval(() => {
-        attempts++
-        if (typeof AppleID !== 'undefined' && AppleID.auth) {
-          clearInterval(checkInterval)
-          resolve()
-        } else if (attempts >= maxAttempts) {
-          clearInterval(checkInterval)
-          reject(new Error('Apple Sign-In library failed to load'))
-        }
-      }, 100)
-    })
-
-    const clientId = import.meta.env.VITE_APPLE_CLIENT_ID || ''
-    
-    // Validate clientId
-    if (!clientId || clientId.trim() === '') {
-      showMessage('Apple Client ID not configured. Please contact the administrator.', 'error')
-      appleLoading.value = false
-      return
-    }
-
-    // Initialize Apple Sign In
-    try {
-      AppleID.auth.init({
-        clientId: clientId.trim(),
-        scope: 'name email',
-        redirectURI: window.location.origin,
-        usePopup: true
-      })
-    } catch (initError) {
-      console.error('Error initializing Apple Sign-In:', initError)
-      showMessage('Error initializing Apple Sign-In. Please try again.', 'error')
-      appleLoading.value = false
-      return
-    }
-
-    // Sign in
-    const response = await AppleID.auth.signIn()
-    
-    if (response && response.id_token) {
-      // Send the ID token to backend
-      const apiResponse = await userApi.loginWithApple(response.id_token)
-      const data = apiResponse.data
-
-      if (data.token && data.user) {
-        authStore.setAuth(data.token, data.user)
-        showMessage('Login with Apple successful!')
-        router.push('/dashboard')
-      }
-    } else {
-      showMessage('Apple Sign-In was cancelled or failed.', 'error')
-    }
-  } catch (error) {
-    console.error('Apple Sign-In error:', error)
-    if (error.message && error.message.includes('failed to load')) {
-      showMessage('Apple Sign-In library not loaded. Please refresh the page and try again.', 'error')
-    } else {
-      const message = error.response?.data?.message || error.message || 'Error logging in with Apple'
-      showMessage(message, 'error')
-    }
-  } finally {
-    appleLoading.value = false
-  }
-}
-
 onMounted(() => {
-  // Check if Apple Client ID is configured
-  const appleClientId = import.meta.env.VITE_APPLE_CLIENT_ID || ''
-  hasAppleClientId.value = appleClientId.trim() !== ''
-  
   // Scripts are loaded in index.html, just wait for them to be available
 })
 </script>

@@ -39,7 +39,7 @@ import io.vertx.ext.web.client.WebClientOptions
 
 /**
  * Social Authentication Web Service.
- * Handles OAuth2 authentication with Google and Apple.
+ * Handles OAuth2 authentication with Google.
  */
 @PermitAll
 @Path("/users/login")
@@ -92,38 +92,6 @@ class SocialAuthWS {
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Google authentication failed"
-                ServiceException(message, Response.Status.UNAUTHORIZED)
-            }
-    }
-
-    /**
-     * Authenticates a user with Apple OAuth2.
-     * Receives the ID token from Apple and validates it.
-     *
-     * @param idToken The Apple ID token (JWT)
-     * @return AuthenticationDTO with user and JWT token
-     * @throws ServiceException if authentication fails
-     */
-    @POST
-    @Path("/apple")
-    @PermitAll
-    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Produces(MediaType.APPLICATION_JSON)
-    @Retry(maxRetries = 1, delay = 2000)
-    fun loginWithApple(
-        @RestForm @NotEmpty idToken: String
-    ): Uni<Response> {
-        return validateAppleToken(idToken)
-            .onItem().transform { (email, name) ->
-                controller.loginWithSocialProvider(email, name, "apple")
-            }
-            .onItem().transformToUni { authUni ->
-                authUni.onItem().transform { dto ->
-                    Response.ok(dto).build()
-                }
-            }
-            .onFailure().transform { e ->
-                val message = e.message ?: "Apple authentication failed"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
     }
@@ -248,76 +216,6 @@ class SocialAuthWS {
             .onFailure().transform { throwable ->
                 IllegalArgumentException("Failed to fetch user info from Google API: ${throwable.message ?: throwable.javaClass.simpleName}")
             }
-    }
-
-    /**
-     * Validates Apple ID token and extracts user information.
-     * This is a simplified validation - in production, you should validate
-     * the token signature and expiration using Apple's public keys.
-     *
-     * @param idToken The Apple ID token
-     * @return Pair of (email, name)
-     */
-    private fun validateAppleToken(idToken: String): Uni<Pair<String, String>> {
-        return try {
-            // Normalize token: remove leading/trailing whitespace and any extra spaces
-            val normalizedToken = idToken.trim().replace("\\s+".toRegex(), "")
-            
-            // Validate token is not empty
-            if (normalizedToken.isEmpty()) {
-                throw IllegalArgumentException("Token is empty")
-            }
-            
-            // Validate JWT format: should have exactly 3 parts separated by dots
-            val parts = normalizedToken.split(".")
-            if (parts.size != 3) {
-                throw IllegalArgumentException("Invalid token format: expected JWT format (header.payload.signature) with 3 parts separated by dots, but found ${parts.size} part(s)")
-            }
-            
-            // Validate parts are not empty
-            if (parts[0].isEmpty() || parts[1].isEmpty() || parts[2].isEmpty()) {
-                throw IllegalArgumentException("Invalid token format: one or more JWT parts are empty")
-            }
-
-            // Decode payload (base64url)
-            val payload: String
-            try {
-                payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
-            } catch (e: IllegalArgumentException) {
-                throw IllegalArgumentException("Invalid token format: unable to decode base64url payload - ${e.message}")
-            }
-            
-            // Parse JSON payload
-            val json: com.fasterxml.jackson.databind.JsonNode
-            try {
-                json = com.fasterxml.jackson.databind.ObjectMapper().readTree(payload)
-            } catch (e: Exception) {
-                throw IllegalArgumentException("Invalid token format: unable to parse JSON payload - ${e.message}")
-            }
-
-            // Extract email
-            val email = json.get("email")?.asText()
-                ?: throw IllegalArgumentException("Email not found in token")
-            
-            // Extract name (handle both object and string formats)
-            val name = json.get("name")?.let { nameNode ->
-                if (nameNode.isObject) {
-                    val firstName = nameNode.get("firstName")?.asText() ?: ""
-                    val lastName = nameNode.get("lastName")?.asText() ?: ""
-                    "$firstName $lastName".trim()
-                } else {
-                    nameNode.asText()
-                }
-            } ?: email
-
-            Uni.createFrom().item(Pair(email, name))
-        } catch (e: IllegalArgumentException) {
-            // Re-throw IllegalArgumentException with improved message
-            Uni.createFrom().failure(IllegalArgumentException("Invalid Apple token: ${e.message}"))
-        } catch (e: Exception) {
-            // Catch any other exceptions and provide a generic error message
-            Uni.createFrom().failure(IllegalArgumentException("Invalid Apple token: ${e.javaClass.simpleName} - ${e.message ?: "Unknown error"}"))
-        }
     }
 }
 

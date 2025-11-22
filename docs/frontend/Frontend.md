@@ -57,7 +57,7 @@ npm run dev
 
 - ✅ User registration
 - ✅ Simple login with email and password
-- ✅ Social authentication (Google and Apple)
+- ✅ Social authentication (Google)
 - ✅ Two-factor authentication (2FA)
 - ✅ WebAuthn (biometric/security key authentication)
 - ✅ Password recovery
@@ -109,9 +109,6 @@ VITE_API_URL=http://localhost:8080
 
 # Google OAuth2 Client ID (optional, for social login)
 VITE_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
-
-# Apple OAuth2 Client ID (optional, for social login)
-VITE_APPLE_CLIENT_ID=com.yourcompany.orionusers
 ```
 
 ### Development Server Configuration
@@ -249,15 +246,6 @@ src/main/resources/META-INF/resources/test/
 5. You will be automatically logged in
 
 **Note**: Requires `VITE_GOOGLE_CLIENT_ID` to be configured in `.env`
-
-#### Apple Login
-
-1. Click the **Login with Apple** button
-2. An Apple sign-in popup will appear
-3. Authenticate with Face ID, Touch ID, or your Apple ID password
-4. You will be automatically logged in
-
-**Note**: Requires `VITE_APPLE_CLIENT_ID` to be configured in `.env`
 
 ### Two-Factor Authentication (2FA)
 
@@ -449,7 +437,6 @@ userApi.createAndAuthenticate(name, email, password)
 // Authentication
 userApi.login(email, password)
 userApi.loginWithGoogle(idToken)
-userApi.loginWithApple(idToken)
 
 // Two-Factor Authentication
 userApi.generate2FAQRCode(email, password)

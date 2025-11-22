@@ -33,7 +33,7 @@ class SocialAuthUC : SocialAuthUCI {
      *
      * @param email The email from the social provider
      * @param name The name from the social provider
-     * @param provider The provider name (e.g., "google", "apple")
+     * @param provider The provider name (e.g., "google")
      * @return A User object with validated data
      * @throws IllegalArgumentException if the data is invalid
      */
@@ -54,8 +54,8 @@ class SocialAuthUC : SocialAuthUCI {
         }
 
         // Validate provider
-        if (provider.isBlank() || (provider != "google" && provider != "apple")) {
-            throw IllegalArgumentException("$INVALID: provider must be 'google' or 'apple'")
+        if (provider.isBlank() || provider != "google") {
+            throw IllegalArgumentException("$INVALID: provider must be 'google'")
         }
 
         // Create user object (password will be null for social auth users)

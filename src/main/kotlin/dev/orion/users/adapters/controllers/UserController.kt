@@ -193,12 +193,12 @@ class UserController : BasicController() {
     }
 
     /**
-     * Authenticates a user with a social provider (Google or Apple).
+     * Authenticates a user with a social provider (Google).
      * If the user doesn't exist, creates it automatically.
      *
      * @param email    The email from the social provider
      * @param name     The name from the social provider
-     * @param provider The provider name ("google" or "apple")
+     * @param provider The provider name ("google")
      * @return A Uni<AuthenticationDTO> object with user and JWT token
      */
     fun loginWithSocialProvider(email: String, name: String, provider: String): Uni<AuthenticationDTO> {
