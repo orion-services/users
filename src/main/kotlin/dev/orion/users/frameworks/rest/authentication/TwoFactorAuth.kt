@@ -17,7 +17,7 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.AuthenticationDTO
+import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
@@ -85,7 +85,7 @@ class TwoFactorAuth {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return The AuthenticationDTO with JWT token
+     * @return The LoginResponseDTO with JWT token
      * @throws ServiceException if validation fails
      */
     @POST
@@ -99,8 +99,8 @@ class TwoFactorAuth {
         @RestForm @NotEmpty code: String
     ): Uni<Response> {
         return controller.validate2FACode(email, code)
-            .onItem().transform { dto ->
-                Response.ok(dto).build()
+            .onItem().transform { response ->
+                Response.ok(response).build()
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Invalid TOTP code"
