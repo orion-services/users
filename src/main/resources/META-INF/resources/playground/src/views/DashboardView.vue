@@ -42,11 +42,50 @@
             </v-card-text>
           </v-card>
 
+          <!-- 2FA Settings -->
+          <v-card variant="outlined" class="mb-4" v-if="authStore.user?.using2FA">
+            <v-card-title class="text-subtitle-1">
+              <v-icon class="mr-2">mdi-cog</v-icon>
+              2FA Settings
+            </v-card-title>
+            <v-card-text>
+              <v-alert type="info" class="mb-4">
+                Configure when 2FA is required. By default, 2FA is optional for both login methods.
+              </v-alert>
+              
+              <v-form ref="settings2FAForm" v-model="settings2FAValid" @submit.prevent="update2FASettings">
+                <v-switch
+                  v-model="settings2FA.require2FAForBasicLogin"
+                  label="Require 2FA for basic login (email/password)"
+                  color="primary"
+                  class="mb-2"
+                ></v-switch>
+                
+                <v-switch
+                  v-model="settings2FA.require2FAForSocialLogin"
+                  label="Require 2FA for social login (Google)"
+                  color="primary"
+                  class="mb-4"
+                ></v-switch>
+
+                <v-btn
+                  type="submit"
+                  color="primary"
+                  block
+                  :loading="settings2FALoading"
+                  size="large"
+                >
+                  Save 2FA Settings
+                </v-btn>
+              </v-form>
+            </v-card-text>
+          </v-card>
+
           <!-- 2FA Setup -->
           <v-card variant="outlined" class="mb-4">
             <v-card-title class="text-subtitle-1">
               <v-icon class="mr-2">mdi-shield-lock</v-icon>
-              Setup Two-Factor Authentication (2FA)
+              2FA Testing and QR Code Setup
             </v-card-title>
             <v-card-text>
               <div v-if="!authStore.user?.using2FA">
@@ -119,7 +158,7 @@
                   @click="goToValidate2FA"
                   size="large"
                 >
-                  Test 2FA Code
+                  2FA Testing
                 </v-btn>
               </div>
             </v-card-text>
@@ -252,7 +291,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { userApi } from '../services/api'
@@ -267,6 +306,15 @@ const setup2FAValid = ref(false)
 const setup2FAPassword = ref('')
 const setup2FALoading = ref(false)
 const qrCodeUrl = ref(null)
+
+// 2FA Settings
+const settings2FAForm = ref(null)
+const settings2FAValid = ref(false)
+const settings2FA = ref({
+  require2FAForBasicLogin: false,
+  require2FAForSocialLogin: false
+})
+const settings2FALoading = ref(false)
 
 // Email Update
 const updateEmailForm = ref(null)
@@ -427,6 +475,40 @@ const updatePassword = async () => {
     updatePasswordLoading.value = false
   }
 }
+
+const update2FASettings = async () => {
+  if (!settings2FAValid.value) return
+
+  settings2FALoading.value = true
+  try {
+    await userApi.update2FASettings(
+      authStore.user.email,
+      settings2FA.value.require2FAForBasicLogin,
+      settings2FA.value.require2FAForSocialLogin
+    )
+    
+    // Update user object in store if needed
+    if (authStore.user) {
+      authStore.user.require2FAForBasicLogin = settings2FA.value.require2FAForBasicLogin
+      authStore.user.require2FAForSocialLogin = settings2FA.value.require2FAForSocialLogin
+    }
+    
+    showMessage('2FA settings updated successfully!', 'success')
+  } catch (error) {
+    const message = error.response?.data?.message || error.message || 'Error updating 2FA settings'
+    showMessage(message, 'error')
+  } finally {
+    settings2FALoading.value = false
+  }
+}
+
+onMounted(() => {
+  // Load current 2FA settings from user object
+  if (authStore.user?.using2FA) {
+    settings2FA.value.require2FAForBasicLogin = authStore.user.require2FAForBasicLogin || false
+    settings2FA.value.require2FAForSocialLogin = authStore.user.require2FAForSocialLogin || false
+  }
+})
 
 const logout = () => {
   authStore.logout()

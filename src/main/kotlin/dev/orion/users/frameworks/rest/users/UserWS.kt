@@ -153,5 +153,51 @@ class UserWS {
                 throw ServiceException(message, status)
             }
     }
+
+    /**
+     * Updates 2FA settings for a user. Requires authentication via JWT token.
+     * Allows the user to configure if 2FA is required for basic login and/or social login.
+     *
+     * @param email                    The current email of the user
+     * @param require2FAForBasicLogin  Whether 2FA is required for basic login (optional, defaults to false)
+     * @param require2FAForSocialLogin Whether 2FA is required for social login (optional, defaults to false)
+     * @return The updated user object
+     * @throws Bad request if the service was unable to update the settings
+     */
+    @POST
+    @Path("/2fa/settings")
+    @RolesAllowed("user")
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun update2FASettings(
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm require2FAForBasicLogin: Boolean?,
+        @RestForm require2FAForSocialLogin: Boolean?
+    ): Uni<Response> {
+        // Extract email from JWT token
+        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
+            ?: jwt.getClaim<String>("email")
+            ?: throw ServiceException(
+                "Invalid token",
+                Response.Status.UNAUTHORIZED
+            )
+
+        // Use provided values or default to false
+        val requireBasic = require2FAForBasicLogin ?: false
+        val requireSocial = require2FAForSocialLogin ?: false
+
+        return controller.update2FASettings(email, requireBasic, requireSocial, jwtEmail)
+            .onItem().transform { user -> Response.ok(user).build() }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                val status = if (message.contains("Unauthorized") || message.contains("token")) {
+                    Response.Status.UNAUTHORIZED
+                } else {
+                    Response.Status.BAD_REQUEST
+                }
+                throw ServiceException(message, status)
+            }
+    }
 }
 

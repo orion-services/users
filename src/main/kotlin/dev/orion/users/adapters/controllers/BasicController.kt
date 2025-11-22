@@ -54,12 +54,12 @@ open class BasicController {
     private val UTF_8 = "UTF-8"
 
     /** Configure the issuer for JWT generation. */
-    @ConfigProperty(name = "users.issuer")
-    protected var issuer: java.util.Optional<String>? = null
+    @ConfigProperty(name = "users.issuer", defaultValue = "orion-users")
+    lateinit var issuer: String
 
     /** Set the validation url. */
     @ConfigProperty(name = "users.email.validation.url", defaultValue = "http://localhost:8080/users/validateEmail")
-    protected var validateURL: String = "http://localhost:8080/users/validateEmail"
+    lateinit var validateURL: String
 
     /** ModelMapper. */
     protected val mapper: ModelMapper = ModelMapper()
@@ -71,7 +71,7 @@ open class BasicController {
      * @return Returns the JWT
      */
     fun generateJWT(user: UserEntity): String {
-        return Jwt.issuer(issuer?.orElse("orion-users") ?: "orion-users")
+        return Jwt.issuer(issuer)
             .upn(user.email)
             .groups(user.getRoleList().toSet())
             .claim(Claims.c_hash, user.hash)

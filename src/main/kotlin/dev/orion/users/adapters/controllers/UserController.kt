@@ -156,12 +156,12 @@ class UserController : BasicController() {
             .onItem().ifNotNull().transform { user ->
                 val response = LoginResponseDTO()
 
-                // Check if user has 2FA enabled
-                if (user.isUsing2FA) {
+                // Check if user has 2FA enabled AND requires it for basic login
+                if (user.isUsing2FA && user.require2FAForBasicLogin) {
                     response.requires2FA = true
                     response.message = "2FA code required"
                 } else {
-                    // Normal login without 2FA
+                    // Normal login without 2FA requirement
                     val dto = AuthenticationDTO()
                     dto.token = this.generateJWT(user)
                     dto.user = user
@@ -195,13 +195,14 @@ class UserController : BasicController() {
     /**
      * Authenticates a user with a social provider (Google).
      * If the user doesn't exist, creates it automatically.
+     * If the user has 2FA enabled and requires it for social login, returns a response indicating that 2FA code is required.
      *
      * @param email    The email from the social provider
      * @param name     The name from the social provider
      * @param provider The provider name ("google")
-     * @return A Uni<AuthenticationDTO> object with user and JWT token
+     * @return A Uni<LoginResponseDTO> object (may contain JWT or indicate 2FA is required)
      */
-    fun loginWithSocialProvider(email: String, name: String, provider: String): Uni<AuthenticationDTO> {
+    fun loginWithSocialProvider(email: String, name: String, provider: String): Uni<LoginResponseDTO> {
         // Validate social auth data using use case
         val user: User = socialAuthUC.validateSocialAuth(email, name, provider)
         val entity: UserEntity = mapper.map(user, UserEntity::class.java)
@@ -209,11 +210,22 @@ class UserController : BasicController() {
         // Try to find existing user by email
         return userRepository.findUserByEmail(email)
             .onItem().ifNotNull().transform { existingUser ->
-                // User exists, generate JWT and return
-                val dto = AuthenticationDTO()
-                dto.token = this.generateJWT(existingUser)
-                dto.user = existingUser
-                dto
+                val response = LoginResponseDTO()
+
+                // Check if user has 2FA enabled AND requires it for social login
+                if (existingUser.isUsing2FA && existingUser.require2FAForSocialLogin) {
+                    response.requires2FA = true
+                    response.message = "2FA code required"
+                } else {
+                    // Normal login without 2FA requirement
+                    val dto = AuthenticationDTO()
+                    dto.token = this.generateJWT(existingUser)
+                    dto.user = existingUser
+                    response.authentication = dto
+                    response.requires2FA = false
+                }
+
+                response
             }
             .onItem().ifNull().switchTo {
                 // User doesn't exist, create it
@@ -221,10 +233,13 @@ class UserController : BasicController() {
                 entity.password = DigestUtils.sha256Hex(UUID.randomUUID().toString())
                 userRepository.createUser(entity)
                     .onItem().ifNotNull().transform { newUser ->
+                        val response = LoginResponseDTO()
                         val dto = AuthenticationDTO()
                         dto.token = this.generateJWT(newUser)
                         dto.user = newUser
-                        dto
+                        response.authentication = dto
+                        response.requires2FA = false
+                        response
                     }
             }
     }
@@ -267,7 +282,7 @@ class UserController : BasicController() {
                 userRepository.updateUser(authenticatedUser)
                     .onItem().transform { updatedUser ->
                         // Generate QR code
-                        val issuer = issuer?.orElse("Orion Users") ?: "Orion Users"
+                        val issuer = issuer
                         val barCodeData = getAuthenticatorBarCode(
                             secretKey,
                             updatedUser.email ?: email,
@@ -275,6 +290,52 @@ class UserController : BasicController() {
                         )
                         createQrCode(barCodeData)
                     }
+            }
+    }
+
+    /**
+     * Validates a TOTP code for 2FA authentication after social login.
+     *
+     * @param email The email of the user
+     * @param code  The TOTP code to validate
+     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     */
+    fun validateSocialLogin2FA(email: String, code: String): Uni<AuthenticationDTO> {
+        // Validate code format using use case
+        val user: User = twoFactorAuthUC.validateCode(email, code)
+
+        // Find user by email
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { userEntity ->
+                // Check if 2FA is enabled
+                if (!userEntity.isUsing2FA) {
+                    throw IllegalArgumentException("2FA is not enabled for this user")
+                }
+
+                // Check if user requires 2FA for social login
+                if (!userEntity.require2FAForSocialLogin) {
+                    throw IllegalArgumentException("2FA is not required for social login for this user")
+                }
+
+                // Get secret from user
+                val secret = userEntity.secret2FA
+                if (secret == null) {
+                    throw IllegalArgumentException("2FA secret not found")
+                }
+
+                // Validate TOTP code
+                val expectedCode = getTOTPCode(secret)
+                if (code != expectedCode) {
+                    throw IllegalArgumentException("Invalid TOTP code")
+                }
+
+                // Generate JWT and return DTO
+                val dto = AuthenticationDTO()
+                dto.token = generateJWT(userEntity)
+                dto.user = userEntity
+                Uni.createFrom().item(dto)
             }
     }
 
@@ -343,7 +404,7 @@ class UserController : BasicController() {
                 val userId = Base64.getUrlEncoder().withoutPadding().encodeToString((user.email ?: email).toByteArray())
 
                 // Create PublicKeyCredentialCreationOptions as JSON
-                val rpName = issuer?.orElse("Orion Users") ?: "Orion Users"
+                val rpName = issuer
                 val rpId = origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
                 val userName = user.email ?: email
                 val userDisplayName = user.name ?: user.email ?: email
@@ -632,6 +693,39 @@ class UserController : BasicController() {
     }
 
     /**
+     * Updates 2FA settings for a user.
+     * Allows the user to configure if 2FA is required for basic login and/or social login.
+     *
+     * @param email                    The email of the user (from JWT)
+     * @param require2FAForBasicLogin  Whether 2FA is required for basic login
+     * @param require2FAForSocialLogin Whether 2FA is required for social login
+     * @param jwtEmail                 The email from the JWT token (for validation)
+     * @return A Uni<UserEntity> with updated settings
+     */
+    fun update2FASettings(
+        email: String,
+        require2FAForBasicLogin: Boolean,
+        require2FAForSocialLogin: Boolean,
+        jwtEmail: String
+    ): Uni<UserEntity> {
+        // Validate that JWT email matches the current email
+        checkTokenEmail(email, jwtEmail)
+
+        // Find user and update settings
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
+            .onItem().ifNotNull().transformToUni { userEntity ->
+                // Update 2FA settings
+                userEntity.require2FAForBasicLogin = require2FAForBasicLogin
+                userEntity.require2FAForSocialLogin = require2FAForSocialLogin
+
+                // Persist changes
+                userRepository.updateUser(userEntity)
+            }
+    }
+
+    /**
      * Extracts the rpId (Relying Party ID) from an origin URL.
      * The rpId is the hostname without protocol and port.
      * This ensures consistency between registration and authentication.
@@ -641,8 +735,8 @@ class UserController : BasicController() {
      */
     private fun extractRpIdFromOrigin(origin: String): String {
         return try {
-            val url = java.net.URL(origin)
-            url.host ?: "localhost"
+            val uri = java.net.URI(origin)
+            uri.host ?: "localhost"
         } catch (e: Exception) {
             // If parsing fails, try to extract manually
             origin.replace(Regex("^https?://"), "")

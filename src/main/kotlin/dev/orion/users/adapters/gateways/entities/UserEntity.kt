@@ -83,6 +83,12 @@ class UserEntity : PanacheEntityBase() {
     /** Secret code to be used at 2FA validation. */
     var secret2FA: String? = null
 
+    /** Controls if 2FA is required for basic login (email/password). */
+    var require2FAForBasicLogin: Boolean = false
+
+    /** Controls if 2FA is required for social login (Google OAuth). */
+    var require2FAForSocialLogin: Boolean = false
+
     /**
      * User constructor.
      */

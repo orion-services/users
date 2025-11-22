@@ -171,6 +171,19 @@ export const userApi = {
   // Social Auth
   loginWithGoogle: (idToken) => {
     return api.post('/users/login/google', toFormData({ idToken }))
+  },
+
+  loginWithGoogle2FA: (email, code) => {
+    return api.post('/users/login/google/2fa', toFormData({ email, code }))
+  },
+
+  // 2FA Settings
+  update2FASettings: (email, require2FAForBasicLogin, require2FAForSocialLogin) => {
+    return api.post('/users/2fa/settings', toFormData({ 
+      email,
+      require2FAForBasicLogin: require2FAForBasicLogin || false,
+      require2FAForSocialLogin: require2FAForSocialLogin || false
+    }))
   }
 }
 

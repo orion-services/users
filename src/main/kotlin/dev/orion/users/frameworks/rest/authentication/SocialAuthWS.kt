@@ -18,11 +18,13 @@ package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
 import dev.orion.users.adapters.presenters.AuthenticationDTO
+import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
 import jakarta.annotation.security.PermitAll
 import jakarta.inject.Inject
+import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.FormParam
@@ -42,7 +44,7 @@ import io.vertx.ext.web.client.WebClientOptions
  * Handles OAuth2 authentication with Google.
  */
 @PermitAll
-@Path("/users/login")
+@Path("/users")
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
 @WithSession
@@ -67,13 +69,14 @@ class SocialAuthWS {
     /**
      * Authenticates a user with Google OAuth2.
      * Receives the ID token from Google and validates it.
+     * If the user has 2FA enabled and requires it for social login, returns a response indicating that 2FA code is required.
      *
      * @param idToken The Google ID token (JWT)
-     * @return AuthenticationDTO with user and JWT token
+     * @return LoginResponseDTO (may contain JWT or indicate 2FA is required)
      * @throws ServiceException if authentication fails
      */
     @POST
-    @Path("/google")
+    @Path("/login/google")
     @PermitAll
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -85,13 +88,47 @@ class SocialAuthWS {
             .onItem().transform { (email, name) ->
                 controller.loginWithSocialProvider(email, name, "google")
             }
-            .onItem().transformToUni { authUni ->
-                authUni.onItem().transform { dto ->
-                    Response.ok(dto).build()
+            .onItem().transformToUni { responseUni ->
+                responseUni.onItem().transform { response ->
+                    if (response.requires2FA) {
+                        // Return 200 OK but indicate 2FA is required
+                        Response.ok(response).status(Response.Status.OK).build()
+                    } else {
+                        // Normal login response
+                        Response.ok(response.authentication).build()
+                    }
                 }
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Google authentication failed"
+                ServiceException(message, Response.Status.UNAUTHORIZED)
+            }
+    }
+
+    /**
+     * Validates a TOTP code for 2FA authentication after social login.
+     *
+     * @param email The email of the user
+     * @param code  The TOTP code to validate
+     * @return AuthenticationDTO with JWT token
+     * @throws ServiceException if validation fails
+     */
+    @POST
+    @Path("/login/google/2fa")
+    @PermitAll
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun loginWithGoogle2FA(
+        @RestForm @NotEmpty @Email email: String,
+        @RestForm @NotEmpty code: String
+    ): Uni<Response> {
+        return controller.validateSocialLogin2FA(email, code)
+            .onItem().transform { dto ->
+                Response.ok(dto).build()
+            }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Invalid TOTP code"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
     }

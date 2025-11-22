@@ -303,8 +303,23 @@ const handleGoogleLogin = async () => {
           const apiResponse = await userApi.loginWithGoogle(response.credential)
           const data = apiResponse.data
 
-          if (data.token && data.user) {
+          // When 2FA is required, backend returns LoginResponseDTO
+          if (data.requires2FA === true) {
+            // Extract email from Google token (simplified - in production, decode JWT properly)
+            // For now, we'll need to get email from the response or store it temporarily
+            // Since we don't have email in the response, we'll need to decode the token or store it
+            // For simplicity, we'll store the token temporarily and extract email later
+            localStorage.setItem('pending_social_login', 'google')
+            localStorage.setItem('pending_google_token', response.credential)
+            router.push('/2fa?mode=validate&source=social')
+          } else if (data.token && data.user) {
+            // Successful login without 2FA - backend returns AuthenticationDTO directly
             authStore.setAuth(data.token, data.user)
+            showMessage('Login with Google successful!')
+            router.push('/dashboard')
+          } else if (data.authentication) {
+            // Fallback: if backend returns LoginResponseDTO without requires2FA
+            authStore.setAuth(data.authentication.token, data.authentication.user)
             showMessage('Login with Google successful!')
             router.push('/dashboard')
           }
@@ -336,8 +351,19 @@ const handleGoogleLogin = async () => {
               const apiResponse = await userApi.loginWithGoogle(tokenResponse.access_token)
               const data = apiResponse.data
 
-              if (data.token && data.user) {
+              // When 2FA is required, backend returns LoginResponseDTO
+              if (data.requires2FA === true) {
+                localStorage.setItem('pending_social_login', 'google')
+                localStorage.setItem('pending_google_token', tokenResponse.access_token)
+                router.push('/2fa?mode=validate&source=social')
+              } else if (data.token && data.user) {
+                // Successful login without 2FA
                 authStore.setAuth(data.token, data.user)
+                showMessage('Login with Google successful!')
+                router.push('/dashboard')
+              } else if (data.authentication) {
+                // Fallback: if backend returns LoginResponseDTO without requires2FA
+                authStore.setAuth(data.authentication.token, data.authentication.user)
                 showMessage('Login with Google successful!')
                 router.push('/dashboard')
               }

@@ -198,6 +198,13 @@ onMounted(() => {
   if (pendingEmail) {
     validateEmail.value = pendingEmail
   }
+  
+  // Check if coming from social login
+  if (route.query.source === 'social') {
+    // For social login, we need to extract email from the token or use a different approach
+    // For now, user will need to enter email manually
+    // In production, decode the Google token to get email
+  }
 })
 
 const showMessage = (message, color = 'success') => {
@@ -231,12 +238,25 @@ const handleValidateCode = async () => {
 
   validateLoading.value = true
   try {
-    const response = await userApi.loginWith2FA(validateEmail.value, validateCode.value)
+    // Check if this is a social login validation
+    const isSocialLogin = localStorage.getItem('pending_social_login')
+    
+    let response
+    if (isSocialLogin === 'google') {
+      // Use social login 2FA endpoint
+      response = await userApi.loginWithGoogle2FA(validateEmail.value, validateCode.value)
+      localStorage.removeItem('pending_social_login')
+      localStorage.removeItem('pending_google_token')
+    } else {
+      // Use regular login 2FA endpoint
+      response = await userApi.loginWith2FA(validateEmail.value, validateCode.value)
+      localStorage.removeItem('pending_email')
+    }
+    
     const data = response.data
 
     if (data.token && data.user) {
       authStore.setAuth(data.token, data.user)
-      localStorage.removeItem('pending_email')
       showMessage('Authentication successful!')
       router.push('/dashboard')
     }
