@@ -1,0 +1,31 @@
+@startuml
+    title Two Factor Authenticate Validate Code
+    actor "User agent" as user
+    autonumber
+    user -> WebService: @POST /api/user/google/2FAuth/Validate (email,code)
+    activate WebService 
+
+    WebService --> UseCase : findUserByEmail(email)
+    activate UseCase
+
+    UseCase -> Repository : findUserByEmail(email)
+    activate Repository
+    Repository --> Repository: findUserByEmail(email)
+    activate Repository
+
+    Repository -->> UseCase: Uni<User>
+    deactivate Repository
+
+    UseCase -->> Webservice : Uni<User>
+
+    WebService --> Webservice : secret = user.getSecret2FA()
+    WebService --> GoogleUtils : getTOTPCode(secret)
+    activate GoogleUtils
+    GoogleUtils --> GoogleUtils : getTOTPCode(secret)
+    GoogleUtils -->> Webservice : String userCode
+    deactivate GoogleUtils
+    WebService --> Webservice : Validate user.isUsing2FA()
+    WebService --> Webservice : Validate !userCode.equals(code)
+    WebService -->> user : User in JSON
+    deactivate WebService
+@enduml

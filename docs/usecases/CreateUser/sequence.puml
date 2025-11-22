@@ -1,0 +1,33 @@
+@startuml
+
+title Create User
+actor "User agent"
+
+"User agent" -> WebService: @POST /users/create (name, email, password)
+activate WebService #F9F3FC
+
+WebService --> UseCase : createUser(name, email, password)
+activate UseCase #F9F3FC
+
+UseCase --> Repository : createUser(User user)
+activate Repository #F9F3FC
+Repository -> Repository: checkEmail(email)
+activate Repository #F9F3FC
+
+Repository -> Repository: checkHash(hash)
+activate Repository #F9F3FC
+
+Repository -> Repository: persist(user)
+Repository -->> UseCase : Uni<User>
+
+deactivate Repository
+deactivate Repository
+deactivate Repository
+
+UseCase -->> WebService : Uni<User>
+deactivate UseCase
+
+WebService -->> "User agent" : User in JSON
+deactivate WebService
+
+@enduml

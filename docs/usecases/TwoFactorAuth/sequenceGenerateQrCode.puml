@@ -1,0 +1,35 @@
+@startuml
+    title Two Factor Authenticate Generate QrCode
+    actor "User agent" as user
+    autonumber
+
+    user -> WebService: @POST /api/user/google/2FAuth/qrCode (email,password)
+    activate WebService
+
+    WebService -> UseCase: authenticate(email,password)
+    activate UseCase
+
+    UseCase --> UseCase : autheticate(email,password)
+    UseCase -->> WebService : Uni<User>
+
+    WebService -> WebService : user.setUsing2FA(true)
+    WebService -> UseCase: updateUser(user)
+
+    UseCase --> UseCase : updateUser(user)
+    UseCase -->> WebService: Uni<User>
+    deactivate UseCase
+
+    WebService -> WebService : secret = user.GetSecret2FA()
+    WebService -> WebService : userEmail = user.GetSecret2FA()
+    WebService -> GoogleUtils : getGoogleAuthenticatorBarCode(secret,userEmail, issuer)
+    activate GoogleUtils
+    GoogleUtils --> GoogleUtils : getgetGoogleAuthenticatorBarCode(secret,userEmail, issuer)
+    GoogleUtils -->> WebService : String barCodeData
+    WebService --> GoogleUtils : createQrCode(barCodeData)
+    GoogleUtils --> GoogleUtils : createQrCode(barCodeData)
+    GoogleUtils -->> WebService : byte[] qrCode
+    deactivate GoogleUtils
+
+    WebService -->> user : QrCode Image
+    deactivate WebService
+@enduml
