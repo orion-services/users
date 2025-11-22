@@ -3,7 +3,7 @@
 ## 0.0.6
 
 - LoginResponseDTO as a standard response object from all endpoints
--
+- New documentation
 
 ## 0.0.5
 

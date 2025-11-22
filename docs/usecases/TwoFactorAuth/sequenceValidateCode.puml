@@ -2,30 +2,32 @@
     title Two Factor Authenticate Validate Code
     actor "User agent" as user
     autonumber
-    user -> WebService: @POST /api/user/google/2FAuth/Validate (email,code)
+    
+    user -> WebService: @POST /users/google/2FAuth/validate (email,code)
     activate WebService 
 
-    WebService --> UseCase : findUserByEmail(email)
+    WebService -> UseCase: validateCode(email,code)
     activate UseCase
 
-    UseCase -> Repository : findUserByEmail(email)
+    UseCase -> UseCase: validateCode(email,code)
+    UseCase -->> WebService: User
+
+    WebService -> Repository: findUserByEmail(email)
     activate Repository
     Repository --> Repository: findUserByEmail(email)
-    activate Repository
-
-    Repository -->> UseCase: Uni<User>
+    Repository -->> WebService: Uni<User>
     deactivate Repository
 
-    UseCase -->> Webservice : Uni<User>
-
-    WebService --> Webservice : secret = user.getSecret2FA()
-    WebService --> GoogleUtils : getTOTPCode(secret)
+    WebService -> WebService: Validate user.isUsing2FA()
+    WebService -> WebService: secret = user.getSecret2FA()
+    WebService -> GoogleUtils: getTOTPCode(secret)
     activate GoogleUtils
-    GoogleUtils --> GoogleUtils : getTOTPCode(secret)
-    GoogleUtils -->> Webservice : String userCode
+    GoogleUtils --> GoogleUtils: getTOTPCode(secret)
+    GoogleUtils -->> WebService: String expectedCode
     deactivate GoogleUtils
-    WebService --> Webservice : Validate user.isUsing2FA()
-    WebService --> Webservice : Validate !userCode.equals(code)
-    WebService -->> user : User in JSON
+    
+    WebService -> WebService: Validate code.equals(expectedCode)
+    WebService -> WebService: generateJWT(user)
+    WebService -->> user: LoginResponseDTO (JSON with JWT token)
     deactivate WebService
 @enduml
