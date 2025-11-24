@@ -252,10 +252,18 @@ const handleRegister = async () => {
     )
     const data = response.data
 
-    if (data.token && data.user) {
+    // Backend returns LoginResponseDTO with authentication object
+    if (data.authentication) {
+      authStore.setAuth(data.authentication.token, data.authentication.user)
+      showMessage('Registration successful!')
+      router.push('/dashboard')
+    } else if (data.token && data.user) {
+      // Fallback for old format (should not happen with current backend)
       authStore.setAuth(data.token, data.user)
       showMessage('Registration successful!')
       router.push('/dashboard')
+    } else {
+      showMessage('Unexpected response format', 'error')
     }
   } catch (error) {
     const message = error.response?.data?.message || error.message || 'Error registering user'

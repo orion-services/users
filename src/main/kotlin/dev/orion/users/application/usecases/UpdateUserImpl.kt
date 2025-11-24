@@ -29,24 +29,25 @@ class UpdateUserImpl : UpdateUser {
     private val BLANK = "Blank Arguments"
 
     /**
-     * Updates user information (email and/or password).
+     * Updates user information (name, email and/or password).
      * At least one field must be provided for update.
      *
      * @param email       : Current user's email
+     * @param name        : New name (optional)
      * @param newEmail    : New email (optional)
      * @param password    : Current password (required if updating password)
      * @param newPassword : New password (optional)
      * @return An User object with updated fields
      * @throws IllegalArgumentException if no fields are provided for update or validation fails
      */
-    override fun updateUser(email: String, newEmail: String?, password: String?, newPassword: String?): User {
+    override fun updateUser(email: String, name: String?, newEmail: String?, password: String?, newPassword: String?): User {
         if (email.isBlank()) {
             throw IllegalArgumentException(BLANK)
         }
         
         // Validate that at least one field is being updated
-        if (newEmail.isNullOrBlank() && newPassword.isNullOrBlank()) {
-            throw IllegalArgumentException("At least one field (newEmail or newPassword) must be provided for update")
+        if (name.isNullOrBlank() && newEmail.isNullOrBlank() && newPassword.isNullOrBlank()) {
+            throw IllegalArgumentException("At least one field (name, newEmail or newPassword) must be provided for update")
         }
         
         // Validate current email format
@@ -56,6 +57,14 @@ class UpdateUserImpl : UpdateUser {
         
         val user = User()
         user.email = email
+        
+        // Update name if provided
+        if (!name.isNullOrBlank()) {
+            if (name.trim().isEmpty()) {
+                throw IllegalArgumentException("Name cannot be empty")
+            }
+            user.name = name.trim()
+        }
         
         // Update email if provided
         if (!newEmail.isNullOrBlank()) {
