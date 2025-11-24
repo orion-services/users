@@ -26,10 +26,13 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
 import jakarta.ws.rs.Consumes
 import jakarta.ws.rs.FormParam
+import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
+import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.faulttolerance.Retry
@@ -111,10 +114,11 @@ class UserWS {
     }
 
     /**
-     * Updates user information (email and/or password). Requires authentication via JWT token.
-     * At least one field (newEmail or newPassword) must be provided.
+     * Updates user information (name, email and/or password). Requires authentication via JWT token with role "user".
+     * At least one field (name, newEmail or newPassword) must be provided.
      *
      * @param email       The current email of the user
+     * @param name        The new name (optional)
      * @param newEmail    The new email address (optional)
      * @param password    The current password (required if updating password)
      * @param newPassword The new password (optional)
@@ -129,6 +133,7 @@ class UserWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun updateUser(
         @RestForm @NotEmpty @Email email: String,
+        @RestForm name: String?,
         @RestForm newEmail: String?,
         @RestForm password: String?,
         @RestForm newPassword: String?
@@ -141,7 +146,34 @@ class UserWS {
                 Response.Status.UNAUTHORIZED
             )
 
-        return controller.updateUser(email, newEmail, password, newPassword, jwtEmail)
+        // Extract groups/roles from JWT token
+        val groups: Set<String> = try {
+            jwt.getClaim<Set<String>>(Claims.groups.name) 
+                ?: jwt.getClaim<List<String>>("groups")?.toSet()
+                ?: emptySet()
+        } catch (e: Exception) {
+            emptySet()
+        }
+        
+        // Verifica se é admin (admins também têm role "user")
+        val isAdmin = groups.contains("admin")
+        
+        // Se não for admin, só pode atualizar seu próprio usuário
+        // Se for admin, pode atualizar qualquer usuário
+        if (!isAdmin && email != jwtEmail) {
+            throw ServiceException(
+                "You can only update your own user",
+                Response.Status.FORBIDDEN
+            )
+        }
+
+        // Normaliza campos vazios para null
+        val normalizedName = if (name.isNullOrBlank()) null else name.trim()
+        val normalizedNewEmail = if (newEmail.isNullOrBlank()) null else newEmail.trim()
+        val normalizedPassword = if (password.isNullOrBlank()) null else password
+        val normalizedNewPassword = if (newPassword.isNullOrBlank()) null else newPassword
+
+        return controller.updateUser(email, normalizedName, normalizedNewEmail, normalizedPassword, normalizedNewPassword, jwtEmail, isAdmin)
             .onItem().transform { response -> Response.ok(response).build() }
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"
@@ -195,6 +227,60 @@ class UserWS {
                     Response.Status.UNAUTHORIZED
                 } else {
                     Response.Status.BAD_REQUEST
+                }
+                throw ServiceException(message, status)
+            }
+    }
+
+    /**
+     * Lists all users in the service. Requires admin role.
+     *
+     * @return A list of all users in JSON format
+     * @throws Unauthorized if the user is not an admin
+     */
+    @GET
+    @Path("/list")
+    @RolesAllowed("admin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun listUsers(): Uni<Response> {
+        return controller.listAllUsers()
+            .onItem().transform { users -> Response.ok(users).build() }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                val status = if (message.contains("Unauthorized") || message.contains("token")) {
+                    Response.Status.UNAUTHORIZED
+                } else {
+                    Response.Status.INTERNAL_SERVER_ERROR
+                }
+                throw ServiceException(message, status)
+            }
+    }
+
+    /**
+     * Gets a user by email. Requires admin role.
+     *
+     * @param email The email of the user to retrieve
+     * @return The user object in JSON format
+     * @throws Bad request if the user is not found
+     * @throws Unauthorized if the user is not an admin
+     */
+    @GET
+    @Path("/by-email")
+    @RolesAllowed("admin")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Retry(maxRetries = 1, delay = 2000)
+    fun getUserByEmail(
+        @QueryParam("email") @NotEmpty @Email email: String
+    ): Uni<Response> {
+        return controller.getUserByEmail(email)
+            .onItem().transform { user -> Response.ok(user).build() }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                val status = when {
+                    message.contains("not found") -> Response.Status.NOT_FOUND
+                    message.contains("Unauthorized") || message.contains("token") -> Response.Status.UNAUTHORIZED
+                    else -> Response.Status.BAD_REQUEST
                 }
                 throw ServiceException(message, status)
             }

@@ -630,10 +630,11 @@ class UserController : BasicController() {
     }
 
     /**
-     * Updates user information (email and/or password). Validates the token,
+     * Updates user information (name, email and/or password). Validates the token,
      * updates the fields, generates a new JWT, and sends a validation email if email was changed.
      *
      * @param email       : The current email of the user
+     * @param name        : The new name (optional)
      * @param newEmail    : The new email address (optional)
      * @param password    : The current password (required if updating password)
      * @param newPassword : The new password (optional)
@@ -642,21 +643,27 @@ class UserController : BasicController() {
      */
     fun updateUser(
         email: String,
+        name: String?,
         newEmail: String?,
         password: String?,
         newPassword: String?,
-        jwtEmail: String
+        jwtEmail: String,
+        isAdmin: Boolean = false
     ): Uni<LoginResponseDTO> {
         // Validate using use case
-        val user: User = updateUserUC.updateUser(email, newEmail, password, newPassword)
+        val user: User = updateUserUC.updateUser(email, name, newEmail, password, newPassword)
 
-        // Validate that JWT email matches the current email
-        checkTokenEmail(email, jwtEmail)
+        // Validate that JWT email matches the current email (unless user is admin)
+        if (!isAdmin) {
+            checkTokenEmail(email, jwtEmail)
+        }
 
         // Capture variables for use in lambdas
+        val nameUpdated = !name.isNullOrBlank()
         val emailUpdated = !newEmail.isNullOrBlank()
         val passwordUpdate = !newPassword.isNullOrBlank() && !password.isNullOrBlank()
         val currentEmail = email
+        val newNameValue = name
         val newEmailValue = newEmail
         val currentPassword = password
         val newPasswordValue = newPassword
@@ -674,6 +681,11 @@ class UserController : BasicController() {
                     }
                 }
 
+                // Update name if provided
+                if (nameUpdated) {
+                    userEntity.name = newNameValue
+                }
+
                 // First update email if provided
                 if (emailUpdated) {
                     userRepository.updateEmail(currentEmail, newEmailValue!!)
@@ -682,7 +694,21 @@ class UserController : BasicController() {
                             sendValidationEmail(updatedUser)
                         }
                 } else {
-                    Uni.createFrom().item(userEntity)
+                    // If only name was updated, persist the user
+                    if (nameUpdated) {
+                        userRepository.updateUser(userEntity)
+                    } else {
+                        Uni.createFrom().item(userEntity)
+                    }
+                }
+            }
+            .onItem().ifNotNull().transformToUni { updatedUser ->
+                // Update name if email was also updated (to ensure name is saved)
+                if (emailUpdated && nameUpdated) {
+                    updatedUser.name = newNameValue
+                    userRepository.updateUser(updatedUser)
+                } else {
+                    Uni.createFrom().item(updatedUser)
                 }
             }
             .onItem().ifNotNull().transformToUni { updatedUser ->
@@ -763,6 +789,27 @@ class UserController : BasicController() {
                 .replace(Regex(":\\d+$"), "")
                 .takeIf { it.isNotBlank() } ?: "localhost"
         }
+    }
+
+    /**
+     * Lists all users in the service.
+     *
+     * @return A Uni<List<UserEntity>> containing all users
+     */
+    fun listAllUsers(): Uni<List<UserEntity>> {
+        return userRepository.listAllUsers()
+    }
+
+    /**
+     * Gets a user by email.
+     *
+     * @param email The email of the user
+     * @return A Uni<UserEntity> containing the user if found
+     */
+    fun getUserByEmail(email: String): Uni<UserEntity> {
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
     }
 
 }

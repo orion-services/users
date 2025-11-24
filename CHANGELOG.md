@@ -3,12 +3,13 @@
 ## 0.0.6
 
 - LoginResponseDTO as a standard response object from all endpoints
-- New documentation
+- Users Admin Console Vue App (Experimental)
+- Playground Vue App (Experimental)
 
 ## 0.0.5
 
 - Port to Kotlin
-- webauthn (experimental)
+- webauthn (Experimental)
 
 ## 0.0.4
 

@@ -341,5 +341,15 @@ class UserRepositoryImpl @Inject constructor(
         return Panache.withTransaction { user.persist() }
             .onItem().transform { user }
     }
+
+    /**
+     * Lists all users in the service.
+     *
+     * @return A Uni<List<UserEntity>> containing all users
+     */
+    override fun listAllUsers(): Uni<List<UserEntity>> {
+        return (this as io.quarkus.hibernate.reactive.panache.PanacheRepository<UserEntity>)
+            .listAll()
+    }
 }
 
