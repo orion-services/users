@@ -175,20 +175,25 @@ class UserController : BasicController() {
 
     /**
      * Creates a user, generates a Json Web Token and returns a
-     * AuthenticationDTO object.
+     * LoginResponseDTO object.
      *
      * @param name     : The user name
      * @param email    : The user e-mail
      * @param password : The user password
-     * @return A Uni<AuthenticationDTO> object
+     * @return A Uni<LoginResponseDTO> object
      */
-    fun createAuthenticate(name: String, email: String, password: String): Uni<AuthenticationDTO> {
+    fun createAuthenticate(name: String, email: String, password: String): Uni<LoginResponseDTO> {
         return this.createUser(name, email, password)
             .onItem().ifNotNull().transform { user ->
-                val dto = AuthenticationDTO()
-                dto.token = this.generateJWT(user)
-                dto.user = user
-                dto
+                val authDto = AuthenticationDTO()
+                authDto.token = this.generateJWT(user)
+                authDto.user = user
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                response
             }
     }
 
@@ -298,9 +303,9 @@ class UserController : BasicController() {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validateSocialLogin2FA(email: String, code: String): Uni<AuthenticationDTO> {
+    fun validateSocialLogin2FA(email: String, code: String): Uni<LoginResponseDTO> {
         // Validate code format using use case
         val user: User = twoFactorAuthUC.validateCode(email, code)
 
@@ -332,10 +337,15 @@ class UserController : BasicController() {
                 }
 
                 // Generate JWT and return DTO
-                val dto = AuthenticationDTO()
-                dto.token = generateJWT(userEntity)
-                dto.user = userEntity
-                Uni.createFrom().item(dto)
+                val authDto = AuthenticationDTO()
+                authDto.token = generateJWT(userEntity)
+                authDto.user = userEntity
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                Uni.createFrom().item(response)
             }
     }
 
@@ -344,9 +354,9 @@ class UserController : BasicController() {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return A Uni that emits an AuthenticationDTO with JWT if validation succeeds
+     * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validate2FACode(email: String, code: String): Uni<AuthenticationDTO> {
+    fun validate2FACode(email: String, code: String): Uni<LoginResponseDTO> {
         // Validate code format using use case
         val user: User = twoFactorAuthUC.validateCode(email, code)
 
@@ -373,10 +383,15 @@ class UserController : BasicController() {
                 }
 
                 // Generate JWT and return DTO
-                val dto = AuthenticationDTO()
-                dto.token = generateJWT(userEntity)
-                dto.user = userEntity
-                Uni.createFrom().item(dto)
+                val authDto = AuthenticationDTO()
+                authDto.token = generateJWT(userEntity)
+                authDto.user = userEntity
+                
+                val response = LoginResponseDTO()
+                response.authentication = authDto
+                response.requires2FA = false
+                
+                Uni.createFrom().item(response)
             }
     }
 
@@ -540,9 +555,9 @@ class UserController : BasicController() {
      *
      * @param email    The email of the user
      * @param response The authentication response from the client (JSON string)
-     * @return An AuthenticationDTO with JWT if authentication succeeds
+     * @return A LoginResponseDTO with JWT if authentication succeeds
      */
-    fun finishWebAuthnAuthentication(email: String, response: String): Uni<AuthenticationDTO> {
+    fun finishWebAuthnAuthentication(email: String, response: String): Uni<LoginResponseDTO> {
         // Validate using use case
         webAuthnUC.finishAuthentication(email, response)
 
@@ -566,10 +581,15 @@ class UserController : BasicController() {
                         webAuthnCredentialRepository.saveCredential(credential)
 
                         // Generate JWT and return DTO
-                        val dto = AuthenticationDTO()
-                        dto.token = generateJWT(user)
-                        dto.user = user
-                        dto
+                        val authDto = AuthenticationDTO()
+                        authDto.token = generateJWT(user)
+                        authDto.user = user
+                        
+                        val loginResponse = LoginResponseDTO()
+                        loginResponse.authentication = authDto
+                        loginResponse.requires2FA = false
+                        
+                        loginResponse
                     }
             }
     }
@@ -610,10 +630,11 @@ class UserController : BasicController() {
     }
 
     /**
-     * Updates user information (email and/or password). Validates the token,
+     * Updates user information (name, email and/or password). Validates the token,
      * updates the fields, generates a new JWT, and sends a validation email if email was changed.
      *
      * @param email       : The current email of the user
+     * @param name        : The new name (optional)
      * @param newEmail    : The new email address (optional)
      * @param password    : The current password (required if updating password)
      * @param newPassword : The new password (optional)
@@ -622,21 +643,27 @@ class UserController : BasicController() {
      */
     fun updateUser(
         email: String,
+        name: String?,
         newEmail: String?,
         password: String?,
         newPassword: String?,
-        jwtEmail: String
+        jwtEmail: String,
+        isAdmin: Boolean = false
     ): Uni<LoginResponseDTO> {
         // Validate using use case
-        val user: User = updateUserUC.updateUser(email, newEmail, password, newPassword)
+        val user: User = updateUserUC.updateUser(email, name, newEmail, password, newPassword)
 
-        // Validate that JWT email matches the current email
-        checkTokenEmail(email, jwtEmail)
+        // Validate that JWT email matches the current email (unless user is admin)
+        if (!isAdmin) {
+            checkTokenEmail(email, jwtEmail)
+        }
 
         // Capture variables for use in lambdas
+        val nameUpdated = !name.isNullOrBlank()
         val emailUpdated = !newEmail.isNullOrBlank()
         val passwordUpdate = !newPassword.isNullOrBlank() && !password.isNullOrBlank()
         val currentEmail = email
+        val newNameValue = name
         val newEmailValue = newEmail
         val currentPassword = password
         val newPasswordValue = newPassword
@@ -654,6 +681,11 @@ class UserController : BasicController() {
                     }
                 }
 
+                // Update name if provided
+                if (nameUpdated) {
+                    userEntity.name = newNameValue
+                }
+
                 // First update email if provided
                 if (emailUpdated) {
                     userRepository.updateEmail(currentEmail, newEmailValue!!)
@@ -662,7 +694,21 @@ class UserController : BasicController() {
                             sendValidationEmail(updatedUser)
                         }
                 } else {
-                    Uni.createFrom().item(userEntity)
+                    // If only name was updated, persist the user
+                    if (nameUpdated) {
+                        userRepository.updateUser(userEntity)
+                    } else {
+                        Uni.createFrom().item(userEntity)
+                    }
+                }
+            }
+            .onItem().ifNotNull().transformToUni { updatedUser ->
+                // Update name if email was also updated (to ensure name is saved)
+                if (emailUpdated && nameUpdated) {
+                    updatedUser.name = newNameValue
+                    userRepository.updateUser(updatedUser)
+                } else {
+                    Uni.createFrom().item(updatedUser)
                 }
             }
             .onItem().ifNotNull().transformToUni { updatedUser ->
@@ -743,6 +789,27 @@ class UserController : BasicController() {
                 .replace(Regex(":\\d+$"), "")
                 .takeIf { it.isNotBlank() } ?: "localhost"
         }
+    }
+
+    /**
+     * Lists all users in the service.
+     *
+     * @return A Uni<List<UserEntity>> containing all users
+     */
+    fun listAllUsers(): Uni<List<UserEntity>> {
+        return userRepository.listAllUsers()
+    }
+
+    /**
+     * Gets a user by email.
+     *
+     * @param email The email of the user
+     * @return A Uni<UserEntity> containing the user if found
+     */
+    fun getUserByEmail(email: String): Uni<UserEntity> {
+        return userRepository.findUserByEmail(email)
+            .onItem().ifNull()
+            .failWith(IllegalArgumentException("User not found"))
     }
 
 }

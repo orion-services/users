@@ -103,5 +103,12 @@ interface UserRepository : PanacheRepository<UserEntity> {
      * @return Returns a Long 1 if user was deleted
      */
     fun deleteUser(email: String): Uni<Void>
+
+    /**
+     * Lists all users in the service.
+     *
+     * @return A Uni<List<UserEntity>> containing all users
+     */
+    fun listAllUsers(): Uni<List<UserEntity>>
 }
 

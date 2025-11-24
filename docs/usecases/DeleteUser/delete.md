@@ -1,48 +1,59 @@
 ---
 layout: default
-title: Delete user
+title: Delete User
 parent: Use Cases
 nav_order: 5
 ---
 
-## Normal flow
+## Delete User
 
-* A client sends a e-mail.
-* The service validates the input data and verifies if the users exists in the
-  system.
-* If the users exists, delete the user.
+This use case is responsible for deleting a user from the system. The endpoint requires admin role authentication and permanently removes the user account.
+
+### Normal flow
+
+* A client sends an e-mail along with a valid JWT token with admin role.
+* The service validates the JWT token and verifies that the requester has admin role.
+* The service validates the input data and verifies if the user exists in the system.
+* If the user exists, the service deletes the user from the data repository.
+* The service returns a success response indicating the user was deleted.
 
 ## HTTPS endpoints
 
 * /users/delete
-  * Method: DELETE
+  * Method: POST
   * Consumes: application/x-www-form-urlencoded
   * Produces: application/json
-  * Examples:
+  * Requires: JWT token with admin role in Authorization header
 
-    * Request:
+### Request Example
 
-        ```shell
-            curl -X DELETE \
-                'http://localhost:8080/users/delete' \
-                --header 'Accept: */*' \
-                --header 'User-Agent: Thunder Client (https://www.thunderclient.com)' \
-                --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJvcmlvbi11c2VycyIsInVwbi
-                I6InJvZHJpZ28ucHJlc3Rlc0BnbWFpbC5jb20iLCJncm91cHMiOlsidXNlciJdLCJjX2hhc2giOiJmMjc5NjdlMy1lOTQ5LTQzZDctO
-                GVlZi1lNWRlOTM3MjhhMGEiLCJlbWFpbCI6InJvZHJpZ28ucHJlc3Rlc0BnbWFpbC5jb20iLCJpYXQiOjE2ODAyMTEzODQsImV4cCI6M
-                TY4MDIxMTY4NCwianRpIjoiMDg5ZjlmNjEtNThjMi00OGU2LWE3Y2MtMDU3MDJiMDhkMTM0In0.n5hsgY7xlsk3sYLgu628Z6sPGeJhx
-                roGd_v-cQtSDvUVGBkZOODD9t_19ZOuTAEV5IcrO02HQBQR8fi5-94BejAh4rdBVNsWIyvtWMi2x3nvbnrWzkbYPv9WPrq4aiGcQIrLA
-                Vz17cFZ-oN7gm8-7JAJ8pXseT6PpnzbpL4cIRvUHHeU2pc7zUubLb5S6lO0ly_bCINYW5E87S6JRe33nH6S2u9gdjFctQVNWp4b-EgKx
-                8U9IDsv9a3NC2fWJzbMcOpmq6eGbdFalEf6nbxoLT2yzFKKHWrekXgiOrykI_R2zgnII5Kcezq5mEwU4qf_tPxYXCf0W0YLePJxeij3
-                QA' \
-                --header 'Content-Type: application/x-www-form-urlencoded' \
-                --data-urlencode 'email=orion@test.com'
-        ```
+```shell
+curl -X POST \
+  'http://localhost:8080/users/delete' \
+  --header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9...' \
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'email=orion@test.com'
+```
 
-    * Response will be an HTTP 204 (Undocumented)
+### Response Example
+
+When the user is successfully deleted, the response contains:
+
+```json
+true
+```
+
+**Note:** The endpoint returns HTTP 200 (OK) with a boolean `true` value indicating successful deletion.
 
 ## Exceptions
 
-In the use case layer, exceptions related with arguments will be
-IllegalArgumentException. However, in the RESTful Web Service layer will be
-transformed to Bad Request (HTTP 400).
+RESTful Web Service layer will return:
+- HTTP 401 (Unauthorized) if:
+  - The JWT token is missing or invalid
+  - The JWT token does not have admin role
+- HTTP 400 (Bad Request) if:
+  - The email format is invalid
+  - The email parameter is missing
+  - The user does not exist in the system
+
+In the use case layer, exceptions related with arguments will be `IllegalArgumentException`. However, in the RESTful Web Service layer these will be transformed to Bad Request (HTTP 400) or Unauthorized (HTTP 401) as appropriate.

@@ -17,7 +17,6 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.AuthenticationDTO
 import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
@@ -90,13 +89,8 @@ class SocialAuthWS {
             }
             .onItem().transformToUni { responseUni ->
                 responseUni.onItem().transform { response ->
-                    if (response.requires2FA) {
-                        // Return 200 OK but indicate 2FA is required
-                        Response.ok(response).status(Response.Status.OK).build()
-                    } else {
-                        // Normal login response
-                        Response.ok(response.authentication).build()
-                    }
+                    // Always return LoginResponseDTO complete
+                    Response.ok(response).build()
                 }
             }
             .onFailure().transform { e ->
@@ -110,7 +104,7 @@ class SocialAuthWS {
      *
      * @param email The email of the user
      * @param code  The TOTP code to validate
-     * @return AuthenticationDTO with JWT token
+     * @return LoginResponseDTO with JWT token
      * @throws ServiceException if validation fails
      */
     @POST
@@ -124,8 +118,8 @@ class SocialAuthWS {
         @RestForm @NotEmpty code: String
     ): Uni<Response> {
         return controller.validateSocialLogin2FA(email, code)
-            .onItem().transform { dto ->
-                Response.ok(dto).build()
+            .onItem().transform { response ->
+                Response.ok(response).build()
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Invalid TOTP code"

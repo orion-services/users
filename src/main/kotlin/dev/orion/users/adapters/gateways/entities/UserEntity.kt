@@ -23,6 +23,8 @@ import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.Email
@@ -68,6 +70,11 @@ class UserEntity : PanacheEntityBase() {
     /** Role list. */
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+        name = "User_Role",
+        joinColumns = [JoinColumn(name = "User_id")],
+        inverseJoinColumns = [JoinColumn(name = "roles_id")]
+    )
     var roles: MutableList<RoleEntity> = mutableListOf()
 
     /** Stores if the e-mail was validated. */

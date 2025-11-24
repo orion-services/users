@@ -103,13 +103,8 @@ class AuthenticationWS {
         return controller.login(email, password)
             .onItem().ifNotNull()
             .transform { response ->
-                if (response.requires2FA) {
-                    // Return 200 OK but indicate 2FA is required
-                    Response.ok(response).status(Response.Status.OK).build()
-                } else {
-                    // Normal login response
-                    Response.ok(response.authentication).build()
-                }
+                // Always return LoginResponseDTO complete
+                Response.ok(response).build()
             }
             .onItem().ifNull()
             .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
@@ -124,7 +119,7 @@ class AuthenticationWS {
      *
      * @param email The email of the user
      * @param code  The TOTP code
-     * @return The AuthenticationDTO with JWT token
+     * @return The LoginResponseDTO with JWT token
      * @throws A ServiceException if validation fails
      */
     @POST
@@ -138,8 +133,8 @@ class AuthenticationWS {
         @RestForm @NotEmpty code: String
     ): Uni<Response> {
         return controller.validate2FACode(email, code)
-            .onItem().transform { dto ->
-                Response.ok(dto).build()
+            .onItem().transform { response ->
+                Response.ok(response).build()
             }
             .onFailure().transform { e ->
                 val message = e.message ?: "Invalid TOTP code"
@@ -153,7 +148,7 @@ class AuthenticationWS {
      * @param name     The name of the user
      * @param email    The email of the user
      * @param password The password of the user
-     * @return The Authentication DTO
+     * @return The LoginResponseDTO
      * @throws A Bad Request if the service is unable to create the user
      */
     @POST
@@ -168,7 +163,7 @@ class AuthenticationWS {
         @FormParam("password") @NotEmpty password: String
     ): Uni<Response> {
         return controller.createAuthenticate(name, email, password)
-            .onItem().ifNotNull().transform { dto -> Response.ok(dto).build() }
+            .onItem().ifNotNull().transform { response -> Response.ok(response).build() }
             .onFailure().transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)

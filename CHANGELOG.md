@@ -1,14 +1,21 @@
 # Users change Log
 
+## 0.0.6
+
+- LoginResponseDTO as a standard response object from all endpoints
+- Users Admin Console Vue App (Experimental)
+- Playground Vue App (Experimental)
+
 ## 0.0.5
 
 - Port to Kotlin
+- webauthn (Experimental)
 
 ## 0.0.4
 
-    - Clean Architecture
-    - Updated to Quarkus 3
-    - Updated to Java 20 Temurin
+- Clean Architecture
+- Updated to Quarkus 3
+- Updated to Java 20 Temurin
 
 ## 0.0.3
 
