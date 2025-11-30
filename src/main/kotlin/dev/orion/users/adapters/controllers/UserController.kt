@@ -94,6 +94,8 @@ class UserController : BasicController() {
     fun createUser(name: String, email: String, password: String): Uni<UserEntity> {
         val user: User = createUC.createUser(name, email, password)
         val entity: UserEntity = mapper.map(user, UserEntity::class.java)
+        // Allow the ID to be null for auto-generation by the database
+        entity.id = null
         return userRepository.createUser(entity)
             .onItem().ifNotNull().transform { u -> u }
             .onItem().ifNotNull().call { user -> this.sendValidationEmail(user) }
@@ -133,7 +135,9 @@ class UserController : BasicController() {
         // generates a JWT
         return userRepository.authenticate(entity)
             .onItem().ifNotNull()
-            .transform { this.generateJWT(it) }
+            .transform {
+                this.generateJWT(it)
+            }
     }
 
     /**
@@ -168,7 +172,6 @@ class UserController : BasicController() {
                     response.authentication = dto
                     response.requires2FA = false
                 }
-
                 response
             }
     }
@@ -236,6 +239,8 @@ class UserController : BasicController() {
                 // User doesn't exist, create it
                 // Generate a secure password (user won't use it, but DB requires it)
                 entity.password = DigestUtils.sha256Hex(UUID.randomUUID().toString())
+                // Garantir que o ID seja null para permitir geração automática pelo banco
+                entity.id = null
                 userRepository.createUser(entity)
                     .onItem().ifNotNull().transform { newUser ->
                         val response = LoginResponseDTO()
@@ -813,4 +818,3 @@ class UserController : BasicController() {
     }
 
 }
-

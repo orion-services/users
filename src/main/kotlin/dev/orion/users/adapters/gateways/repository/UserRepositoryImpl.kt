@@ -251,6 +251,8 @@ class UserRepositoryImpl @Inject constructor(
             .failWith(IOException("Role not found"))
             .onItem().ifNotNull()
             .transformToUni { role ->
+                // Allow the ID to be null for auto-generation by the database
+                user.id = null
                 user.addRole(role)
                 Panache.withTransaction { user.persist() }
                     .onItem().transform { user }
