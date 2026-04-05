@@ -24,10 +24,10 @@ open class TwoFactorAuthUC
             password: String,
         ): User {
             if (email.isBlank() || password.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             PasswordValidator.validatePasswordOrThrow(password)
             val user = User()
@@ -41,10 +41,10 @@ open class TwoFactorAuthUC
             code: String,
         ): User {
             if (email.isBlank() || code.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             if (!code.matches(Regex("\\d{6}"))) {
                 throw IllegalArgumentException("Invalid TOTP code format")

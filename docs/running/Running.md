@@ -218,46 +218,29 @@ The project includes several Dockerfiles in `src/main/docker/`:
 - **Dockerfile.legacy-jar**: Legacy JAR packaging (not recommended)
 - **Dockerfile.native-micro**: MicroProfile native container
 
-### Docker Compose Example
+### Docker Compose
 
-For local development with database:
+The project includes a ready-to-use `docker-compose.yml` file in the root directory that automatically provisions a PostgreSQL database and builds the Orion Users service.
 
-```yaml
-version: '3.8'
+This is the easiest way to launch the complete environment (including the API, Playground, and Admin Dashboard).
 
-services:
-  database:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: users
-      POSTGRES_USER: users
-      POSTGRES_PASSWORD: userspassword
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-  users-service:
-    build:
-      context: .
-      dockerfile: src/main/docker/Dockerfile.jvm
-    ports:
-      - "8080:8080"
-    environment:
-      QUARKUS_DATASOURCE_REACTIVE_URL: postgresql://users:userspassword@database:5432/users
-      QUARKUS_DATASOURCE_USERNAME: users
-      QUARKUS_DATASOURCE_PASSWORD: userspassword
-    depends_on:
-      - database
-
-volumes:
-  postgres_data:
-```
-
-Run with:
+**Running the environment:**
 ```bash
-docker-compose up
+docker compose up --build
 ```
+
+**Features provided by this compose file:**
+- Automatically builds the API service from the root `Dockerfile`
+- Deploys a `postgres:17-alpine` database with health checks
+- Injects necessary database credentials natively
+- Mocks out the email backend (`QUARKUS_MAILER_MOCK=true`) so the server boots smoothly without real SMTP credentials
+
+Once it finishes booting, access the services:
+- **API**: `http://localhost:8080`
+- **Playground**: `http://localhost:8080/test`
+- **Admin Dashboard**: `http://localhost:8080/dashboard`
+
+*(Note: Configuration values can be securely overridden by placing a `.env` file in the root directory)*
 
 ## Packaging Options
 

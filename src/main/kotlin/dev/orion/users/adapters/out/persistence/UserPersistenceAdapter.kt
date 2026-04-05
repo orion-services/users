@@ -37,8 +37,6 @@ class UserPersistenceAdapter
         private val defaultRoleName = "user"
         private val passwordLength = 8
         private val userNotFoundError = "Error: user not found"
-        private val email = "email"
-        private val password = "password"
 
         // ---- suspend overrides (port contract) ----
 
@@ -168,8 +166,10 @@ class UserPersistenceAdapter
                 }
 
         private fun authenticateEntity(user: UserEntity): Uni<UserEntity?> =
-            find("email = :email and password = :password", mapOf(EMAIL to user.email, PASSWORD to user.password))
-                .firstResult<UserEntity>()
+            find(
+                "email = :email and password = :password",
+                mapOf("email" to user.email, "password" to user.password),
+            ).firstResult<UserEntity>()
 
         private fun updateEmailEntity(
             email: String,
@@ -178,7 +178,7 @@ class UserPersistenceAdapter
             checkEmail(email)
                 .onItem()
                 .ifNull()
-                .failWith(IllegalArgumentException(USER_NOT_FOUND_ERROR))
+                .failWith(IllegalArgumentException(userNotFoundError))
                 .onItem()
                 .ifNotNull()
                 .transformToUni { user ->
@@ -204,7 +204,7 @@ class UserPersistenceAdapter
             email: String,
             code: String,
         ): Uni<UserEntity> =
-            find("email = :email and emailValidationCode = :code", mapOf(EMAIL to email, "code" to code))
+            find("email = :email and emailValidationCode = :code", mapOf("email" to email, "code" to code))
                 .firstResult<UserEntity>()
                 .onItem()
                 .ifNotNull()
@@ -226,7 +226,7 @@ class UserPersistenceAdapter
             checkEmail(email)
                 .onItem()
                 .ifNull()
-                .failWith(IllegalArgumentException(USER_NOT_FOUND_ERROR))
+                .failWith(IllegalArgumentException(userNotFoundError))
                 .onItem()
                 .ifNotNull()
                 .transformToUni { user ->
@@ -265,7 +265,7 @@ class UserPersistenceAdapter
             checkEmail(email)
                 .onItem()
                 .ifNull()
-                .failWith(IllegalArgumentException(USER_NOT_FOUND_ERROR))
+                .failWith(IllegalArgumentException(userNotFoundError))
                 .onItem()
                 .ifNotNull()
                 .transformToUni { user ->
@@ -278,11 +278,11 @@ class UserPersistenceAdapter
                 .onItem()
                 .transform { user }
 
-        private fun findUserEntityByEmail(email: String): Uni<UserEntity?> = find(EMAIL, email).firstResult<UserEntity>()
+        private fun findUserEntityByEmail(email: String): Uni<UserEntity?> = find("email", email).firstResult<UserEntity>()
 
         private fun listAllEntities(): Uni<List<UserEntity>> = listAll()
 
-        private fun checkEmail(email: String): Uni<UserEntity?> = find(EMAIL, email).firstResult<UserEntity>()
+        private fun checkEmail(email: String): Uni<UserEntity?> = find("email", email).firstResult<UserEntity>()
 
         private fun checkName(name: String): Uni<UserEntity?> = find("name", name).firstResult<UserEntity>()
 
@@ -304,7 +304,7 @@ class UserPersistenceAdapter
                         .transform { user }
                 }
 
-        private fun getDefaultRole(): Uni<RoleEntity> = roleRepository.findByName(DEFAULT_ROLE_NAME)
+        private fun getDefaultRole(): Uni<RoleEntity> = roleRepository.findByName(defaultRoleName)
 
         private fun generateSecurePassword(): String {
             val lcr = CharacterRule(EnglishCharacterData.LowerCase)
@@ -318,7 +318,7 @@ class UserPersistenceAdapter
             val sr = CharacterRule(special)
             sr.numberOfCharacters = 1
             val passGen = PasswordGenerator()
-            return passGen.generatePassword(PASSWORD_LENGTH, sr, lcr, ucr, dr)
+            return passGen.generatePassword(passwordLength, sr, lcr, ucr, dr)
         }
 
         private fun defineSpecialChar(character: String): CharacterData =

@@ -26,7 +26,7 @@ open class UpdateUserImpl
             newPassword: String?,
         ): User {
             if (email.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (name.isNullOrBlank() && newEmail.isNullOrBlank() && newPassword.isNullOrBlank()) {
                 throw IllegalArgumentException("At least one field (name, newEmail or newPassword) must be provided for update")

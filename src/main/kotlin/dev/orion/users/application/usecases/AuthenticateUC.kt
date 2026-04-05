@@ -27,7 +27,7 @@ open class AuthenticateUC
                 user.password = DigestUtils.sha256Hex(password)
                 return user
             } else {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
         }
 
@@ -36,13 +36,13 @@ open class AuthenticateUC
             code: String,
         ) {
             if (email.isBlank() || code.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
         }
 
         override fun recoverPassword(email: String): String? {
             if (email.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             return null
         }

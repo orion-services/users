@@ -39,6 +39,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.UnsupportedEncodingException
+import java.nio.charset.StandardCharsets
 import java.net.URLEncoder
 import java.security.SecureRandom
 import javax.imageio.ImageIO
@@ -75,9 +76,6 @@ open class BasicController {
             }
         }
 
-    /** The encoding used in the QR code. */
-    private val utf8 = "UTF-8"
-
     /** Configure the issuer for JWT generation. */
     @ConfigProperty(name = "users.issuer", defaultValue = "orion-users")
     lateinit var issuer: String
@@ -101,7 +99,7 @@ open class BasicController {
             .upn(user.email)
             .groups(user.getRoleList().toSet())
             .claim(Claims.c_hash, user.hash)
-            .claim(Claims.c_name, user.name)
+            .claim("name", user.name)
             .claim(Claims.email, user.email)
             .sign()
 
@@ -112,7 +110,7 @@ open class BasicController {
             .upn(user.email)
             .groups(user.getRoleList().toSet())
             .claim(Claims.c_hash, user.hash)
-            .claim(Claims.c_name, user.name)
+            .claim("name", user.name)
             .claim(Claims.email, user.email)
             .sign()
 
@@ -193,15 +191,15 @@ open class BasicController {
         try {
             return "otpauth://totp/" +
                 URLEncoder
-                    .encode("$issuer:$account", UTF_8)
+                    .encode("$issuer:$account", StandardCharsets.UTF_8)
                     .replace("+", "%20") +
                 "?secret=" +
                 URLEncoder
-                    .encode(secretKey, UTF_8)
+                    .encode(secretKey, StandardCharsets.UTF_8)
                     .replace("+", "%20") +
                 "&issuer=" +
                 URLEncoder
-                    .encode(issuer, UTF_8)
+                    .encode(issuer, StandardCharsets.UTF_8)
                     .replace("+", "%20")
         } catch (e: UnsupportedEncodingException) {
             throw IllegalStateException(e)

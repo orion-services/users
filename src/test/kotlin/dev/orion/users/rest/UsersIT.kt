@@ -64,19 +64,19 @@ class UsersIT {
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(PARAM_NAME, NAME)
-                .param(PARAM_EMAIL, EMAIL)
-                .param(PARAM_PASSWORD, PASSWORD)
+                .param(paramName, name)
+                .param(paramEmail, email)
+                .param(paramPassword, password)
                 .post("/users/create")
                 .then()
-                .statusCode(OK)
+                .statusCode(ok)
                 .body(
-                    PARAM_NAME,
-                    `is`(NAME),
-                    PARAM_EMAIL,
-                    `is`(EMAIL),
+                    paramName,
+                    `is`(name),
+                    paramEmail,
+                    `is`(email),
                 )
-        assertEquals(OK, response.extract().statusCode())
+        assertEquals(ok, response.extract().statusCode())
     }
 
     /**
@@ -89,13 +89,13 @@ class UsersIT {
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(PARAM_NAME, NAME)
-                .param(PARAM_EMAIL, EMAIL)
-                .param(PARAM_PASSWORD, "123")
+                .param(paramName, name)
+                .param(paramEmail, email)
+                .param(paramPassword, "123")
                 .post("/users/create")
                 .then()
-                .statusCode(BAD_REQUEST)
-        assertEquals(BAD_REQUEST, response.extract().statusCode())
+                .statusCode(badRequest)
+        assertEquals(badRequest, response.extract().statusCode())
     }
 
     /**
@@ -111,22 +111,22 @@ class UsersIT {
     fun login() {
         given()
             .`when`()
-            .param(PARAM_NAME, NAME)
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, PASSWORD)
+            .param(paramName, name)
+            .param(paramEmail, email)
+            .param(paramPassword, password)
             .post("/users/create")
 
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(PARAM_EMAIL, EMAIL)
-                .param(PARAM_PASSWORD, PASSWORD)
+                .param(paramEmail, email)
+                .param(paramPassword, password)
                 .post("/users/login")
                 .then()
-                .statusCode(OK)
+                .statusCode(ok)
 
         assertEquals(
-            NAME,
+            name,
             response
                 .extract()
                 .body()
@@ -145,21 +145,21 @@ class UsersIT {
     fun loginWithWrongPassword() {
         given()
             .`when`()
-            .param(PARAM_NAME, NAME)
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, PASSWORD)
+            .param(paramName, name)
+            .param(paramEmail, email)
+            .param(paramPassword, password)
             .post("/users/create")
 
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(PARAM_EMAIL, EMAIL)
-                .param(PARAM_PASSWORD, "123")
+                .param(paramEmail, email)
+                .param(paramPassword, "123")
                 .post("/users/login")
                 .then()
-                .statusCode(UNAUTHORIZED)
+                .statusCode(unauthorized)
 
-        assertEquals(UNAUTHORIZED, response.extract().statusCode())
+        assertEquals(unauthorized, response.extract().statusCode())
     }
 
     /**
@@ -175,20 +175,20 @@ class UsersIT {
     fun loginWithoutPassword() {
         given()
             .`when`()
-            .param(PARAM_NAME, NAME)
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, PASSWORD)
+            .param(paramName, name)
+            .param(paramEmail, email)
+            .param(paramPassword, password)
             .post("/users/create")
 
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(PARAM_PASSWORD, PASSWORD)
+                .param(paramPassword, password)
                 .post("/users/login")
                 .then()
-                .statusCode(BAD_REQUEST)
+                .statusCode(badRequest)
 
-        assertEquals(BAD_REQUEST, response.extract().statusCode())
+        assertEquals(badRequest, response.extract().statusCode())
     }
 
     /**
@@ -205,12 +205,12 @@ class UsersIT {
         val response: ValidatableResponse =
             given()
                 .`when`()
-                .param(EMAIL, "nonexistent@orion-services.dev")
-                .param(PARAM_PASSWORD, PASSWORD)
+                .param(paramEmail, "nonexistent@orion-services.dev")
+                .param(paramPassword, password)
                 .post("/users/login")
                 .then()
-                .statusCode(BAD_REQUEST)
+                .statusCode(badRequest)
 
-        assertEquals(BAD_REQUEST, response.extract().statusCode())
+        assertEquals(badRequest, response.extract().statusCode())
     }
 }
