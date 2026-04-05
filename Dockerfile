@@ -30,7 +30,7 @@ WORKDIR /build
 COPY pom.xml .
 COPY src ./src
 COPY --from=admin-build /app/dashboard ./src/main/resources/META-INF/resources/dashboard
-RUN mvn -B -DskipTests package
+RUN mvn -B -DskipTests -Dexec.skip=true package
 
 # --- 3) Runtime (JRE 25)
 FROM eclipse-temurin:25-jre-noble
