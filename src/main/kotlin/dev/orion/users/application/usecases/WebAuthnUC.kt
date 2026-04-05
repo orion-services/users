@@ -43,10 +43,10 @@ open class WebAuthnUC
          */
         override fun startRegistration(email: String): String {
             if (email.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             // The actual options will be generated in the controller
             // This method just validates the input
@@ -70,10 +70,10 @@ open class WebAuthnUC
             deviceName: String?,
         ): Boolean {
             if (email.isBlank() || response.isBlank() || origin.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             // The actual validation will be done in the controller
             return true
@@ -88,10 +88,10 @@ open class WebAuthnUC
          */
         override fun startAuthentication(email: String): String {
             if (email.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             // The actual options will be generated in the controller
             return ""
@@ -110,10 +110,10 @@ open class WebAuthnUC
             response: String,
         ): Boolean {
             if (email.isBlank() || response.isBlank()) {
-                throw IllegalArgumentException(BLANK)
+                throw IllegalArgumentException(blank)
             }
             if (!EmailValidator.getInstance().isValid(email)) {
-                throw IllegalArgumentException(INVALID)
+                throw IllegalArgumentException(invalid)
             }
             // The actual validation will be done in the controller
             return true
