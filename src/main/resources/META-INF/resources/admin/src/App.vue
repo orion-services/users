@@ -32,13 +32,13 @@
         <v-list>
           <v-list-item>
             <v-list-item-title>{{ currentUser?.email || 'Admin' }}</v-list-item-title>
-            <v-list-item-subtitle>Administrador</v-list-item-subtitle>
+            <v-list-item-subtitle>Administrator</v-list-item-subtitle>
           </v-list-item>
           <v-divider></v-divider>
           <v-list-item @click="logout">
             <v-list-item-title>
               <v-icon start>mdi-logout</v-icon>
-              Sair
+              Sign out
             </v-list-item-title>
           </v-list-item>
         </v-list>
@@ -53,12 +53,12 @@
       <v-list>
         <v-list-item
           prepend-icon="mdi-view-list"
-          title="Lista de Usuários"
+          title="User list"
           :to="{ name: 'UsersList' }"
         ></v-list-item>
         <v-list-item
           prepend-icon="mdi-account-plus"
-          title="Criar Usuário"
+          title="Create user"
           :to="{ name: 'CreateUser' }"
         ></v-list-item>
       </v-list>
@@ -83,7 +83,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Fechar
+          Close
         </v-btn>
       </template>
     </v-snackbar>
@@ -111,8 +111,7 @@ const snackbar = ref({
 
 const logout = () => {
   usersStore.logout()
-  // Força o redirecionamento para /console após logout
-  window.location.href = '/console'
+  window.location.href = '/dashboard'
 }
 
 // Listen for error messages from store

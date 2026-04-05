@@ -7,22 +7,22 @@
     <v-card>
       <v-card-title class="text-h5 pa-4">
         <v-icon color="error" class="mr-2">mdi-alert</v-icon>
-        Confirmar Exclusão
+        Confirm deletion
       </v-card-title>
 
       <v-divider></v-divider>
 
       <v-card-text class="pa-6">
         <p class="text-body-1 mb-4">
-          Tem certeza que deseja deletar o usuário abaixo?
+          Are you sure you want to delete the user below?
         </p>
         
         <v-card variant="outlined" class="pa-4">
           <div class="mb-2">
-            <strong>Nome:</strong> {{ user?.name || 'N/A' }}
+            <strong>Name:</strong> {{ user?.name || 'N/A' }}
           </div>
           <div class="mb-2">
-            <strong>E-mail:</strong> {{ user?.email || 'N/A' }}
+            <strong>Email:</strong> {{ user?.email || 'N/A' }}
           </div>
           <div>
             <strong>Hash:</strong> {{ user?.hash || 'N/A' }}
@@ -30,7 +30,7 @@
         </v-card>
 
         <v-alert type="warning" class="mt-4">
-          <strong>Atenção:</strong> Esta ação não pode ser desfeita!
+          <strong>Warning:</strong> This action cannot be undone!
         </v-alert>
       </v-card-text>
 
@@ -42,7 +42,7 @@
           variant="text"
           @click="$emit('update:modelValue', false)"
         >
-          Cancelar
+          Cancel
         </v-btn>
         <v-btn
           color="error"
@@ -50,7 +50,7 @@
           @click="confirm"
           :loading="loading"
         >
-          Deletar
+          Delete
         </v-btn>
       </v-card-actions>
     </v-card>

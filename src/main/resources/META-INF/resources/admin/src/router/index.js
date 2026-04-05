@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useUsersStore } from '../stores/users'
 
 const router = createRouter({
-  history: createWebHistory('/console/'),
+  history: createWebHistory('/dashboard'),
   routes: [
     {
       path: '/',
@@ -84,13 +84,13 @@ router.beforeEach((to, from, next) => {
           if (!groups.includes('admin')) {
             // User is not admin, redirect to login
             usersStore.logout()
-            next({ name: 'Login', query: { error: 'Acesso negado. Apenas administradores podem acessar esta área.' } })
+            next({ name: 'Login', query: { error: 'Access denied. Only administrators can access this area.' } })
             return
           }
         } catch (e) {
           // Invalid token, logout and redirect to login
           usersStore.logout()
-          next({ name: 'Login', query: { error: 'Token inválido.' } })
+          next({ name: 'Login', query: { error: 'Invalid token.' } })
           return
         }
       } else {

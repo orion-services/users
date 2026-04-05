@@ -16,46 +16,44 @@
  */
 package dev.orion.users.rest
 
+import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
+import io.restassured.response.ValidatableResponse
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-
-import io.quarkus.test.junit.QuarkusTest
-import io.restassured.response.ValidatableResponse
 
 /**
  * This class contains test cases for the Users REST API.
  */
 @QuarkusTest
 class UsersIT {
-
     /**
      * Represents the HTTP status code for a successful request.
      */
-    private val OK = 200
+    private val ok = 200
 
     /**
      * The HTTP status code for a bad request.
      */
-    private val BAD_REQUEST = 400
+    private val badRequest = 400
 
     /**
      * The HTTP status code for an unauthorized request.
      */
-    private val UNAUTHORIZED = 401
+    private val unauthorized = 401
 
     /**
      * Test case for creating a user.
      */
-    private val NAME = "Orion"
-    private val EMAIL = "orion@test.com"
-    private val PASSWORD = "12345678"
+    private val name = "Orion"
+    private val email = "orion@test.com"
+    private val password = "12345678"
 
-    private val PARAM_NAME = "name"
-    private val PARAM_EMAIL = "email"
-    private val PARAM_PASSWORD = "password"
+    private val paramName = "name"
+    private val paramEmail = "email"
+    private val paramPassword = "password"
 
     /**
      * Test case for creating a user.
@@ -63,15 +61,21 @@ class UsersIT {
     @Test
     @Order(1)
     fun createUser() {
-        val response: ValidatableResponse = given().`when`()
-            .param(PARAM_NAME, NAME)
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, PASSWORD)
-            .post("/users/create")
-            .then()
-            .statusCode(OK)
-            .body(PARAM_NAME, `is`(NAME),
-                PARAM_EMAIL, `is`(EMAIL))
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(PARAM_NAME, NAME)
+                .param(PARAM_EMAIL, EMAIL)
+                .param(PARAM_PASSWORD, PASSWORD)
+                .post("/users/create")
+                .then()
+                .statusCode(OK)
+                .body(
+                    PARAM_NAME,
+                    `is`(NAME),
+                    PARAM_EMAIL,
+                    `is`(EMAIL),
+                )
         assertEquals(OK, response.extract().statusCode())
     }
 
@@ -82,13 +86,15 @@ class UsersIT {
     @Test
     @Order(2)
     fun createUserWithWrongPassword() {
-        val response: ValidatableResponse = given().`when`()
-            .param(PARAM_NAME, NAME)
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, "123")
-            .post("/users/create")
-            .then()
-            .statusCode(BAD_REQUEST)
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(PARAM_NAME, NAME)
+                .param(PARAM_EMAIL, EMAIL)
+                .param(PARAM_PASSWORD, "123")
+                .post("/users/create")
+                .then()
+                .statusCode(BAD_REQUEST)
         assertEquals(BAD_REQUEST, response.extract().statusCode())
     }
 
@@ -103,21 +109,30 @@ class UsersIT {
     @Test
     @Order(3)
     fun login() {
-        given().`when`()
+        given()
+            .`when`()
             .param(PARAM_NAME, NAME)
             .param(PARAM_EMAIL, EMAIL)
             .param(PARAM_PASSWORD, PASSWORD)
             .post("/users/create")
 
-        val response: ValidatableResponse = given().`when`()
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, PASSWORD)
-            .post("/users/login")
-            .then()
-            .statusCode(OK)
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(PARAM_EMAIL, EMAIL)
+                .param(PARAM_PASSWORD, PASSWORD)
+                .post("/users/login")
+                .then()
+                .statusCode(OK)
 
-        assertEquals(NAME, response.extract()
-            .body().jsonPath().getString("user.name"))
+        assertEquals(
+            NAME,
+            response
+                .extract()
+                .body()
+                .jsonPath()
+                .getString("user.name"),
+        )
     }
 
     /**
@@ -128,18 +143,21 @@ class UsersIT {
     @Test
     @Order(4)
     fun loginWithWrongPassword() {
-        given().`when`()
+        given()
+            .`when`()
             .param(PARAM_NAME, NAME)
             .param(PARAM_EMAIL, EMAIL)
             .param(PARAM_PASSWORD, PASSWORD)
             .post("/users/create")
 
-        val response: ValidatableResponse = given().`when`()
-            .param(PARAM_EMAIL, EMAIL)
-            .param(PARAM_PASSWORD, "123")
-            .post("/users/login")
-            .then()
-            .statusCode(UNAUTHORIZED)
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(PARAM_EMAIL, EMAIL)
+                .param(PARAM_PASSWORD, "123")
+                .post("/users/login")
+                .then()
+                .statusCode(UNAUTHORIZED)
 
         assertEquals(UNAUTHORIZED, response.extract().statusCode())
     }
@@ -155,17 +173,20 @@ class UsersIT {
     @Test
     @Order(5)
     fun loginWithoutPassword() {
-        given().`when`()
+        given()
+            .`when`()
             .param(PARAM_NAME, NAME)
             .param(PARAM_EMAIL, EMAIL)
             .param(PARAM_PASSWORD, PASSWORD)
             .post("/users/create")
 
-        val response: ValidatableResponse = given().`when`()
-            .param(PARAM_PASSWORD, PASSWORD)
-            .post("/users/login")
-            .then()
-            .statusCode(BAD_REQUEST)
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(PARAM_PASSWORD, PASSWORD)
+                .post("/users/login")
+                .then()
+                .statusCode(BAD_REQUEST)
 
         assertEquals(BAD_REQUEST, response.extract().statusCode())
     }
@@ -181,14 +202,15 @@ class UsersIT {
     @Test
     @Order(6)
     fun loginWithNonexistentUser() {
-        val response: ValidatableResponse = given().`when`()
-            .param(EMAIL, "nonexistent@orion-services.dev")
-            .param(PARAM_PASSWORD, PASSWORD)
-            .post("/users/login")
-            .then()
-            .statusCode(BAD_REQUEST)
+        val response: ValidatableResponse =
+            given()
+                .`when`()
+                .param(EMAIL, "nonexistent@orion-services.dev")
+                .param(PARAM_PASSWORD, PASSWORD)
+                .post("/users/login")
+                .then()
+                .statusCode(BAD_REQUEST)
 
         assertEquals(BAD_REQUEST, response.extract().statusCode())
     }
 }
-

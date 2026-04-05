@@ -25,8 +25,5 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class RoleRepositoryImpl : RoleRepository {
-    override fun findByName(name: String): Uni<RoleEntity> {
-        return find("name", name).firstResult<RoleEntity>()
-    }
+    override fun findByName(name: String): Uni<RoleEntity> = find("name", name).firstResult<RoleEntity>()
 }
-

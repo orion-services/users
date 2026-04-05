@@ -56,7 +56,7 @@ npm install
 npm run dev
 ```
 
-A aplicação estará disponível em `http://localhost:3001/console/`
+A aplicação estará disponível em `http://localhost:3001/dashboard/` (base Vite alinhada ao Quarkus)
 
 ## Build
 
@@ -64,7 +64,7 @@ A aplicação estará disponível em `http://localhost:3001/console/`
 npm run build
 ```
 
-Os arquivos serão gerados em `target/classes/META-INF/resources/console/`
+Os arquivos serão gerados em `target/classes/META-INF/resources/dashboard/`
 
 ## Endpoints da API Utilizados
 
@@ -81,7 +81,7 @@ A aplicação requer autenticação com role `admin` no JWT token. O token é ar
 
 ## Notas
 
-- A aplicação está configurada para ser servida em `/console/` pelo Quarkus
+- A aplicação é servida em `/dashboard` pelo Quarkus
 - Em desenvolvimento, o Vite roda na porta 3001 com proxy para a API
-- O build gera os arquivos diretamente no diretório de recursos do Quarkus (`target/classes/META-INF/resources/console/`)
+- O build gera os ficheiros em `target/classes/META-INF/resources/dashboard/` (também via `mvn generate-resources`)
 

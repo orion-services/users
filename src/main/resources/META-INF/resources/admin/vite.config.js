@@ -4,8 +4,8 @@ import vuetify from 'vite-plugin-vuetify'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  // Configurar base para servir em /console/ tanto em desenvolvimento quanto em produção
-  base: '/console/',
+  // Base sem barra final na URL: http://host/dashboard
+  base: '/dashboard',
   plugins: [
     vue(),
     vuetify({ autoImport: true })
@@ -16,9 +16,8 @@ export default defineConfig({
     }
   },
   build: {
-    // Gerar arquivos diretamente em META-INF/resources/console/
-    // para serem servidos pelo Quarkus em http://localhost:8080/console/
-    outDir: '../console',
+    // Saída em META-INF/resources/dashboard/ — URL: http://localhost:8080/dashboard
+    outDir: '../dashboard',
     emptyOutDir: false, // Não esvaziar o diretório pois está fora do projeto root
     rollupOptions: {
       output: {

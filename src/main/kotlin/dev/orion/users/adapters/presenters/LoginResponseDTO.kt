@@ -25,6 +25,5 @@ data class LoginResponseDTO(
     /** Indicates if 2FA is required. */
     var requires2FA: Boolean = false,
     /** Message for the client. */
-    var message: String? = null
+    var message: String? = null,
 )
-

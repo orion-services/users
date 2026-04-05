@@ -4,7 +4,7 @@
       <v-card>
         <v-card-title class="text-h5 pa-4 text-center">
           <v-icon class="mr-2">mdi-shield-account</v-icon>
-          Orion Users Console
+          Orion Users
         </v-card-title>
 
         <v-divider></v-divider>
@@ -23,7 +23,7 @@
           <v-form ref="loginForm" v-model="valid" @submit.prevent="handleLogin">
             <v-text-field
               v-model="email"
-              label="E-mail"
+              label="Email"
               type="email"
               :rules="emailRules"
               required
@@ -34,7 +34,7 @@
 
             <v-text-field
               v-model="password"
-              label="Senha"
+              label="Password"
               type="password"
               :rules="passwordRules"
               required
@@ -51,12 +51,12 @@
               :loading="loading"
               :disabled="!valid"
             >
-              Entrar
+              Sign in
             </v-btn>
           </v-form>
 
           <v-alert type="info" class="mt-4">
-            <strong>Atenção:</strong> Apenas usuários com role "admin" podem acessar esta área.
+            <strong>Notice:</strong> Only users with the &quot;admin&quot; role can access this area.
           </v-alert>
         </v-card-text>
       </v-card>
@@ -81,13 +81,13 @@ const loading = ref(false)
 const errorMessage = ref('')
 
 const emailRules = [
-  v => !!v || 'E-mail é obrigatório',
-  v => /.+@.+\..+/.test(v) || 'E-mail deve ser válido'
+  v => !!v || 'Email is required',
+  v => /.+@.+\..+/.test(v) || 'Email must be valid'
 ]
 
 const passwordRules = [
-  v => !!v || 'Senha é obrigatória',
-  v => (v && v.length >= 8) || 'Senha deve ter pelo menos 8 caracteres'
+  v => !!v || 'Password is required',
+  v => (v && v.length >= 8) || 'Password must be at least 8 characters'
 ]
 
 const handleLogin = async () => {
@@ -102,7 +102,7 @@ const handleLogin = async () => {
     
     // Verifica se recebemos o token com sucesso
     if (!authData || !authData.token) {
-      errorMessage.value = 'Erro ao fazer login. Token não recebido.'
+      errorMessage.value = 'Sign-in failed. No token received.'
       loading.value = false
       return
     }
@@ -115,32 +115,28 @@ const handleLogin = async () => {
       if (!groups.includes('admin')) {
         // Usuário não é admin, faz logout e mostra erro
         usersStore.logout()
-        errorMessage.value = 'Acesso negado. Apenas administradores podem acessar esta área.'
+        errorMessage.value = 'Access denied. Only administrators can access this area.'
         loading.value = false
         return
       }
       
-      // Login bem-sucedido e usuário é admin - redireciona para /console
-      // Força o redirecionamento usando window.location para garantir que funcione
-      // mesmo se o router guard estiver bloqueando
       const redirectPath = route.query.redirect 
         ? decodeURIComponent(route.query.redirect) 
-        : '/console'
+        : '/dashboard'
       
-      // Usa window.location para garantir o redirecionamento
-      window.location.href = redirectPath.startsWith('/console') 
+      window.location.href = redirectPath.startsWith('/dashboard') 
         ? redirectPath 
-        : `/console${redirectPath}`
+        : `/dashboard${redirectPath}`
     } catch (e) {
       // Erro ao decodificar token
-      console.error('Erro ao decodificar token:', e)
+      console.error('Failed to decode token:', e)
       usersStore.logout()
-      errorMessage.value = 'Token inválido. Tente fazer login novamente.'
+      errorMessage.value = 'Invalid token. Please sign in again.'
       loading.value = false
     }
   } catch (error) {
     // Erro no login (credenciais inválidas, etc)
-    errorMessage.value = error.response?.data?.message || error.message || 'Erro ao fazer login. Verifique suas credenciais.'
+    errorMessage.value = error.response?.data?.message || error.message || 'Sign-in failed. Check your credentials.'
     loading.value = false
   }
 }

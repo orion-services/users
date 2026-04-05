@@ -16,27 +16,10 @@
  */
 package dev.orion.users.adapters.controllers
 
-import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import java.io.IOException
-import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
-import java.security.SecureRandom
-
-import javax.imageio.ImageIO
-
-import org.apache.commons.codec.binary.Base32
-import org.apache.commons.codec.binary.Hex
-import org.eclipse.microprofile.config.inject.ConfigProperty
-import org.eclipse.microprofile.jwt.Claims
-import org.modelmapper.ModelMapper
-
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
 import com.google.zxing.client.j2se.MatrixToImageWriter
-import com.google.zxing.common.BitMatrix
-
 import de.taimos.totp.TOTP
 import dev.orion.users.adapters.gateways.entities.UserEntity
 import dev.orion.users.frameworks.mail.MailTemplate
@@ -44,14 +27,56 @@ import dev.orion.users.frameworks.rest.ServiceException
 import io.smallrye.jwt.build.Jwt
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.core.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.apache.commons.codec.binary.Base32
+import org.apache.commons.codec.binary.Hex
+import org.eclipse.microprofile.config.inject.ConfigProperty
+import org.eclipse.microprofile.jwt.Claims
+import org.modelmapper.ModelMapper
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.UnsupportedEncodingException
+import java.net.URLEncoder
+import java.security.SecureRandom
+import javax.imageio.ImageIO
+import dev.orion.users.domain.model.User as DomainUser
 
 /**
  * The controller class.
  */
 open class BasicController {
+    /**
+     * Bridges a suspend block into a [Uni], keeping the Vert.x event-loop
+     * context via [Dispatchers.Unconfined].
+     */
+    protected fun <T> toUni(block: suspend () -> T): Uni<T> =
+        Uni.createFrom().emitter { em ->
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                try {
+                    em.complete(block())
+                } catch (e: Throwable) {
+                    em.fail(e)
+                }
+            }
+        }
+
+    protected fun toUniVoid(block: suspend () -> Unit): Uni<Void> =
+        Uni.createFrom().emitter { em ->
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                try {
+                    block()
+                    em.complete(null)
+                } catch (e: Throwable) {
+                    em.fail(e)
+                }
+            }
+        }
 
     /** The encoding used in the QR code. */
-    private val UTF_8 = "UTF-8"
+    private val utf8 = "UTF-8"
 
     /** Configure the issuer for JWT generation. */
     @ConfigProperty(name = "users.issuer", defaultValue = "orion-users")
@@ -70,14 +95,26 @@ open class BasicController {
      * @param user : The user object
      * @return Returns the JWT
      */
-    fun generateJWT(user: UserEntity): String {
-        return Jwt.issuer(issuer)
+    fun generateJWT(user: UserEntity): String =
+        Jwt
+            .issuer(issuer)
             .upn(user.email)
             .groups(user.getRoleList().toSet())
             .claim(Claims.c_hash, user.hash)
+            .claim(Claims.c_name, user.name)
             .claim(Claims.email, user.email)
             .sign()
-    }
+
+    /** JWT from domain user (same claims as entity). */
+    fun generateJWT(user: DomainUser): String =
+        Jwt
+            .issuer(issuer)
+            .upn(user.email)
+            .groups(user.getRoleList().toSet())
+            .claim(Claims.c_hash, user.hash)
+            .claim(Claims.c_name, user.name)
+            .claim(Claims.email, user.email)
+            .sign()
 
     /**
      * Verifies if the e-mail from the jwt is the same from request.
@@ -89,7 +126,10 @@ open class BasicController {
      *                          different, indicating that possibly the JWT is
      *                          outdated.
      */
-    fun checkTokenEmail(email: String, jwtEmail: String): Boolean {
+    fun checkTokenEmail(
+        email: String,
+        jwtEmail: String,
+    ): Boolean {
         if (email != jwtEmail) {
             throw ServiceException("JWT outdated", Response.Status.BAD_REQUEST)
         }
@@ -108,11 +148,13 @@ open class BasicController {
         url.append("?code=" + user.emailValidationCode)
         url.append("&email=" + user.email)
 
-        return MailTemplate.validateEmail(url.toString())
+        return MailTemplate
+            .validateEmail(url.toString())
             .to(user.email ?: "")
             .subject("E-mail confirmation")
             .send()
-            .onItem().ifNotNull()
+            .onItem()
+            .ifNotNull()
             .transform { user }
     }
 
@@ -143,14 +185,23 @@ open class BasicController {
      * @return The Google Bar Code in String format
      * @throws IllegalArgumentException
      */
-    fun getAuthenticatorBarCode(secretKey: String, account: String, issuer: String): String {
+    fun getAuthenticatorBarCode(
+        secretKey: String,
+        account: String,
+        issuer: String,
+    ): String {
         try {
             return "otpauth://totp/" +
-                URLEncoder.encode("$issuer:$account", UTF_8)
+                URLEncoder
+                    .encode("$issuer:$account", UTF_8)
                     .replace("+", "%20") +
-                "?secret=" + URLEncoder.encode(secretKey, UTF_8)
+                "?secret=" +
+                URLEncoder
+                    .encode(secretKey, UTF_8)
                     .replace("+", "%20") +
-                "&issuer=" + URLEncoder.encode(issuer, UTF_8)
+                "&issuer=" +
+                URLEncoder
+                    .encode(issuer, UTF_8)
                     .replace("+", "%20")
         } catch (e: UnsupportedEncodingException) {
             throw IllegalStateException(e)
@@ -196,4 +247,3 @@ open class BasicController {
         return base32.encodeToString(bytes)
     }
 }
-

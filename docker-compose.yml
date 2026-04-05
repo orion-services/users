@@ -1,0 +1,43 @@
+# Orion Users — API Quarkus + PostgreSQL
+#
+#   docker compose up --build
+#   Abre: http://localhost:8080  (admin: http://localhost:8080/dashboard)
+#
+# Variáveis podem ser sobrescritas com ficheiro .env na mesma pasta.
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-orion}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-orion}
+      POSTGRES_DB: ${POSTGRES_DB:-users}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-orion} -d ${POSTGRES_DB:-users}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  users:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    environment:
+      QUARKUS_DEVSERVICES_ENABLED: "false"
+      QUARKUS_DATASOURCE_REACTIVE_URL: postgresql://${POSTGRES_USER:-orion}:${POSTGRES_PASSWORD:-orion}@postgres:5432/${POSTGRES_DB:-users}
+      QUARKUS_DATASOURCE_USERNAME: ${POSTGRES_USER:-orion}
+      QUARKUS_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-orion}
+      # Evita dependência de SMTP real ao subir com compose (sobrescreve perfil prod)
+      QUARKUS_MAILER_MOCK: "${QUARKUS_MAILER_MOCK:-true}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:

@@ -30,7 +30,6 @@ import jakarta.ws.rs.GET
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.PUT
 import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.QueryParam
 import jakarta.ws.rs.core.MediaType
@@ -47,7 +46,6 @@ import org.jboss.resteasy.reactive.RestForm
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @Produces(MediaType.APPLICATION_JSON)
 class UserWS {
-
     /** Business logic of the system. */
     @Inject
     lateinit var controller: UserController
@@ -57,7 +55,7 @@ class UserWS {
     lateinit var jwt: JsonWebToken
 
     /** Fault tolerance default delay. */
-    protected val DELAY: Long = 2000
+    protected val delay: Long = 2000
 
     /**
      * Creates a user inside the service.
@@ -75,16 +73,19 @@ class UserWS {
     fun create(
         @FormParam("name") @NotEmpty name: String,
         @FormParam("email") @NotEmpty @Email email: String,
-        @FormParam("password") @NotEmpty password: String
-    ): Uni<Response> {
-        return controller.createUser(name, email, password)
+        @FormParam("password") @NotEmpty password: String,
+    ): Uni<Response> =
+        controller
+            .createUser(name, email, password)
             .log()
-            .onItem().ifNotNull().transform { user -> Response.ok(user).build() }
-            .onFailure().transform { e ->
+            .onItem()
+            .ifNotNull()
+            .transform { user -> Response.ok(user).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Deletes a user inside the service.
@@ -100,18 +101,20 @@ class UserWS {
     @RolesAllowed("admin")
     @Retry(maxRetries = 1, delay = 2000)
     fun delete(
-        @FormParam("email") @NotEmpty @Email email: String
-    ): Uni<Response> {
-        return controller.deleteUser(email)
+        @FormParam("email") @NotEmpty @Email email: String,
+    ): Uni<Response> =
+        controller
+            .deleteUser(email)
             .log()
-            .onItem().ifNotNull().transform { result ->
+            .onItem()
+            .ifNotNull()
+            .transform { result ->
                 Response.ok(true).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Updates user information (name, email and/or password). Requires authentication via JWT token with role "user".
@@ -136,34 +139,36 @@ class UserWS {
         @RestForm name: String?,
         @RestForm newEmail: String?,
         @RestForm password: String?,
-        @RestForm newPassword: String?
+        @RestForm newPassword: String?,
     ): Uni<Response> {
         // Extract email from JWT token
-        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
-            ?: jwt.getClaim<String>("email")
-            ?: throw ServiceException(
-                "Invalid token",
-                Response.Status.UNAUTHORIZED
-            )
+        val jwtEmail =
+            jwt.getClaim<String>(Claims.email.name)
+                ?: jwt.getClaim<String>("email")
+                ?: throw ServiceException(
+                    "Invalid token",
+                    Response.Status.UNAUTHORIZED,
+                )
 
         // Extract groups/roles from JWT token
-        val groups: Set<String> = try {
-            jwt.getClaim<Set<String>>(Claims.groups.name) 
-                ?: jwt.getClaim<List<String>>("groups")?.toSet()
-                ?: emptySet()
-        } catch (e: Exception) {
-            emptySet()
-        }
-        
+        val groups: Set<String> =
+            try {
+                jwt.getClaim<Set<String>>(Claims.groups.name)
+                    ?: jwt.getClaim<List<String>>("groups")?.toSet()
+                    ?: emptySet()
+            } catch (e: Exception) {
+                emptySet()
+            }
+
         // Verifica se é admin (admins também têm role "user")
         val isAdmin = groups.contains("admin")
-        
+
         // Se não for admin, só pode atualizar seu próprio usuário
         // Se for admin, pode atualizar qualquer usuário
         if (!isAdmin && email != jwtEmail) {
             throw ServiceException(
                 "You can only update your own user",
-                Response.Status.FORBIDDEN
+                Response.Status.FORBIDDEN,
             )
         }
 
@@ -173,15 +178,26 @@ class UserWS {
         val normalizedPassword = if (password.isNullOrBlank()) null else password
         val normalizedNewPassword = if (newPassword.isNullOrBlank()) null else newPassword
 
-        return controller.updateUser(email, normalizedName, normalizedNewEmail, normalizedPassword, normalizedNewPassword, jwtEmail, isAdmin)
-            .onItem().transform { response -> Response.ok(response).build() }
-            .onFailure().transform { e ->
+        return controller
+            .updateUser(
+                email,
+                normalizedName,
+                normalizedNewEmail,
+                normalizedPassword,
+                normalizedNewPassword,
+                jwtEmail,
+                isAdmin,
+            ).onItem()
+            .transform { response -> Response.ok(response).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
-                val status = if (message.contains("Unauthorized") || message.contains("token")) {
-                    Response.Status.UNAUTHORIZED
-                } else {
-                    Response.Status.BAD_REQUEST
-                }
+                val status =
+                    if (message.contains("Unauthorized") || message.contains("token")) {
+                        Response.Status.UNAUTHORIZED
+                    } else {
+                        Response.Status.BAD_REQUEST
+                    }
                 throw ServiceException(message, status)
             }
     }
@@ -205,29 +221,34 @@ class UserWS {
     fun update2FASettings(
         @RestForm @NotEmpty @Email email: String,
         @RestForm require2FAForBasicLogin: Boolean?,
-        @RestForm require2FAForSocialLogin: Boolean?
+        @RestForm require2FAForSocialLogin: Boolean?,
     ): Uni<Response> {
         // Extract email from JWT token
-        val jwtEmail = jwt.getClaim<String>(Claims.email.name) 
-            ?: jwt.getClaim<String>("email")
-            ?: throw ServiceException(
-                "Invalid token",
-                Response.Status.UNAUTHORIZED
-            )
+        val jwtEmail =
+            jwt.getClaim<String>(Claims.email.name)
+                ?: jwt.getClaim<String>("email")
+                ?: throw ServiceException(
+                    "Invalid token",
+                    Response.Status.UNAUTHORIZED,
+                )
 
         // Use provided values or default to false
         val requireBasic = require2FAForBasicLogin ?: false
         val requireSocial = require2FAForSocialLogin ?: false
 
-        return controller.update2FASettings(email, requireBasic, requireSocial, jwtEmail)
-            .onItem().transform { user -> Response.ok(user).build() }
-            .onFailure().transform { e ->
+        return controller
+            .update2FASettings(email, requireBasic, requireSocial, jwtEmail)
+            .onItem()
+            .transform { user -> Response.ok(user).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
-                val status = if (message.contains("Unauthorized") || message.contains("token")) {
-                    Response.Status.UNAUTHORIZED
-                } else {
-                    Response.Status.BAD_REQUEST
-                }
+                val status =
+                    if (message.contains("Unauthorized") || message.contains("token")) {
+                        Response.Status.UNAUTHORIZED
+                    } else {
+                        Response.Status.BAD_REQUEST
+                    }
                 throw ServiceException(message, status)
             }
     }
@@ -243,19 +264,22 @@ class UserWS {
     @RolesAllowed("admin")
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
-    fun listUsers(): Uni<Response> {
-        return controller.listAllUsers()
-            .onItem().transform { users -> Response.ok(users).build() }
-            .onFailure().transform { e ->
+    fun listUsers(): Uni<Response> =
+        controller
+            .listAllUsers()
+            .onItem()
+            .transform { users -> Response.ok(users).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
-                val status = if (message.contains("Unauthorized") || message.contains("token")) {
-                    Response.Status.UNAUTHORIZED
-                } else {
-                    Response.Status.INTERNAL_SERVER_ERROR
-                }
+                val status =
+                    if (message.contains("Unauthorized") || message.contains("token")) {
+                        Response.Status.UNAUTHORIZED
+                    } else {
+                        Response.Status.INTERNAL_SERVER_ERROR
+                    }
                 throw ServiceException(message, status)
             }
-    }
 
     /**
      * Gets a user by email. Requires admin role.
@@ -271,19 +295,21 @@ class UserWS {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     fun getUserByEmail(
-        @QueryParam("email") @NotEmpty @Email email: String
-    ): Uni<Response> {
-        return controller.getUserByEmail(email)
-            .onItem().transform { user -> Response.ok(user).build() }
-            .onFailure().transform { e ->
+        @QueryParam("email") @NotEmpty @Email email: String,
+    ): Uni<Response> =
+        controller
+            .getUserByEmail(email)
+            .onItem()
+            .transform { user -> Response.ok(user).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
-                val status = when {
-                    message.contains("not found") -> Response.Status.NOT_FOUND
-                    message.contains("Unauthorized") || message.contains("token") -> Response.Status.UNAUTHORIZED
-                    else -> Response.Status.BAD_REQUEST
-                }
+                val status =
+                    when {
+                        message.contains("not found") -> Response.Status.NOT_FOUND
+                        message.contains("Unauthorized") || message.contains("token") -> Response.Status.UNAUTHORIZED
+                        else -> Response.Status.BAD_REQUEST
+                    }
                 throw ServiceException(message, status)
             }
-    }
 }
-
