@@ -10,6 +10,20 @@ The Playground is a Vue 3 application built with Vuetify that provides a user in
 
 ## Running the Playground
 
+### Fast Start with Docker Compose
+
+By far the easiest way to run the entire backend and the pre-built Playground is to use Docker Compose from the root directory:
+
+1. **Run the compose environment**:
+```bash
+docker compose up --build
+```
+2. **Access the application**: `http://localhost:8080/test`
+
+If you are modifying the Vue 3 source code directly, please follow the Development Mode instructions below.
+
+---
+
 ### Development Mode
 
 For development with hot module replacement:
