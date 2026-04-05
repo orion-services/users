@@ -26,18 +26,16 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class WebAuthnCredentialRepositoryImpl : WebAuthnCredentialRepository {
-
     /**
      * Finds a credential by credential ID.
      *
      * @param credentialId The credential ID
      * @return A Uni<WebAuthnCredentialEntity> object
      */
-    override fun findByCredentialId(credentialId: String): Uni<WebAuthnCredentialEntity> {
-        return (this as io.quarkus.hibernate.reactive.panache.PanacheRepository<WebAuthnCredentialEntity>)
+    override fun findByCredentialId(credentialId: String): Uni<WebAuthnCredentialEntity> =
+        (this as io.quarkus.hibernate.reactive.panache.PanacheRepository<WebAuthnCredentialEntity>)
             .find("credentialId", credentialId)
             .firstResult<WebAuthnCredentialEntity>()
-    }
 
     /**
      * Finds all credentials for a user.
@@ -45,11 +43,10 @@ class WebAuthnCredentialRepositoryImpl : WebAuthnCredentialRepository {
      * @param userEmail The user's email
      * @return A Uni<List<WebAuthnCredentialEntity>> object
      */
-    override fun findByUserEmail(userEmail: String): Uni<List<WebAuthnCredentialEntity>> {
-        return (this as io.quarkus.hibernate.reactive.panache.PanacheRepository<WebAuthnCredentialEntity>)
+    override fun findByUserEmail(userEmail: String): Uni<List<WebAuthnCredentialEntity>> =
+        (this as io.quarkus.hibernate.reactive.panache.PanacheRepository<WebAuthnCredentialEntity>)
             .find("userEmail", userEmail)
             .list<WebAuthnCredentialEntity>()
-    }
 
     /**
      * Saves or updates a credential.
@@ -57,10 +54,11 @@ class WebAuthnCredentialRepositoryImpl : WebAuthnCredentialRepository {
      * @param credential The credential entity
      * @return A Uni<WebAuthnCredentialEntity> object
      */
-    override fun saveCredential(credential: WebAuthnCredentialEntity): Uni<WebAuthnCredentialEntity> {
-        return Panache.withTransaction { credential.persist() }
-            .onItem().transform { credential }
-    }
+    override fun saveCredential(credential: WebAuthnCredentialEntity): Uni<WebAuthnCredentialEntity> =
+        Panache
+            .withTransaction { credential.persist() }
+            .onItem()
+            .transform { credential }
 
     /**
      * Deletes a credential.
@@ -68,14 +66,14 @@ class WebAuthnCredentialRepositoryImpl : WebAuthnCredentialRepository {
      * @param credentialId The credential ID
      * @return A Uni<Void> object
      */
-    override fun deleteCredential(credentialId: String): Uni<Void> {
-        return findByCredentialId(credentialId)
-            .onItem().ifNull()
+    override fun deleteCredential(credentialId: String): Uni<Void> =
+        findByCredentialId(credentialId)
+            .onItem()
+            .ifNull()
             .failWith(IllegalArgumentException("Credential not found"))
-            .onItem().ifNotNull()
+            .onItem()
+            .ifNotNull()
             .transformToUni { credential ->
                 Panache.withTransaction<Void> { credential.delete() }
             }
-    }
 }
-

@@ -24,7 +24,6 @@ import io.smallrye.mutiny.Uni
  * WebAuthn Credential repository interface.
  */
 interface WebAuthnCredentialRepository : PanacheRepository<WebAuthnCredentialEntity> {
-
     /**
      * Finds a credential by credential ID.
      *
@@ -57,4 +56,3 @@ interface WebAuthnCredentialRepository : PanacheRepository<WebAuthnCredentialEnt
      */
     fun deleteCredential(credentialId: String): Uni<Void>
 }
-

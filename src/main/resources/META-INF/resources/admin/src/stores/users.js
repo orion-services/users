@@ -65,7 +65,7 @@ export const useUsersStore = defineStore('users', {
         const response = await userApi.listUsers()
         this.users = response.data || []
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao carregar usuários'
+        this.error = error.response?.data?.message || error.message || 'Failed to load users'
         throw error
       } finally {
         this.loading = false
@@ -80,7 +80,7 @@ export const useUsersStore = defineStore('users', {
         this.currentUser = response.data
         return response.data
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao carregar usuário'
+        this.error = error.response?.data?.message || error.message || 'Failed to load user'
         throw error
       } finally {
         this.loading = false
@@ -100,7 +100,7 @@ export const useUsersStore = defineStore('users', {
         await this.fetchUsers()
         return response.data
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao criar usuário'
+        this.error = error.response?.data?.message || error.message || 'Failed to create user'
         throw error
       } finally {
         this.loading = false
@@ -128,7 +128,7 @@ export const useUsersStore = defineStore('users', {
         await this.fetchUsers()
         return response.data
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao atualizar usuário'
+        this.error = error.response?.data?.message || error.message || 'Failed to update user'
         throw error
       } finally {
         this.loading = false
@@ -143,7 +143,7 @@ export const useUsersStore = defineStore('users', {
         // Refresh users list
         await this.fetchUsers()
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao deletar usuário'
+        this.error = error.response?.data?.message || error.message || 'Failed to delete user'
         throw error
       } finally {
         this.loading = false
@@ -163,12 +163,12 @@ export const useUsersStore = defineStore('users', {
           return authData
         } else if (response.data?.requires2FA) {
           // Handle 2FA requirement
-          throw new Error('2FA é necessário para este usuário')
+          throw new Error('2FA is required for this user')
         } else {
-          throw new Error('Resposta de autenticação inválida')
+          throw new Error('Invalid authentication response')
         }
       } catch (error) {
-        this.error = error.response?.data?.message || error.message || 'Erro ao fazer login'
+        this.error = error.response?.data?.message || error.message || 'Sign-in failed'
         throw error
       } finally {
         this.loading = false

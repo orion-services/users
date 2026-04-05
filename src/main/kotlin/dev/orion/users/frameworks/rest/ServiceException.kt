@@ -23,8 +23,10 @@ import jakarta.ws.rs.core.Response.Status
 /**
  * Frameworks and Drivers layer of Clean Architecture.
  */
-class ServiceException(message: String, status: Status) : WebApplicationException(init(message, status)) {
-
+class ServiceException(
+    message: String,
+    status: Status,
+) : WebApplicationException(init(message, status)) {
     companion object {
         /**
          * A static method to init the message.
@@ -34,7 +36,10 @@ class ServiceException(message: String, status: Status) : WebApplicationExceptio
          *
          * @return A Response object
          */
-        private fun init(message: String, status: Status): Response {
+        private fun init(
+            message: String,
+            status: Status,
+        ): Response {
             val violations = listOf(mapOf("message" to message))
 
             return Response
@@ -44,4 +49,3 @@ class ServiceException(message: String, status: Status) : WebApplicationExceptio
         }
     }
 }
-

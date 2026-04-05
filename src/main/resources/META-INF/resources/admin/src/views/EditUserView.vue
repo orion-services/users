@@ -5,7 +5,7 @@
         <v-card>
           <v-card-title class="d-flex align-center">
             <v-icon class="mr-2">mdi-account-edit</v-icon>
-            Editar Usuário
+            Edit user
             <v-spacer></v-spacer>
             <v-btn
               icon="mdi-arrow-left"
@@ -13,7 +13,7 @@
               @click="$router.push({ name: 'UsersList' })"
             >
               <v-icon>mdi-arrow-left</v-icon>
-              <v-tooltip activator="parent">Voltar</v-tooltip>
+              <v-tooltip activator="parent">Back</v-tooltip>
             </v-btn>
           </v-card-title>
 
@@ -30,7 +30,7 @@
             <v-form v-else ref="userForm" v-model="valid" @submit.prevent="handleSubmit">
               <v-text-field
                 v-model="formData.name"
-                label="Nome"
+                label="Name"
                 :rules="nameRules"
                 prepend-inner-icon="mdi-account"
                 variant="outlined"
@@ -40,7 +40,7 @@
 
               <v-text-field
                 v-model="formData.currentEmail"
-                label="E-mail Atual"
+                label="Current email"
                 disabled
                 prepend-inner-icon="mdi-email"
                 variant="outlined"
@@ -49,50 +49,50 @@
 
               <v-text-field
                 v-model="formData.newEmail"
-                label="Novo E-mail (opcional)"
+                label="New email (optional)"
                 type="email"
                 :rules="newEmailRules"
                 prepend-inner-icon="mdi-email-outline"
                 variant="outlined"
                 class="mb-4"
-                hint="Deixe em branco para manter o e-mail atual"
+                hint="Leave blank to keep the current email"
                 persistent-hint
               ></v-text-field>
 
               <v-divider class="my-4"></v-divider>
 
               <v-alert type="info" class="mb-4">
-                Para alterar a senha, preencha ambos os campos abaixo. Caso contrário, deixe em branco.
+                To change your password, fill in both fields below. Otherwise leave them blank.
               </v-alert>
 
               <v-text-field
                 v-model="formData.password"
-                label="Senha Atual (obrigatório se alterar senha)"
+                label="Current password (required if changing password)"
                 type="password"
                 :rules="passwordRules"
                 prepend-inner-icon="mdi-lock"
                 variant="outlined"
                 class="mb-4"
-                :hint="formData.newPassword ? 'Obrigatório' : 'Opcional'"
+                :hint="formData.newPassword ? 'Required' : 'Optional'"
                 persistent-hint
               ></v-text-field>
 
               <v-text-field
                 v-model="formData.newPassword"
-                label="Nova Senha (opcional)"
+                label="New password (optional)"
                 type="password"
                 :rules="newPasswordRules"
                 prepend-inner-icon="mdi-lock-outline"
                 variant="outlined"
                 class="mb-4"
-                hint="Mínimo 8 caracteres"
+                hint="At least 8 characters"
                 persistent-hint
               ></v-text-field>
 
               <v-text-field
                 v-if="formData.newPassword"
                 v-model="formData.confirmPassword"
-                label="Confirmar Nova Senha"
+                label="Confirm new password"
                 type="password"
                 :rules="confirmPasswordRules"
                 prepend-inner-icon="mdi-lock-check"
@@ -108,7 +108,7 @@
                 :loading="loading"
                 :disabled="!valid"
               >
-                Atualizar Usuário
+                Update user
               </v-btn>
             </v-form>
           </v-card-text>
@@ -129,7 +129,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Fechar
+          Close
         </v-btn>
       </template>
     </v-snackbar>
@@ -166,18 +166,18 @@ const snackbar = ref({
 })
 
 const nameRules = [
-  v => !!v || 'Nome é obrigatório',
-  v => (v && v.trim().length > 0) || 'Nome não pode estar vazio'
+  v => !!v || 'Name is required',
+  v => (v && v.trim().length > 0) || 'Name cannot be empty'
 ]
 
 const newEmailRules = [
-  v => !v || /.+@.+\..+/.test(v) || 'E-mail deve ser válido'
+  v => !v || /.+@.+\..+/.test(v) || 'Email must be valid'
 ]
 
 const passwordRules = [
   v => {
     if (formData.value.newPassword && !v) {
-      return 'Senha atual é obrigatória quando alterar senha'
+      return 'Current password is required when changing password'
     }
     return true
   }
@@ -186,7 +186,7 @@ const passwordRules = [
 const newPasswordRules = [
   v => {
     if (!v) return true // Optional
-    if (v.length < 8) return 'Senha deve ter pelo menos 8 caracteres'
+    if (v.length < 8) return 'Password must be at least 8 characters'
     return true
   }
 ]
@@ -194,8 +194,8 @@ const newPasswordRules = [
 const confirmPasswordRules = [
   v => {
     if (!formData.value.newPassword) return true
-    if (!v) return 'Confirmação de senha é obrigatória'
-    if (v !== formData.value.newPassword) return 'As senhas não coincidem'
+    if (!v) return 'Password confirmation is required'
+    if (v !== formData.value.newPassword) return 'Passwords do not match'
     return true
   }
 ]
@@ -205,7 +205,7 @@ const handleSubmit = async () => {
 
   // Validate that if newPassword is provided, password must also be provided
   if (formData.value.newPassword && !formData.value.password) {
-    showMessage('A senha atual é obrigatória quando alterar a senha', 'error')
+    showMessage('Current password is required when changing password', 'error')
     return
   }
 
@@ -220,14 +220,14 @@ const handleSubmit = async () => {
       newPassword: formData.value.newPassword || null
     })
 
-    showMessage('Usuário atualizado com sucesso!', 'success')
+    showMessage('User updated successfully.', 'success')
     
     // Redirect to users list after a short delay
     setTimeout(() => {
       router.push({ name: 'UsersList' })
     }, 1500)
   } catch (error) {
-    showMessage(error.message || 'Erro ao atualizar usuário', 'error')
+    showMessage(error.message || 'Failed to update user', 'error')
   } finally {
     loading.value = false
   }
@@ -250,7 +250,7 @@ onMounted(async () => {
     formData.value.name = user.name || ''
     formData.value.currentEmail = user.email || email
   } catch (error) {
-    showMessage(error.message || 'Erro ao carregar usuário', 'error')
+    showMessage(error.message || 'Failed to load user', 'error')
     setTimeout(() => {
       router.push({ name: 'UsersList' })
     }, 2000)

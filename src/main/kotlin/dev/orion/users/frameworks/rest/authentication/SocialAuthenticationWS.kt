@@ -23,4 +23,3 @@ import jakarta.ws.rs.Path
  */
 @Path("/api/users")
 class SocialAuthenticationWS
-

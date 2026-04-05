@@ -20,6 +20,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import io.quarkus.hibernate.reactive.panache.PanacheEntityBase
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
@@ -28,12 +29,11 @@ import jakarta.validation.constraints.NotNull
  * Role Entity.
  */
 @Entity
-@Table(name = "Role")
+@Table(name = "\"Role\"")
 open class RoleEntity : PanacheEntityBase() {
-
     /** Primary key. */
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonIgnore
     var id: Long? = null
 

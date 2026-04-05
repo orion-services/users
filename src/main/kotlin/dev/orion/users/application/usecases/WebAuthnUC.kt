@@ -16,99 +16,106 @@
  */
 package dev.orion.users.application.usecases
 
+import dev.orion.users.application.port.`in`.WebAuthnUCI
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 import org.apache.commons.validator.routines.EmailValidator
 
-import dev.orion.users.application.interfaces.WebAuthnUCI
-
 /**
- * Use case implementation for WebAuthn.
- * This is a basic implementation that validates input.
- * The actual WebAuthn processing will be done in the controller layer
- * where we have access to webauthn4j library.
+ * Use case implementation for WebAuthn (input validation; protocol details stay in adapters).
  */
-class WebAuthnUC : WebAuthnUCI {
+@ApplicationScoped
+open class WebAuthnUC
+    @Inject
+    constructor() : WebAuthnUCI {
+        /** Default blank arguments message. */
+        private val blank = "Blank arguments"
 
-    /** Default blank arguments message. */
-    private val BLANK = "Blank arguments"
+        /** Default invalid arguments message. */
+        private val invalid = "Invalid arguments"
 
-    /** Default invalid arguments message. */
-    private val INVALID = "Invalid arguments"
-
-    /**
-     * Starts the WebAuthn registration process.
-     *
-     * @param email The email of the user
-     * @return A JSON string containing PublicKeyCredentialCreationOptions
-     * @throws IllegalArgumentException if email is invalid
-     */
-    override fun startRegistration(email: String): String {
-        if (email.isBlank()) {
-            throw IllegalArgumentException(BLANK)
+        /**
+         * Starts the WebAuthn registration process.
+         *
+         * @param email The email of the user
+         * @return A JSON string containing PublicKeyCredentialCreationOptions
+         * @throws IllegalArgumentException if email is invalid
+         */
+        override fun startRegistration(email: String): String {
+            if (email.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+            if (!EmailValidator.getInstance().isValid(email)) {
+                throw IllegalArgumentException(INVALID)
+            }
+            // The actual options will be generated in the controller
+            // This method just validates the input
+            return ""
         }
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw IllegalArgumentException(INVALID)
+
+        /**
+         * Finishes the WebAuthn registration process.
+         *
+         * @param email    The email of the user
+         * @param response The registration response from the client (JSON string)
+         * @param origin   The origin (complete site address) where the device was registered
+         * @param deviceName Optional name for the device
+         * @return true if registration was successful
+         * @throws IllegalArgumentException if arguments are invalid
+         */
+        override fun finishRegistration(
+            email: String,
+            response: String,
+            origin: String,
+            deviceName: String?,
+        ): Boolean {
+            if (email.isBlank() || response.isBlank() || origin.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+            if (!EmailValidator.getInstance().isValid(email)) {
+                throw IllegalArgumentException(INVALID)
+            }
+            // The actual validation will be done in the controller
+            return true
         }
-        // The actual options will be generated in the controller
-        // This method just validates the input
-        return ""
+
+        /**
+         * Starts the WebAuthn authentication process.
+         *
+         * @param email The email of the user
+         * @return A JSON string containing PublicKeyCredentialRequestOptions
+         * @throws IllegalArgumentException if email is invalid
+         */
+        override fun startAuthentication(email: String): String {
+            if (email.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+            if (!EmailValidator.getInstance().isValid(email)) {
+                throw IllegalArgumentException(INVALID)
+            }
+            // The actual options will be generated in the controller
+            return ""
+        }
+
+        /**
+         * Finishes the WebAuthn authentication process.
+         *
+         * @param email    The email of the user
+         * @param response The authentication response from the client (JSON string)
+         * @return true if authentication was successful
+         * @throws IllegalArgumentException if arguments are invalid
+         */
+        override fun finishAuthentication(
+            email: String,
+            response: String,
+        ): Boolean {
+            if (email.isBlank() || response.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+            if (!EmailValidator.getInstance().isValid(email)) {
+                throw IllegalArgumentException(INVALID)
+            }
+            // The actual validation will be done in the controller
+            return true
+        }
     }
-
-    /**
-     * Finishes the WebAuthn registration process.
-     *
-     * @param email    The email of the user
-     * @param response The registration response from the client (JSON string)
-     * @param origin   The origin (complete site address) where the device was registered
-     * @param deviceName Optional name for the device
-     * @return true if registration was successful
-     * @throws IllegalArgumentException if arguments are invalid
-     */
-    override fun finishRegistration(email: String, response: String, origin: String, deviceName: String?): Boolean {
-        if (email.isBlank() || response.isBlank() || origin.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw IllegalArgumentException(INVALID)
-        }
-        // The actual validation will be done in the controller
-        return true
-    }
-
-    /**
-     * Starts the WebAuthn authentication process.
-     *
-     * @param email The email of the user
-     * @return A JSON string containing PublicKeyCredentialRequestOptions
-     * @throws IllegalArgumentException if email is invalid
-     */
-    override fun startAuthentication(email: String): String {
-        if (email.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw IllegalArgumentException(INVALID)
-        }
-        // The actual options will be generated in the controller
-        return ""
-    }
-
-    /**
-     * Finishes the WebAuthn authentication process.
-     *
-     * @param email    The email of the user
-     * @param response The authentication response from the client (JSON string)
-     * @return true if authentication was successful
-     * @throws IllegalArgumentException if arguments are invalid
-     */
-    override fun finishAuthentication(email: String, response: String): Boolean {
-        if (email.isBlank() || response.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-        if (!EmailValidator.getInstance().isValid(email)) {
-            throw IllegalArgumentException(INVALID)
-        }
-        // The actual validation will be done in the controller
-        return true
-    }
-}
-

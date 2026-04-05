@@ -14,15 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.enterprise.model
+package dev.orion.users.domain.model
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import java.util.UUID
 
 /**
- * Represents a user in the system.
+ * Represents a user in the system (domain — no framework dependencies).
  */
 class User {
+    /** Database id when loaded from persistence. */
+    var id: Long? = null
+
     /** The hash used to identify the user. */
     var hash: String = UUID.randomUUID().toString()
 
@@ -32,7 +34,7 @@ class User {
     /** The e-mail of the user. */
     var email: String? = null
 
-    /** The password of the user. */
+    /** The password of the user (hash). */
     var password: String? = null
 
     /** Role list. */
@@ -56,31 +58,20 @@ class User {
     /** Controls if 2FA is required for social login (Google OAuth). */
     var require2FAForSocialLogin: Boolean = false
 
-    /**
-     * User constructor. Initializes the user with a unique hash, an empty role
-     * list, and a random email validation code.
-     */
     init {
         this.hash = UUID.randomUUID().toString()
         this.roles = mutableListOf()
         this.emailValidationCode = UUID.randomUUID().toString()
     }
 
-    /**
-     * Add a role to the user.
-     *
-     * @param role The role to be added.
-     */
+    /** Add a role to the user. */
     fun addRole(role: Role) {
         roles.add(role)
     }
 
     /**
-     * Get the list of roles assigned to the user.
-     *
-     * @return A list of roles in String format.
+     * Role names for JWT / authorization (default "user" when empty).
      */
-    @JsonIgnore
     fun getRoleList(): List<String> {
         val strRoles = mutableListOf<String>()
         if (this.roles.isEmpty()) {
@@ -93,18 +84,13 @@ class User {
         return strRoles
     }
 
-    /**
-     * Generates a new email validation code for the user.
-     */
+    /** Generates a new email validation code for the user. */
     fun setEmailValidationCode() {
         this.emailValidationCode = UUID.randomUUID().toString()
     }
 
-    /**
-     * Removes all roles assigned to the user.
-     */
+    /** Removes all roles assigned to the user. */
     fun removeRoles() {
         this.roles.clear()
     }
 }
-
