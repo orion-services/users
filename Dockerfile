@@ -1,20 +1,23 @@
 ####
-# Imagem JVM (Java 25) com o frontend admin (Vite/Vue) incluído.
+# JVM image (Java 25) with the admin frontend (Vite/Vue) included.
 #
-# A partir da raiz do repositório:
+# The admin app in src/main/resources/META-INF/resources/admin generates artifacts in
+# META-INF/resources/dashboard/ (URL /dashboard), served by Quarkus.
+#
+# From the repository root:
 #
 #   docker build -t quarkus/users-jvm-admin .
 #
 #   docker run --rm -p 8080:8080 quarkus/users-jvm-admin
 #
-# Requisitos: apenas Docker (Node e Maven correm dentro do build).
+# Requirements: only Docker (Node and Maven run inside the build).
 ####
 
 # --- 1) Build Quarkus + admin (npm via exec-maven-plugin)
+# Node.js is installed in the Maven stage because exec-maven-plugin runs
+# "npm ci" and "npm run build" during the generate-resources phase.
 FROM maven:3-eclipse-temurin-25 AS maven-build
 WORKDIR /build
-# Node.js necessário: exec-maven-plugin executa npm ci + npm run build
-# em generate-resources para empacotar o admin Vue junto ao jar.
 RUN apt-get update -q && \
     apt-get install -y --no-install-recommends nodejs npm && \
     rm -rf /var/lib/apt/lists/*
