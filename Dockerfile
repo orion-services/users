@@ -1,9 +1,6 @@
 ####
 # Imagem JVM (Java 25) com o frontend admin (Vite/Vue) incluído.
 #
-# O admin em src/main/resources/META-INF/resources/admin gera artefatos em
-# META-INF/resources/dashboard/ (URL /dashboard), servidos pelo Quarkus.
-#
 # A partir da raiz do repositório:
 #
 #   docker build -t quarkus/users-jvm-admin .
@@ -13,26 +10,19 @@
 # Requisitos: apenas Docker (Node e Maven correm dentro do build).
 ####
 
-# --- 1) Build do admin (npm)
-FROM node:22-alpine AS admin-build
-WORKDIR /app/admin
-COPY src/main/resources/META-INF/resources/admin/package.json \
-     src/main/resources/META-INF/resources/admin/package-lock.json ./
-RUN npm ci
-COPY src/main/resources/META-INF/resources/admin/ ./
-RUN npm run build
-# vite.config.js: outDir ../dashboard -> /app/dashboard
-
-# --- 2) Build Quarkus (fast-jar), alinhado a maven.compiler.release=25
-# Imagem Maven oficial (evita depender do wrapper: maven-wrapper.jar está em .gitignore)
+# --- 1) Build Quarkus + admin (npm via exec-maven-plugin)
 FROM maven:3-eclipse-temurin-25 AS maven-build
 WORKDIR /build
+# Node.js necessário: exec-maven-plugin executa npm ci + npm run build
+# em generate-resources para empacotar o admin Vue junto ao jar.
+RUN apt-get update -q && \
+    apt-get install -y --no-install-recommends nodejs npm && \
+    rm -rf /var/lib/apt/lists/*
 COPY pom.xml .
 COPY src ./src
-COPY --from=admin-build /app/dashboard ./src/main/resources/META-INF/resources/dashboard
-RUN mvn -B -DskipTests -Dexec.skip=true package
+RUN mvn -B -DskipTests package
 
-# --- 3) Runtime (JRE 25)
+# --- 2) Runtime (JRE 25)
 FROM eclipse-temurin:25-jre-noble
 ENV LANG='en_US.UTF-8' \
     LANGUAGE='en_US:en' \
