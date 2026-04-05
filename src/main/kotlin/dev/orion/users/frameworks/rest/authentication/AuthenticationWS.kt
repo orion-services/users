@@ -45,9 +45,8 @@ import org.jboss.resteasy.reactive.RestForm
 @Produces(MediaType.APPLICATION_JSON)
 @WithSession
 class AuthenticationWS {
-
     /** Fault tolerance default delay. */
-    protected val DELAY: Long = 2000
+    protected val delay: Long = 2000
 
     /** Business logic of the system. */
     @Inject
@@ -73,13 +72,16 @@ class AuthenticationWS {
     @Deprecated("Use login method instead", ReplaceWith("login(email, password)"))
     fun authenticate(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty password: String
-    ): Uni<String> {
-        return controller.authenticate(email, password)
-            .onItem().ifNotNull().transform { jwt -> jwt }
-            .onItem().ifNull()
+        @RestForm @NotEmpty password: String,
+    ): Uni<String> =
+        controller
+            .authenticate(email, password)
+            .onItem()
+            .ifNotNull()
+            .transform { jwt -> jwt }
+            .onItem()
+            .ifNull()
             .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
-    }
 
     /**
      * Authenticates a user.
@@ -98,21 +100,22 @@ class AuthenticationWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun login(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty password: String
-    ): Uni<Response> {
-        return controller.login(email, password)
+        @RestForm @NotEmpty password: String,
+    ): Uni<Response> =
+        controller
+            .login(email, password)
             .onItem().ifNotNull()
-            .transform { response ->
-                // Always return LoginResponseDTO complete
-                Response.ok(response).build()
-            }
+                .transform { response ->
+                    // Always return LoginResponseDTO complete
+                    Response.ok(response).build()
+                }
             .onItem().ifNull()
-            .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
-            .onFailure().transform { e ->
-                val message = e.message ?: "Unknown error"
-                throw ServiceException(message, Response.Status.BAD_REQUEST)
-            }
-    }
+                .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
+                .onFailure()
+                    .transform { e ->
+                        val message = e.message ?: "Unknown error"
+                        throw ServiceException(message, Response.Status.BAD_REQUEST)
+                    }
 
     /**
      * Authenticates a user with 2FA code.
@@ -130,17 +133,18 @@ class AuthenticationWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun loginWith2FA(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty code: String
-    ): Uni<Response> {
-        return controller.validate2FACode(email, code)
-            .onItem().transform { response ->
+        @RestForm @NotEmpty code: String,
+    ): Uni<Response> =
+        controller
+            .validate2FACode(email, code)
+            .onItem()
+            .transform { response ->
                 Response.ok(response).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Invalid TOTP code"
                 throw ServiceException(message, Response.Status.UNAUTHORIZED)
             }
-    }
 
     /**
      * Creates and authenticates a user.
@@ -160,15 +164,18 @@ class AuthenticationWS {
     fun createAuthenticate(
         @FormParam("name") @NotEmpty name: String,
         @FormParam("email") @NotEmpty @Email email: String,
-        @FormParam("password") @NotEmpty password: String
-    ): Uni<Response> {
-        return controller.createAuthenticate(name, email, password)
-            .onItem().ifNotNull().transform { response -> Response.ok(response).build() }
-            .onFailure().transform { e ->
+        @FormParam("password") @NotEmpty password: String,
+    ): Uni<Response> =
+        controller
+            .createAuthenticate(name, email, password)
+            .onItem()
+            .ifNotNull()
+            .transform { response -> Response.ok(response).build() }
+            .onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Validates e-mail, this method is used to confirm the user's e-mail using
@@ -187,19 +194,23 @@ class AuthenticationWS {
     @WithSession
     fun validateEmail(
         @QueryParam("email") @NotEmpty email: String,
-        @QueryParam("code") @NotEmpty code: String
-    ): Uni<Response> {
-        return controller.validateEmail(email, code)
-            .onItem().ifNotNull().transform { Response.ok(true).build() }
-            .onItem().ifNull().continueWith {
+        @QueryParam("code") @NotEmpty code: String,
+    ): Uni<Response> =
+        controller
+            .validateEmail(email, code)
+            .onItem()
+            .ifNotNull()
+            .transform { Response.ok(true).build() }
+            .onItem()
+            .ifNull()
+            .continueWith {
                 val message = "Invalid e-mail or code"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Recovers the password of a user. Generates a new password and sends it via email.
@@ -215,16 +226,16 @@ class AuthenticationWS {
     @Produces(MediaType.TEXT_PLAIN)
     @Retry(maxRetries = 1, delay = 2000)
     fun recoverPassword(
-        @RestForm @NotEmpty @Email email: String
-    ): Uni<Response> {
-        return controller.recoverPassword(email)
-            .onItem().transform {
+        @RestForm @NotEmpty @Email email: String,
+    ): Uni<Response> =
+        controller
+            .recoverPassword(email)
+            .onItem()
+            .transform {
                 Response.noContent().build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 }
-

@@ -9,12 +9,13 @@ import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 
 @ApplicationScoped
-open class DeleteUserImpl @Inject constructor() : DeleteUser {
-
-    override fun deleteUser(email: String): Boolean {
-        if (email.isBlank()) {
-            throw IllegalArgumentException("Email can not be blank")
+open class DeleteUserImpl
+    @Inject
+    constructor() : DeleteUser {
+        override fun deleteUser(email: String): Boolean {
+            if (email.isBlank()) {
+                throw IllegalArgumentException("Email can not be blank")
+            }
+            return true
         }
-        return true
     }
-}

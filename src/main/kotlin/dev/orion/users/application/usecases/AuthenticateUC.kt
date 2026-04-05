@@ -11,32 +11,39 @@ import jakarta.inject.Inject
 import org.apache.commons.codec.digest.DigestUtils
 
 @ApplicationScoped
-open class AuthenticateUC @Inject constructor() : AuthenticateUCI {
+open class AuthenticateUC
+    @Inject
+    constructor() : AuthenticateUCI {
+        private val blank = "Blank arguments"
+        private val invalid = "Invalid arguments"
 
-    private val BLANK = "Blank arguments"
-    private val INVALID = "Invalid arguments"
+        override fun authenticate(
+            email: String,
+            password: String,
+        ): User {
+            if (email.isNotEmpty() && password.isNotEmpty() && password.length >= 8) {
+                val user = User()
+                user.email = email
+                user.password = DigestUtils.sha256Hex(password)
+                return user
+            } else {
+                throw IllegalArgumentException(INVALID)
+            }
+        }
 
-    override fun authenticate(email: String, password: String): User {
-        if (email.isNotEmpty() && password.isNotEmpty() && password.length >= 8) {
-            val user = User()
-            user.email = email
-            user.password = DigestUtils.sha256Hex(password)
-            return user
-        } else {
-            throw IllegalArgumentException(INVALID)
+        override fun requireEmailValidationParams(
+            email: String,
+            code: String,
+        ) {
+            if (email.isBlank() || code.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+        }
+
+        override fun recoverPassword(email: String): String? {
+            if (email.isBlank()) {
+                throw IllegalArgumentException(BLANK)
+            }
+            return null
         }
     }
-
-    override fun requireEmailValidationParams(email: String, code: String) {
-        if (email.isBlank() || code.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-    }
-
-    override fun recoverPassword(email: String): String? {
-        if (email.isBlank()) {
-            throw IllegalArgumentException(BLANK)
-        }
-        return null
-    }
-}

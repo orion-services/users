@@ -14,14 +14,14 @@ import jakarta.ws.rs.core.Response
 @ApplicationScoped
 @Path("/dashboard")
 class DashboardSpaRootResource {
-
     @GET
     @Produces(MediaType.TEXT_HTML)
     fun index(): Response {
-        val bytes = javaClass.classLoader
-            .getResourceAsStream("META-INF/resources/dashboard/index.html")
-            ?.use { it.readAllBytes() }
-            ?: return Response.status(Response.Status.NOT_FOUND).build()
+        val bytes =
+            javaClass.classLoader
+                .getResourceAsStream("META-INF/resources/dashboard/index.html")
+                ?.use { it.readAllBytes() }
+                ?: return Response.status(Response.Status.NOT_FOUND).build()
         return Response.ok(bytes, MediaType.TEXT_HTML).build()
     }
 }

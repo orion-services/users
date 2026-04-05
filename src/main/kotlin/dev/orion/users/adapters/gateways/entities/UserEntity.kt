@@ -38,7 +38,6 @@ import java.util.UUID
 @Entity
 @Table(name = "\"User\"")
 class UserEntity : PanacheEntityBase() {
-
     /** Default size for column. */
     companion object {
         private const val COLUMN_LENGTH = 256
@@ -74,7 +73,7 @@ class UserEntity : PanacheEntityBase() {
     @JoinTable(
         name = "\"User_Role\"",
         joinColumns = [JoinColumn(name = "\"User_id\"")],
-        inverseJoinColumns = [JoinColumn(name = "\"roles_id\"")]
+        inverseJoinColumns = [JoinColumn(name = "\"roles_id\"")],
     )
     var roles: MutableList<RoleEntity> = mutableListOf()
 
@@ -148,4 +147,3 @@ class UserEntity : PanacheEntityBase() {
         this.roles.clear()
     }
 }
-

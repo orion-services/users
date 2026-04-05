@@ -32,7 +32,6 @@ import jakarta.validation.constraints.NotNull
 @Entity
 @Table(name = "WebAuthnCredential")
 class WebAuthnCredentialEntity : PanacheEntityBase() {
-
     /** Primary key. */
     @Id
     @GeneratedValue
@@ -71,4 +70,3 @@ class WebAuthnCredentialEntity : PanacheEntityBase() {
     @Column(name = "notes", length = 512)
     var notes: String? = null
 }
-

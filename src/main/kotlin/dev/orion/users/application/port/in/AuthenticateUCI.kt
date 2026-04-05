@@ -8,13 +8,19 @@ import dev.orion.users.domain.model.User
 
 /** Inbound port: authentication use cases. */
 interface AuthenticateUCI {
-    fun authenticate(email: String, password: String): User
+    fun authenticate(
+        email: String,
+        password: String,
+    ): User
 
     /**
      * Precondition for email validation: non-blank email and code.
      * @throws IllegalArgumentException if invalid
      */
-    fun requireEmailValidationParams(email: String, code: String)
+    fun requireEmailValidationParams(
+        email: String,
+        code: String,
+    )
 
     fun recoverPassword(email: String): String?
 }

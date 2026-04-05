@@ -17,7 +17,6 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
@@ -42,9 +41,8 @@ import org.jboss.resteasy.reactive.RestForm
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 @WithSession
 class TwoFactorAuth {
-
     /** Fault tolerance default delay. */
-    protected val DELAY: Long = 2000
+    protected val delay: Long = 2000
 
     /** Business logic of the system. */
     @Inject
@@ -66,19 +64,21 @@ class TwoFactorAuth {
     @Retry(maxRetries = 1, delay = 2000)
     fun generateQRCode(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty password: String
-    ): Uni<Response> {
-        return controller.generate2FAQRCode(email, password)
-            .onItem().transform { qrCodeBytes ->
-                Response.ok(qrCodeBytes)
+        @RestForm @NotEmpty password: String,
+    ): Uni<Response> =
+        controller
+            .generate2FAQRCode(email, password)
+            .onItem()
+            .transform { qrCodeBytes ->
+                Response
+                    .ok(qrCodeBytes)
                     .type("image/png")
                     .build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Failed to generate QR code"
                 ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Validates a TOTP code for 2FA authentication.
@@ -96,16 +96,16 @@ class TwoFactorAuth {
     @Retry(maxRetries = 1, delay = 2000)
     fun validateCode(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty code: String
-    ): Uni<Response> {
-        return controller.validate2FACode(email, code)
-            .onItem().transform { response ->
+        @RestForm @NotEmpty code: String,
+    ): Uni<Response> =
+        controller
+            .validate2FACode(email, code)
+            .onItem()
+            .transform { response ->
                 Response.ok(response).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Invalid TOTP code"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
-    }
 }
-

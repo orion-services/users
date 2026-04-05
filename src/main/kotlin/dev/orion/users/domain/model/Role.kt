@@ -21,5 +21,5 @@ package dev.orion.users.domain.model
  */
 data class Role(
     /** The name of the role. */
-    var name: String? = null
+    var name: String? = null,
 )

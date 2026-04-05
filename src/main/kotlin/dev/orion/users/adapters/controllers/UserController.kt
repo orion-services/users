@@ -16,6 +16,7 @@
  */
 package dev.orion.users.adapters.controllers
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import dev.orion.users.adapters.gateways.entities.UserEntity
 import dev.orion.users.adapters.gateways.entities.WebAuthnCredentialEntity
 import dev.orion.users.adapters.gateways.repository.WebAuthnCredentialRepository
@@ -31,16 +32,15 @@ import dev.orion.users.application.port.`in`.WebAuthnUCI
 import dev.orion.users.application.port.out.UserPersistencePort
 import dev.orion.users.domain.model.User
 import dev.orion.users.frameworks.mail.MailTemplate
-import com.fasterxml.jackson.databind.ObjectMapper
-import java.security.SecureRandom
-import java.util.*
-import java.util.Base64
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
 import io.smallrye.mutiny.coroutines.awaitSuspending
 import jakarta.enterprise.context.ApplicationScoped
 import jakarta.inject.Inject
 import org.apache.commons.codec.digest.DigestUtils
+import java.security.SecureRandom
+import java.util.Base64
+import java.util.UUID
 
 /**
  * The controller class.
@@ -48,7 +48,6 @@ import org.apache.commons.codec.digest.DigestUtils
 @WithSession
 @ApplicationScoped
 class UserController : BasicController() {
-
     @Inject
     lateinit var createUC: CreateUserUCI
 
@@ -87,13 +86,18 @@ class UserController : BasicController() {
      * @param password : The user password
      * @return : Returns a Uni<UserEntity> object
      */
-    fun createUser(name: String, email: String, password: String): Uni<UserEntity> = toUni {
-        val user: User = createUC.createUser(name, email, password)
-        val created = userPersistence.createUser(user)
-        val entity = userEntityMapper.toEntity(created)
-        sendValidationEmail(entity).awaitSuspending()
-        entity
-    }
+    fun createUser(
+        name: String,
+        email: String,
+        password: String,
+    ): Uni<UserEntity> =
+        toUni {
+            val user: User = createUC.createUser(name, email, password)
+            val created = userPersistence.createUser(user)
+            val entity = userEntityMapper.toEntity(created)
+            sendValidationEmail(entity).awaitSuspending()
+            entity
+        }
 
     /**
      * Validates the e-mail of a user.
@@ -102,11 +106,15 @@ class UserController : BasicController() {
      * @param code  : The validation code
      * @return : Returns a Uni<UserEntity> object
      */
-    fun validateEmail(email: String, code: String): Uni<UserEntity> = toUni {
-        authenticationUC.requireEmailValidationParams(email, code)
-        val validated = userPersistence.validateEmail(email, code)
-        userEntityMapper.toEntity(validated)
-    }
+    fun validateEmail(
+        email: String,
+        code: String,
+    ): Uni<UserEntity> =
+        toUni {
+            authenticationUC.requireEmailValidationParams(email, code)
+            val validated = userPersistence.validateEmail(email, code)
+            userEntityMapper.toEntity(validated)
+        }
 
     /**
      * Authenticates the user in the service.
@@ -115,12 +123,17 @@ class UserController : BasicController() {
      * @param password : The user password
      * @return : Returns a JSON Web Token (JWT)
      */
-    fun authenticate(email: String, password: String): Uni<String> = toUni {
-        val auth = authenticationUC.authenticate(email, password)
-        val domain = userPersistence.authenticate(auth.email!!, auth.password!!)
-            ?: throw IllegalArgumentException("Invalid credentials")
-        generateJWT(domain)
-    }
+    fun authenticate(
+        email: String,
+        password: String,
+    ): Uni<String> =
+        toUni {
+            val auth = authenticationUC.authenticate(email, password)
+            val domain =
+                userPersistence.authenticate(auth.email!!, auth.password!!)
+                    ?: throw IllegalArgumentException("Invalid credentials")
+            generateJWT(domain)
+        }
 
     /**
      * Authenticates a user with the provided email and password.
@@ -130,24 +143,29 @@ class UserController : BasicController() {
      * @param password the password of the user
      * @return a Uni object that emits a LoginResponseDTO
      */
-    fun login(email: String, password: String): Uni<LoginResponseDTO> = toUni {
-        val auth = authenticationUC.authenticate(email, password)
-        val domain = userPersistence.authenticate(auth.email!!, auth.password!!)
-            ?: throw IllegalArgumentException("Invalid credentials")
+    fun login(
+        email: String,
+        password: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            val auth = authenticationUC.authenticate(email, password)
+            val domain =
+                userPersistence.authenticate(auth.email!!, auth.password!!)
+                    ?: throw IllegalArgumentException("Invalid credentials")
 
-        val response = LoginResponseDTO()
-        if (domain.using2FA && domain.require2FAForBasicLogin) {
-            response.requires2FA = true
-            response.message = "2FA code required"
-        } else {
-            val dto = AuthenticationDTO()
-            dto.token = generateJWT(domain)
-            dto.user = userEntityMapper.toEntity(domain)
-            response.authentication = dto
-            response.requires2FA = false
+            val response = LoginResponseDTO()
+            if (domain.using2FA && domain.require2FAForBasicLogin) {
+                response.requires2FA = true
+                response.message = "2FA code required"
+            } else {
+                val dto = AuthenticationDTO()
+                dto.token = generateJWT(domain)
+                dto.user = userEntityMapper.toEntity(domain)
+                response.authentication = dto
+                response.requires2FA = false
+            }
+            response
         }
-        response
-    }
 
     /**
      * Creates a user, generates a Json Web Token and returns a
@@ -158,18 +176,23 @@ class UserController : BasicController() {
      * @param password : The user password
      * @return A Uni<LoginResponseDTO> object
      */
-    fun createAuthenticate(name: String, email: String, password: String): Uni<LoginResponseDTO> = toUni {
-        val entity = this@UserController.createUser(name, email, password).awaitSuspending()
+    fun createAuthenticate(
+        name: String,
+        email: String,
+        password: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            val entity = this@UserController.createUser(name, email, password).awaitSuspending()
 
-        val authDto = AuthenticationDTO()
-        authDto.token = generateJWT(entity)
-        authDto.user = entity
+            val authDto = AuthenticationDTO()
+            authDto.token = generateJWT(entity)
+            authDto.user = entity
 
-        val response = LoginResponseDTO()
-        response.authentication = authDto
-        response.requires2FA = false
-        response
-    }
+            val response = LoginResponseDTO()
+            response.authentication = authDto
+            response.requires2FA = false
+            response
+        }
 
     /**
      * Authenticates a user with a social provider (Google).
@@ -182,40 +205,45 @@ class UserController : BasicController() {
      * @param provider The provider name ("google")
      * @return A Uni<LoginResponseDTO> object (may contain JWT or indicate 2FA is required)
      */
-    fun loginWithSocialProvider(email: String, name: String, provider: String): Uni<LoginResponseDTO> = toUni {
-        val socialUser: User = socialAuthUC.validateSocialAuth(email, name, provider)
-        val existingDomain = userPersistence.findUserByEmail(email)
+    fun loginWithSocialProvider(
+        email: String,
+        name: String,
+        provider: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            val socialUser: User = socialAuthUC.validateSocialAuth(email, name, provider)
+            val existingDomain = userPersistence.findUserByEmail(email)
 
-        if (existingDomain != null) {
-            val response = LoginResponseDTO()
-            if (existingDomain.using2FA && existingDomain.require2FAForSocialLogin) {
-                response.requires2FA = true
-                response.message = "2FA code required"
+            if (existingDomain != null) {
+                val response = LoginResponseDTO()
+                if (existingDomain.using2FA && existingDomain.require2FAForSocialLogin) {
+                    response.requires2FA = true
+                    response.message = "2FA code required"
+                } else {
+                    val dto = AuthenticationDTO()
+                    dto.token = generateJWT(existingDomain)
+                    dto.user = userEntityMapper.toEntity(existingDomain)
+                    response.authentication = dto
+                    response.requires2FA = false
+                }
+                response
             } else {
+                val newUser = User()
+                newUser.name = socialUser.name
+                newUser.email = socialUser.email
+                newUser.emailValid = socialUser.emailValid
+                newUser.password = DigestUtils.sha256Hex(UUID.randomUUID().toString())
+                val newDomain = userPersistence.createUser(newUser)
+
+                val response = LoginResponseDTO()
                 val dto = AuthenticationDTO()
-                dto.token = generateJWT(existingDomain)
-                dto.user = userEntityMapper.toEntity(existingDomain)
+                dto.token = generateJWT(newDomain)
+                dto.user = userEntityMapper.toEntity(newDomain)
                 response.authentication = dto
                 response.requires2FA = false
+                response
             }
-            response
-        } else {
-            val newUser = User()
-            newUser.name = socialUser.name
-            newUser.email = socialUser.email
-            newUser.emailValid = socialUser.emailValid
-            newUser.password = DigestUtils.sha256Hex(UUID.randomUUID().toString())
-            val newDomain = userPersistence.createUser(newUser)
-
-            val response = LoginResponseDTO()
-            val dto = AuthenticationDTO()
-            dto.token = generateJWT(newDomain)
-            dto.user = userEntityMapper.toEntity(newDomain)
-            response.authentication = dto
-            response.requires2FA = false
-            response
         }
-    }
 
     /**
      * Delete a user from the service.
@@ -223,9 +251,10 @@ class UserController : BasicController() {
      * @param email The user's e-mail
      * @return A Uni<Void> object
      */
-    fun deleteUser(email: String): Uni<Void> = toUniVoid {
-        userPersistence.deleteUser(email)
-    }
+    fun deleteUser(email: String): Uni<Void> =
+        toUniVoid {
+            userPersistence.deleteUser(email)
+        }
 
     /**
      * Generates a QR code for 2FA setup.
@@ -236,19 +265,24 @@ class UserController : BasicController() {
      * @param password The password of the user
      * @return A Uni that emits a ByteArray containing the QR code image
      */
-    fun generate2FAQRCode(email: String, password: String): Uni<ByteArray> = toUni {
-        val user: User = twoFactorAuthUC.generateQRCode(email, password)
-        val authenticatedDomain = userPersistence.authenticate(user.email!!, user.password!!)
-            ?: throw IllegalArgumentException("Invalid credentials")
+    fun generate2FAQRCode(
+        email: String,
+        password: String,
+    ): Uni<ByteArray> =
+        toUni {
+            val user: User = twoFactorAuthUC.generateQRCode(email, password)
+            val authenticatedDomain =
+                userPersistence.authenticate(user.email!!, user.password!!)
+                    ?: throw IllegalArgumentException("Invalid credentials")
 
-        val secretKey = generateSecretKey()
-        authenticatedDomain.using2FA = true
-        authenticatedDomain.secret2FA = secretKey
+            val secretKey = generateSecretKey()
+            authenticatedDomain.using2FA = true
+            authenticatedDomain.secret2FA = secretKey
 
-        val updatedDomain = userPersistence.updateUser(authenticatedDomain)
-        val barCodeData = getAuthenticatorBarCode(secretKey, updatedDomain.email ?: email, issuer)
-        createQrCode(barCodeData)
-    }
+            val updatedDomain = userPersistence.updateUser(authenticatedDomain)
+            val barCodeData = getAuthenticatorBarCode(secretKey, updatedDomain.email ?: email, issuer)
+            createQrCode(barCodeData)
+        }
 
     /**
      * Validates a TOTP code for 2FA authentication after social login.
@@ -257,24 +291,29 @@ class UserController : BasicController() {
      * @param code  The TOTP code to validate
      * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validateSocialLogin2FA(email: String, code: String): Uni<LoginResponseDTO> = toUni {
-        twoFactorAuthUC.validateCode(email, code)
+    fun validateSocialLogin2FA(
+        email: String,
+        code: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            twoFactorAuthUC.validateCode(email, code)
 
-        val d = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
-        if (!d.using2FA) throw IllegalArgumentException("2FA is not enabled for this user")
-        if (!d.require2FAForSocialLogin) throw IllegalArgumentException("2FA is not required for social login for this user")
-        val secret = d.secret2FA ?: throw IllegalArgumentException("2FA secret not found")
-        if (code != getTOTPCode(secret)) throw IllegalArgumentException("Invalid TOTP code")
+            val d =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
+            if (!d.using2FA) throw IllegalArgumentException("2FA is not enabled for this user")
+            if (!d.require2FAForSocialLogin) throw IllegalArgumentException("2FA is not required for social login for this user")
+            val secret = d.secret2FA ?: throw IllegalArgumentException("2FA secret not found")
+            if (code != getTOTPCode(secret)) throw IllegalArgumentException("Invalid TOTP code")
 
-        val authDto = AuthenticationDTO()
-        authDto.token = generateJWT(d)
-        authDto.user = userEntityMapper.toEntity(d)
-        val response = LoginResponseDTO()
-        response.authentication = authDto
-        response.requires2FA = false
-        response
-    }
+            val authDto = AuthenticationDTO()
+            authDto.token = generateJWT(d)
+            authDto.user = userEntityMapper.toEntity(d)
+            val response = LoginResponseDTO()
+            response.authentication = authDto
+            response.requires2FA = false
+            response
+        }
 
     /**
      * Validates a TOTP code for 2FA authentication.
@@ -283,23 +322,28 @@ class UserController : BasicController() {
      * @param code  The TOTP code to validate
      * @return A Uni that emits a LoginResponseDTO with JWT if validation succeeds
      */
-    fun validate2FACode(email: String, code: String): Uni<LoginResponseDTO> = toUni {
-        twoFactorAuthUC.validateCode(email, code)
+    fun validate2FACode(
+        email: String,
+        code: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            twoFactorAuthUC.validateCode(email, code)
 
-        val d = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
-        if (!d.using2FA) throw IllegalArgumentException("2FA is not enabled for this user")
-        val secret = d.secret2FA ?: throw IllegalArgumentException("2FA secret not found")
-        if (code != getTOTPCode(secret)) throw IllegalArgumentException("Invalid TOTP code")
+            val d =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
+            if (!d.using2FA) throw IllegalArgumentException("2FA is not enabled for this user")
+            val secret = d.secret2FA ?: throw IllegalArgumentException("2FA secret not found")
+            if (code != getTOTPCode(secret)) throw IllegalArgumentException("Invalid TOTP code")
 
-        val authDto = AuthenticationDTO()
-        authDto.token = generateJWT(d)
-        authDto.user = userEntityMapper.toEntity(d)
-        val response = LoginResponseDTO()
-        response.authentication = authDto
-        response.requires2FA = false
-        response
-    }
+            val authDto = AuthenticationDTO()
+            authDto.token = generateJWT(d)
+            authDto.user = userEntityMapper.toEntity(d)
+            val response = LoginResponseDTO()
+            response.authentication = authDto
+            response.requires2FA = false
+            response
+        }
 
     /**
      * Starts WebAuthn registration process.
@@ -308,41 +352,52 @@ class UserController : BasicController() {
      * @param origin Optional origin URL to extract rpId from
      * @return A JSON string containing PublicKeyCredentialCreationOptions
      */
-    fun startWebAuthnRegistration(email: String, origin: String? = null): Uni<String> = toUni {
-        webAuthnUC.startRegistration(email)
+    fun startWebAuthnRegistration(
+        email: String,
+        origin: String? = null,
+    ): Uni<String> =
+        toUni {
+            webAuthnUC.startRegistration(email)
 
-        val user = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
+            val user =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
 
-        val challengeBytes = ByteArray(32)
-        SecureRandom().nextBytes(challengeBytes)
-        val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
-        val userId = Base64.getUrlEncoder().withoutPadding()
-            .encodeToString((user.email ?: email).toByteArray())
+            val challengeBytes = ByteArray(32)
+            SecureRandom().nextBytes(challengeBytes)
+            val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
+            val userId =
+                Base64
+                    .getUrlEncoder()
+                    .withoutPadding()
+                    .encodeToString((user.email ?: email).toByteArray())
 
-        val rpName = issuer
-        val rpId = origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
-        val userName = user.email ?: email
-        val userDisplayName = user.name ?: user.email ?: email
+            val rpName = issuer
+            val rpId = origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
+            val userName = user.email ?: email
+            val userDisplayName = user.name ?: user.email ?: email
 
-        val options = mapOf(
-            "rp" to mapOf("name" to rpName, "id" to rpId),
-            "user" to mapOf("id" to userId, "name" to userName, "displayName" to userDisplayName),
-            "challenge" to challenge,
-            "pubKeyCredParams" to listOf(
-                mapOf("type" to "public-key", "alg" to -7),
-                mapOf("type" to "public-key", "alg" to -257)
-            ),
-            "authenticatorSelection" to mapOf(
-                "authenticatorAttachment" to "platform",
-                "userVerification" to "preferred"
-            ),
-            "timeout" to 60000L,
-            "attestation" to "none"
-        )
+            val options =
+                mapOf(
+                    "rp" to mapOf("name" to rpName, "id" to rpId),
+                    "user" to mapOf("id" to userId, "name" to userName, "displayName" to userDisplayName),
+                    "challenge" to challenge,
+                    "pubKeyCredParams" to
+                        listOf(
+                            mapOf("type" to "public-key", "alg" to -7),
+                            mapOf("type" to "public-key", "alg" to -257),
+                        ),
+                    "authenticatorSelection" to
+                        mapOf(
+                            "authenticatorAttachment" to "platform",
+                            "userVerification" to "preferred",
+                        ),
+                    "timeout" to 60000L,
+                    "attestation" to "none",
+                )
 
-        objectMapper.writeValueAsString(mapOf("options" to options, "challenge" to challenge))
-    }
+            objectMapper.writeValueAsString(mapOf("options" to options, "challenge" to challenge))
+        }
 
     /**
      * Finishes WebAuthn registration process.
@@ -354,24 +409,28 @@ class UserController : BasicController() {
      * @return true if registration was successful
      */
     fun finishWebAuthnRegistration(
-        email: String, response: String, origin: String, deviceName: String?
-    ): Uni<Boolean> = toUni {
-        webAuthnUC.finishRegistration(email, response, origin, deviceName)
-        userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
+        email: String,
+        response: String,
+        origin: String,
+        deviceName: String?,
+    ): Uni<Boolean> =
+        toUni {
+            webAuthnUC.finishRegistration(email, response, origin, deviceName)
+            userPersistence.findUserByEmail(email)
+                ?: throw IllegalArgumentException("User not found")
 
-        val credentialEntity = WebAuthnCredentialEntity()
-        credentialEntity.userEmail = email
-        credentialEntity.credentialId = UUID.randomUUID().toString()
-        credentialEntity.publicKey = response
-        credentialEntity.counter = 0
-        credentialEntity.origin = origin
-        credentialEntity.notes = deviceName ?: "Unknown Device"
-        credentialEntity.deviceName = deviceName ?: "Unknown Device"
+            val credentialEntity = WebAuthnCredentialEntity()
+            credentialEntity.userEmail = email
+            credentialEntity.credentialId = UUID.randomUUID().toString()
+            credentialEntity.publicKey = response
+            credentialEntity.counter = 0
+            credentialEntity.origin = origin
+            credentialEntity.notes = deviceName ?: "Unknown Device"
+            credentialEntity.deviceName = deviceName ?: "Unknown Device"
 
-        webAuthnCredentialRepository.saveCredential(credentialEntity).awaitSuspending()
-        true
-    }
+            webAuthnCredentialRepository.saveCredential(credentialEntity).awaitSuspending()
+            true
+        }
 
     /**
      * Starts WebAuthn authentication process.
@@ -379,35 +438,38 @@ class UserController : BasicController() {
      * @param email The email of the user
      * @return A JSON string containing PublicKeyCredentialRequestOptions
      */
-    fun startWebAuthnAuthentication(email: String): Uni<String> = toUni {
-        webAuthnUC.startAuthentication(email)
-        userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
+    fun startWebAuthnAuthentication(email: String): Uni<String> =
+        toUni {
+            webAuthnUC.startAuthentication(email)
+            userPersistence.findUserByEmail(email)
+                ?: throw IllegalArgumentException("User not found")
 
-        val credentials = webAuthnCredentialRepository.findByUserEmail(email).awaitSuspending()
-        if (credentials.isNullOrEmpty()) {
-            throw IllegalArgumentException("No WebAuthn credentials found for user")
+            val credentials = webAuthnCredentialRepository.findByUserEmail(email).awaitSuspending()
+            if (credentials.isNullOrEmpty()) {
+                throw IllegalArgumentException("No WebAuthn credentials found for user")
+            }
+
+            val challengeBytes = ByteArray(32)
+            SecureRandom().nextBytes(challengeBytes)
+            val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
+
+            val allowCredentials =
+                credentials.mapNotNull { cred ->
+                    cred.credentialId?.let { id -> mapOf("type" to "public-key", "id" to id) }
+                }
+            val rpId = credentials.firstOrNull()?.origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
+
+            val options =
+                mapOf(
+                    "challenge" to challenge,
+                    "rpId" to rpId,
+                    "allowCredentials" to allowCredentials,
+                    "userVerification" to "preferred",
+                    "timeout" to 60000L,
+                )
+
+            objectMapper.writeValueAsString(mapOf("options" to options, "challenge" to challenge))
         }
-
-        val challengeBytes = ByteArray(32)
-        SecureRandom().nextBytes(challengeBytes)
-        val challenge = Base64.getUrlEncoder().withoutPadding().encodeToString(challengeBytes)
-
-        val allowCredentials = credentials.mapNotNull { cred ->
-            cred.credentialId?.let { id -> mapOf("type" to "public-key", "id" to id) }
-        }
-        val rpId = credentials.firstOrNull()?.origin?.let { extractRpIdFromOrigin(it) } ?: "localhost"
-
-        val options = mapOf(
-            "challenge" to challenge,
-            "rpId" to rpId,
-            "allowCredentials" to allowCredentials,
-            "userVerification" to "preferred",
-            "timeout" to 60000L
-        )
-
-        objectMapper.writeValueAsString(mapOf("options" to options, "challenge" to challenge))
-    }
 
     /**
      * Finishes WebAuthn authentication process.
@@ -416,30 +478,35 @@ class UserController : BasicController() {
      * @param response The authentication response from the client (JSON string)
      * @return A LoginResponseDTO with JWT if authentication succeeds
      */
-    fun finishWebAuthnAuthentication(email: String, response: String): Uni<LoginResponseDTO> = toUni {
-        webAuthnUC.finishAuthentication(email, response)
+    fun finishWebAuthnAuthentication(
+        email: String,
+        response: String,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            webAuthnUC.finishAuthentication(email, response)
 
-        val user = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
+            val user =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
 
-        val credentials = webAuthnCredentialRepository.findByUserEmail(email).awaitSuspending()
-        if (credentials.isNullOrEmpty()) {
-            throw IllegalArgumentException("No WebAuthn credentials found")
+            val credentials = webAuthnCredentialRepository.findByUserEmail(email).awaitSuspending()
+            if (credentials.isNullOrEmpty()) {
+                throw IllegalArgumentException("No WebAuthn credentials found")
+            }
+
+            val credential = credentials.first()
+            credential.counter++
+            webAuthnCredentialRepository.saveCredential(credential).awaitSuspending()
+
+            val authDto = AuthenticationDTO()
+            authDto.token = generateJWT(user)
+            authDto.user = userEntityMapper.toEntity(user)
+
+            val loginResponse = LoginResponseDTO()
+            loginResponse.authentication = authDto
+            loginResponse.requires2FA = false
+            loginResponse
         }
-
-        val credential = credentials.first()
-        credential.counter++
-        webAuthnCredentialRepository.saveCredential(credential).awaitSuspending()
-
-        val authDto = AuthenticationDTO()
-        authDto.token = generateJWT(user)
-        authDto.user = userEntityMapper.toEntity(user)
-
-        val loginResponse = LoginResponseDTO()
-        loginResponse.authentication = authDto
-        loginResponse.requires2FA = false
-        loginResponse
-    }
 
     /**
      * Recovers the password of a user. Generates a new password, updates it in the database,
@@ -448,22 +515,27 @@ class UserController : BasicController() {
      * @param email : The e-mail of the user
      * @return A Uni<Void> that completes when the password is recovered and email is sent
      */
-    fun recoverPassword(email: String): Uni<Void> = toUniVoid {
-        authenticationUC.recoverPassword(email)
-        val newPassword = userPersistence.recoverPassword(email)
-        sendRecoveryEmail(email, newPassword).awaitSuspending()
-    }
+    fun recoverPassword(email: String): Uni<Void> =
+        toUniVoid {
+            authenticationUC.recoverPassword(email)
+            val newPassword = userPersistence.recoverPassword(email)
+            sendRecoveryEmail(email, newPassword).awaitSuspending()
+        }
 
     /**
      * Sends a recovery password email to the user.
      */
-    private fun sendRecoveryEmail(email: String, password: String): Uni<Void> {
-        return MailTemplate.recoverPwd(password)
+    private fun sendRecoveryEmail(
+        email: String,
+        password: String,
+    ): Uni<Void> =
+        MailTemplate
+            .recoverPwd(password)
             .to(email)
             .subject("Recuperação de senha")
             .send()
-            .onItem().transform { null }
-    }
+            .onItem()
+            .transform { null }
 
     /**
      * Updates user information (name, email and/or password). Validates the token,
@@ -484,51 +556,53 @@ class UserController : BasicController() {
         password: String?,
         newPassword: String?,
         jwtEmail: String,
-        isAdmin: Boolean = false
-    ): Uni<LoginResponseDTO> = toUni {
-        updateUserUC.updateUser(email, name, newEmail, password, newPassword)
-        if (!isAdmin) checkTokenEmail(email, jwtEmail)
+        isAdmin: Boolean = false,
+    ): Uni<LoginResponseDTO> =
+        toUni {
+            updateUserUC.updateUser(email, name, newEmail, password, newPassword)
+            if (!isAdmin) checkTokenEmail(email, jwtEmail)
 
-        val nameUpdated = !name.isNullOrBlank()
-        val emailUpdated = !newEmail.isNullOrBlank()
-        val passwordUpdate = !newPassword.isNullOrBlank() && !password.isNullOrBlank()
+            val nameUpdated = !name.isNullOrBlank()
+            val emailUpdated = !newEmail.isNullOrBlank()
+            val passwordUpdate = !newPassword.isNullOrBlank() && !password.isNullOrBlank()
 
-        var userDomain = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
+            var userDomain =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
 
-        if (passwordUpdate) {
-            val encryptedPassword = DigestUtils.sha256Hex(password)
-            if (encryptedPassword != userDomain.password) {
-                throw IllegalArgumentException("Current password is incorrect")
+            if (passwordUpdate) {
+                val encryptedPassword = DigestUtils.sha256Hex(password)
+                if (encryptedPassword != userDomain.password) {
+                    throw IllegalArgumentException("Current password is incorrect")
+                }
             }
-        }
 
-        if (emailUpdated) {
-            val updated = userPersistence.updateEmail(email, newEmail)
-            sendValidationEmail(userEntityMapper.toEntity(updated)).awaitSuspending()
-            userDomain = updated
-        }
+            if (emailUpdated) {
+                val updated = userPersistence.updateEmail(email, newEmail)
+                sendValidationEmail(userEntityMapper.toEntity(updated)).awaitSuspending()
+                userDomain = updated
+            }
 
-        if (nameUpdated) {
-            userDomain.name = name
-            userDomain = userPersistence.updateUser(userDomain)
-        }
+            if (nameUpdated) {
+                userDomain.name = name
+                userDomain = userPersistence.updateUser(userDomain)
+            }
 
-        if (passwordUpdate) {
-            val encryptedPassword = DigestUtils.sha256Hex(password)
-            val encryptedNewPassword = DigestUtils.sha256Hex(newPassword)
-            val emailForPwdUpdate = userDomain.email ?: email
-            userDomain = userPersistence.changePassword(encryptedPassword, encryptedNewPassword, emailForPwdUpdate)
-        }
+            if (passwordUpdate) {
+                val encryptedPassword = DigestUtils.sha256Hex(password)
+                val encryptedNewPassword = DigestUtils.sha256Hex(newPassword)
+                val emailForPwdUpdate = userDomain.email ?: email
+                userDomain = userPersistence.changePassword(encryptedPassword, encryptedNewPassword, emailForPwdUpdate)
+            }
 
-        val response = LoginResponseDTO()
-        val dto = AuthenticationDTO()
-        dto.token = generateJWT(userDomain)
-        dto.user = userEntityMapper.toEntity(userDomain)
-        response.authentication = dto
-        response.requires2FA = false
-        response
-    }
+            val response = LoginResponseDTO()
+            val dto = AuthenticationDTO()
+            dto.token = generateJWT(userDomain)
+            dto.user = userEntityMapper.toEntity(userDomain)
+            response.authentication = dto
+            response.requires2FA = false
+            response
+        }
 
     /**
      * Updates 2FA settings for a user.
@@ -543,39 +617,42 @@ class UserController : BasicController() {
         email: String,
         require2FAForBasicLogin: Boolean,
         require2FAForSocialLogin: Boolean,
-        jwtEmail: String
-    ): Uni<UserEntity> = toUni {
-        checkTokenEmail(email, jwtEmail)
-        val domain = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
-        domain.require2FAForBasicLogin = require2FAForBasicLogin
-        domain.require2FAForSocialLogin = require2FAForSocialLogin
-        val updated = userPersistence.updateUser(domain)
-        userEntityMapper.toEntity(updated)
-    }
+        jwtEmail: String,
+    ): Uni<UserEntity> =
+        toUni {
+            checkTokenEmail(email, jwtEmail)
+            val domain =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
+            domain.require2FAForBasicLogin = require2FAForBasicLogin
+            domain.require2FAForSocialLogin = require2FAForSocialLogin
+            val updated = userPersistence.updateUser(domain)
+            userEntityMapper.toEntity(updated)
+        }
 
     /**
      * Extracts the rpId (Relying Party ID) from an origin URL.
      */
-    private fun extractRpIdFromOrigin(origin: String): String {
-        return try {
+    private fun extractRpIdFromOrigin(origin: String): String =
+        try {
             val uri = java.net.URI(origin)
             uri.host ?: "localhost"
         } catch (e: Exception) {
-            origin.replace(Regex("^https?://"), "")
+            origin
+                .replace(Regex("^https?://"), "")
                 .replace(Regex(":\\d+$"), "")
                 .takeIf { it.isNotBlank() } ?: "localhost"
         }
-    }
 
     /**
      * Lists all users in the service.
      *
      * @return A Uni<List<UserEntity>> containing all users
      */
-    fun listAllUsers(): Uni<List<UserEntity>> = toUni {
-        userPersistence.listAllUsers().map { userEntityMapper.toEntity(it) }
-    }
+    fun listAllUsers(): Uni<List<UserEntity>> =
+        toUni {
+            userPersistence.listAllUsers().map { userEntityMapper.toEntity(it) }
+        }
 
     /**
      * Gets a user by email.
@@ -583,9 +660,11 @@ class UserController : BasicController() {
      * @param email The email of the user
      * @return A Uni<UserEntity> containing the user if found
      */
-    fun getUserByEmail(email: String): Uni<UserEntity> = toUni {
-        val domain = userPersistence.findUserByEmail(email)
-            ?: throw IllegalArgumentException("User not found")
-        userEntityMapper.toEntity(domain)
-    }
+    fun getUserByEmail(email: String): Uni<UserEntity> =
+        toUni {
+            val domain =
+                userPersistence.findUserByEmail(email)
+                    ?: throw IllegalArgumentException("User not found")
+            userEntityMapper.toEntity(domain)
+        }
 }

@@ -17,16 +17,17 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
+import io.vertx.core.Vertx
+import io.vertx.ext.web.client.WebClient
+import io.vertx.ext.web.client.WebClientOptions
 import jakarta.annotation.security.PermitAll
 import jakarta.inject.Inject
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotEmpty
 import jakarta.ws.rs.Consumes
-import jakarta.ws.rs.FormParam
 import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.Produces
@@ -34,9 +35,6 @@ import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import org.eclipse.microprofile.faulttolerance.Retry
 import org.jboss.resteasy.reactive.RestForm
-import io.vertx.core.Vertx
-import io.vertx.ext.web.client.WebClient
-import io.vertx.ext.web.client.WebClientOptions
 
 /**
  * Social Authentication Web Service.
@@ -48,9 +46,8 @@ import io.vertx.ext.web.client.WebClientOptions
 @Produces(MediaType.APPLICATION_JSON)
 @WithSession
 class SocialAuthWS {
-
     /** Fault tolerance default delay. */
-    protected val DELAY: Long = 2000
+    protected val delay: Long = 2000
 
     /** Business logic of the system. */
     @Inject
@@ -81,23 +78,23 @@ class SocialAuthWS {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     fun loginWithGoogle(
-        @RestForm @NotEmpty idToken: String
-    ): Uni<Response> {
-        return validateGoogleToken(idToken)
-            .onItem().transform { (email, name) ->
+        @RestForm @NotEmpty idToken: String,
+    ): Uni<Response> =
+        validateGoogleToken(idToken)
+            .onItem()
+            .transform { (email, name) ->
                 controller.loginWithSocialProvider(email, name, "google")
-            }
-            .onItem().transformToUni { responseUni ->
+            }.onItem()
+            .transformToUni { responseUni ->
                 responseUni.onItem().transform { response ->
                     // Always return LoginResponseDTO complete
                     Response.ok(response).build()
                 }
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Google authentication failed"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
-    }
 
     /**
      * Validates a TOTP code for 2FA authentication after social login.
@@ -115,17 +112,18 @@ class SocialAuthWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun loginWithGoogle2FA(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty code: String
-    ): Uni<Response> {
-        return controller.validateSocialLogin2FA(email, code)
-            .onItem().transform { response ->
+        @RestForm @NotEmpty code: String,
+    ): Uni<Response> =
+        controller
+            .validateSocialLogin2FA(email, code)
+            .onItem()
+            .transform { response ->
                 Response.ok(response).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Invalid TOTP code"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
-    }
 
     /**
      * Validates Google ID token or access token and extracts user information.
@@ -139,24 +137,26 @@ class SocialAuthWS {
         return try {
             // Normalize token: remove leading/trailing whitespace and any extra spaces
             val normalizedToken = token.trim().replace("\\s+".toRegex(), "")
-            
+
             // Validate token is not empty
             if (normalizedToken.isEmpty()) {
                 return Uni.createFrom().failure(IllegalArgumentException("Invalid Google token: Token is empty"))
             }
-            
+
             // Try to validate as JWT (id_token) first
             val jwtResult = tryValidateAsJWT(normalizedToken)
             if (jwtResult != null) {
                 return jwtResult
             }
-            
+
             // If not a valid JWT, assume it's an access_token and fetch user info from Google API
             fetchUserInfoFromGoogleAPI(normalizedToken)
         } catch (e: IllegalArgumentException) {
             Uni.createFrom().failure(IllegalArgumentException("Invalid Google token: ${e.message}"))
         } catch (e: Exception) {
-            Uni.createFrom().failure(IllegalArgumentException("Invalid Google token: ${e.javaClass.simpleName} - ${e.message ?: "Unknown error"}"))
+            Uni.createFrom().failure(
+                IllegalArgumentException("Invalid Google token: ${e.javaClass.simpleName} - ${e.message ?: "Unknown error"}"),
+            )
         }
     }
 
@@ -171,7 +171,7 @@ class SocialAuthWS {
             if (parts.size != 3) {
                 return null // Not a JWT, might be an access_token
             }
-            
+
             // Validate parts are not empty
             if (parts[0].isEmpty() || parts[1].isEmpty() || parts[2].isEmpty()) {
                 return null // Invalid JWT format
@@ -180,26 +180,36 @@ class SocialAuthWS {
             // Decode payload (base64url)
             val payload: String
             try {
-                payload = String(java.util.Base64.getUrlDecoder().decode(parts[1]))
+                payload =
+                    String(
+                        java.util.Base64
+                            .getUrlDecoder()
+                            .decode(parts[1]),
+                    )
             } catch (e: IllegalArgumentException) {
                 return null // Not a valid base64url, might be an access_token
             }
-            
+
             // Parse JSON payload
             val json: com.fasterxml.jackson.databind.JsonNode
             try {
-                json = com.fasterxml.jackson.databind.ObjectMapper().readTree(payload)
+                json =
+                    com.fasterxml.jackson.databind
+                        .ObjectMapper()
+                        .readTree(payload)
             } catch (e: Exception) {
                 return null // Not valid JSON, might be an access_token
             }
 
             // Extract email
-            val email = json.get("email")?.asText()
-                ?: return null // No email in token, might be an access_token
-            
-            val name = json.get("name")?.asText()
-                ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
-                ?: email
+            val email =
+                json.get("email")?.asText()
+                    ?: return null // No email in token, might be an access_token
+
+            val name =
+                json.get("name")?.asText()
+                    ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
+                    ?: email
 
             Uni.createFrom().item(Pair(email, name))
         } catch (e: Exception) {
@@ -211,41 +221,53 @@ class SocialAuthWS {
      * Fetches user information from Google API using an access_token.
      */
     private fun fetchUserInfoFromGoogleAPI(accessToken: String): Uni<Pair<String, String>> {
-        val future = webClient.get(443, "www.googleapis.com", "/oauth2/v2/userinfo")
-            .ssl(true)
-            .putHeader("Authorization", "Bearer $accessToken")
-            .send()
-        
-        return Uni.createFrom().completionStage(future.toCompletionStage())
-            .onItem().transform { response ->
+        val future =
+            webClient
+                .get(443, "www.googleapis.com", "/oauth2/v2/userinfo")
+                .ssl(true)
+                .putHeader("Authorization", "Bearer $accessToken")
+                .send()
+
+        return Uni
+            .createFrom()
+            .completionStage(future.toCompletionStage())
+            .onItem()
+            .transform { response ->
                 if (response.statusCode() != 200) {
-                    val errorBody = try {
-                        response.bodyAsString()
-                    } catch (e: Exception) {
-                        "Unable to read error response"
-                    }
+                    val errorBody =
+                        try {
+                            response.bodyAsString()
+                        } catch (e: Exception) {
+                            "Unable to read error response"
+                        }
                     throw IllegalArgumentException("Failed to fetch user info from Google API: HTTP ${response.statusCode()} - $errorBody")
                 }
 
                 val json: com.fasterxml.jackson.databind.JsonNode
                 try {
-                    json = com.fasterxml.jackson.databind.ObjectMapper().readTree(response.bodyAsString())
+                    json =
+                        com.fasterxml.jackson.databind
+                            .ObjectMapper()
+                            .readTree(response.bodyAsString())
                 } catch (e: Exception) {
                     throw IllegalArgumentException("Failed to parse Google API response: ${e.message}")
                 }
 
-                val email = json.get("email")?.asText()
-                    ?: throw IllegalArgumentException("Email not found in Google API response")
-                
-                val name = json.get("name")?.asText()
-                    ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
-                    ?: email
+                val email =
+                    json.get("email")?.asText()
+                        ?: throw IllegalArgumentException("Email not found in Google API response")
+
+                val name =
+                    json.get("name")?.asText()
+                        ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
+                        ?: email
 
                 Pair(email, name)
-            }
-            .onFailure().transform { throwable ->
-                IllegalArgumentException("Failed to fetch user info from Google API: ${throwable.message ?: throwable.javaClass.simpleName}")
+            }.onFailure()
+            .transform { throwable ->
+                IllegalArgumentException(
+                    "Failed to fetch user info from Google API: ${throwable.message ?: throwable.javaClass.simpleName}",
+                )
             }
     }
 }
-

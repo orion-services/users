@@ -7,5 +7,9 @@ package dev.orion.users.application.port.`in`
 import dev.orion.users.domain.model.User
 
 interface SocialAuthUCI {
-    fun validateSocialAuth(email: String, name: String, provider: String): User
+    fun validateSocialAuth(
+        email: String,
+        name: String,
+        provider: String,
+    ): User
 }

@@ -31,7 +31,6 @@ import jakarta.validation.constraints.NotNull
 @Entity
 @Table(name = "\"Role\"")
 open class RoleEntity : PanacheEntityBase() {
-
     /** Primary key. */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

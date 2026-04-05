@@ -25,7 +25,6 @@ package dev.orion.users.application.utils
  * - At least one special character
  */
 object PasswordValidator {
-
     /** The minimum size of the password required. */
     private const val MIN_PASSWORD_LENGTH = 8
 
@@ -93,6 +92,5 @@ object PasswordValidator {
  */
 data class PasswordValidationResult(
     val isValid: Boolean,
-    val errors: List<String>
+    val errors: List<String>,
 )
-

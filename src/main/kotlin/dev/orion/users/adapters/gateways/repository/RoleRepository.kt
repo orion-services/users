@@ -34,4 +34,3 @@ interface RoleRepository : PanacheRepository<RoleEntity> {
      */
     fun findByName(name: String): Uni<RoleEntity>
 }
-

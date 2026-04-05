@@ -17,7 +17,6 @@
 package dev.orion.users.frameworks.rest.authentication
 
 import dev.orion.users.adapters.controllers.UserController
-import dev.orion.users.adapters.presenters.LoginResponseDTO
 import dev.orion.users.frameworks.rest.ServiceException
 import io.quarkus.hibernate.reactive.panache.common.WithSession
 import io.smallrye.mutiny.Uni
@@ -43,9 +42,8 @@ import org.jboss.resteasy.reactive.RestForm
 @Produces(MediaType.APPLICATION_JSON)
 @WithSession
 class WebAuthnWS {
-
     /** Fault tolerance default delay. */
-    protected val DELAY: Long = 2000
+    protected val delay: Long = 2000
 
     /** Business logic of the system. */
     @Inject
@@ -66,17 +64,18 @@ class WebAuthnWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun startRegistration(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm origin: String?
-    ): Uni<Response> {
-        return controller.startWebAuthnRegistration(email, origin)
-            .onItem().transform { optionsJson ->
+        @RestForm origin: String?,
+    ): Uni<Response> =
+        controller
+            .startWebAuthnRegistration(email, origin)
+            .onItem()
+            .transform { optionsJson ->
                 Response.ok(optionsJson).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Failed to start WebAuthn registration"
                 ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Finishes the WebAuthn registration process.
@@ -98,18 +97,19 @@ class WebAuthnWS {
         @RestForm @NotEmpty @Email email: String,
         @RestForm @NotEmpty response: String,
         @RestForm @NotEmpty origin: String,
-        @RestForm deviceName: String?
-    ): Uni<Response> {
-        return controller.finishWebAuthnRegistration(email, response, origin, deviceName)
-            .onItem().transform { success ->
+        @RestForm deviceName: String?,
+    ): Uni<Response> =
+        controller
+            .finishWebAuthnRegistration(email, response, origin, deviceName)
+            .onItem()
+            .transform { success ->
                 val result = mapOf("success" to success, "message" to "WebAuthn credential registered successfully")
                 Response.ok(result).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Failed to finish WebAuthn registration"
                 ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Starts the WebAuthn authentication process.
@@ -125,17 +125,18 @@ class WebAuthnWS {
     @Produces(MediaType.APPLICATION_JSON)
     @Retry(maxRetries = 1, delay = 2000)
     fun startAuthentication(
-        @RestForm @NotEmpty @Email email: String
-    ): Uni<Response> {
-        return controller.startWebAuthnAuthentication(email)
-            .onItem().transform { optionsJson ->
+        @RestForm @NotEmpty @Email email: String,
+    ): Uni<Response> =
+        controller
+            .startWebAuthnAuthentication(email)
+            .onItem()
+            .transform { optionsJson ->
                 Response.ok(optionsJson).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Failed to start WebAuthn authentication"
                 ServiceException(message, Response.Status.BAD_REQUEST)
             }
-    }
 
     /**
      * Finishes the WebAuthn authentication process.
@@ -153,16 +154,16 @@ class WebAuthnWS {
     @Retry(maxRetries = 1, delay = 2000)
     fun finishAuthentication(
         @RestForm @NotEmpty @Email email: String,
-        @RestForm @NotEmpty response: String
-    ): Uni<Response> {
-        return controller.finishWebAuthnAuthentication(email, response)
-            .onItem().transform { loginResponse ->
+        @RestForm @NotEmpty response: String,
+    ): Uni<Response> =
+        controller
+            .finishWebAuthnAuthentication(email, response)
+            .onItem()
+            .transform { loginResponse ->
                 Response.ok(loginResponse).build()
-            }
-            .onFailure().transform { e ->
+            }.onFailure()
+            .transform { e ->
                 val message = e.message ?: "Invalid WebAuthn authentication"
                 ServiceException(message, Response.Status.UNAUTHORIZED)
             }
-    }
 }
-

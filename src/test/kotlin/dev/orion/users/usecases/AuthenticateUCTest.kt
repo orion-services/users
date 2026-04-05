@@ -16,21 +16,19 @@
  */
 package dev.orion.users.usecases
 
+import dev.orion.users.application.port.`in`.AuthenticateUCI
+import dev.orion.users.application.usecases.AuthenticateUC
+import dev.orion.users.domain.model.User
+import io.smallrye.common.constraint.Assert
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 
-import dev.orion.users.application.port.`in`.AuthenticateUCI
-import dev.orion.users.application.usecases.AuthenticateUC
-import dev.orion.users.domain.model.User
-import io.smallrye.common.constraint.Assert
-
 /**
  * This class contains unit tests for the CreateUserUC class.
  */
 class AuthenticateUCTest {
-
     /** Use cases */
     private val uc: AuthenticateUCI = AuthenticateUC()
 
@@ -77,4 +75,3 @@ class AuthenticateUCTest {
         }
     }
 }
-

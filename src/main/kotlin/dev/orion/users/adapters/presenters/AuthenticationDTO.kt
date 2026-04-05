@@ -25,6 +25,5 @@ data class AuthenticationDTO(
     /** The user object. */
     var user: UserEntity? = null,
     /** The authentication token (jwt). */
-    var token: String? = null
+    var token: String? = null,
 )
-

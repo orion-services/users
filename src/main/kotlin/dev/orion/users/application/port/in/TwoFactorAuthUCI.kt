@@ -7,7 +7,13 @@ package dev.orion.users.application.port.`in`
 import dev.orion.users.domain.model.User
 
 interface TwoFactorAuthUCI {
-    fun generateQRCode(email: String, password: String): User
+    fun generateQRCode(
+        email: String,
+        password: String,
+    ): User
 
-    fun validateCode(email: String, code: String): User
+    fun validateCode(
+        email: String,
+        code: String,
+    ): User
 }

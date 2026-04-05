@@ -14,7 +14,6 @@ import jakarta.enterprise.context.ApplicationScoped
  */
 @ApplicationScoped
 class UserEntityMapper {
-
     fun toDomain(entity: UserEntity): User {
         val u = User()
         u.id = entity.id
