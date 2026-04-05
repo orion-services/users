@@ -14,7 +14,7 @@ This document provides comprehensive instructions for running the Orion Users se
 
 - **Java 21** or higher
 - **Maven** (or use the included `mvnw` wrapper)
-- **Database**: MySQL/MariaDB (or compatible database)
+- **Database**: PostgreSQL
 - **Node.js 18+** (for Playground frontend development)
 
 ### Running in Dev Mode
@@ -47,10 +47,10 @@ src/main/resources/application.properties
 
 ```properties
 # Database Configuration
-quarkus.datasource.db-kind=mysql
+quarkus.datasource.db-kind=postgresql
 quarkus.datasource.username=your-username
 quarkus.datasource.password=your-password
-quarkus.datasource.reactive.url=mysql://localhost:3306/users
+quarkus.datasource.reactive.url=postgresql://localhost:5432/users
 
 # JWT Configuration
 mp.jwt.verify.publickey.location=classpath:publicKey.pem
@@ -77,13 +77,13 @@ You can use Quarkus profiles for different environments:
 
 ```properties
 # Development
-%dev.quarkus.datasource.reactive.url=mysql://localhost:3306/users_dev
+%dev.quarkus.datasource.reactive.url=postgresql://localhost:5432/users_dev
 
 # Test
-%test.quarkus.datasource.reactive.url=mysql://localhost:3306/users_test
+%test.quarkus.datasource.reactive.url=postgresql://localhost:5433/users_test
 
 # Production
-%prod.quarkus.datasource.reactive.url=mysql://production-host:3306/users_prod
+%prod.quarkus.datasource.reactive.url=postgresql://production-host:5432/users_prod
 ```
 
 ## Production with Containers
@@ -112,7 +112,7 @@ docker build -f src/main/docker/Dockerfile.jvm -t orion-users:jvm .
 
 ```bash
 docker run -i --rm -p 8080:8080 \
-  -e QUARKUS_DATASOURCE_REACTIVE_URL=mysql://host.docker.internal:3306/users \
+  -e QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://host.docker.internal:5432/users \
   -e QUARKUS_DATASOURCE_USERNAME=your-username \
   -e QUARKUS_DATASOURCE_PASSWORD=your-password \
   orion-users:jvm
@@ -124,7 +124,7 @@ You can override configuration using environment variables:
 
 ```bash
 docker run -i --rm -p 8080:8080 \
-  -e QUARKUS_DATASOURCE_REACTIVE_URL=mysql://db-host:3306/users \
+  -e QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://db-host:5432/users \
   -e QUARKUS_DATASOURCE_USERNAME=dbuser \
   -e QUARKUS_DATASOURCE_PASSWORD=dbpass \
   -e QUARKUS_MAILER_HOST=smtp.example.com \
@@ -192,7 +192,7 @@ docker build -f src/main/docker/Dockerfile.native -t orion-users:native .
 
 ```bash
 docker run -i --rm -p 8080:8080 \
-  -e QUARKUS_DATASOURCE_REACTIVE_URL=mysql://host.docker.internal:3306/users \
+  -e QUARKUS_DATASOURCE_REACTIVE_URL=postgresql://host.docker.internal:5432/users \
   -e QUARKUS_DATASOURCE_USERNAME=your-username \
   -e QUARKUS_DATASOURCE_PASSWORD=your-password \
   orion-users:native
@@ -227,16 +227,15 @@ version: '3.8'
 
 services:
   database:
-    image: mysql:8.0
+    image: postgres:16
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: users
-      MYSQL_USER: users
-      MYSQL_PASSWORD: userspassword
+      POSTGRES_DB: users
+      POSTGRES_USER: users
+      POSTGRES_PASSWORD: userspassword
     ports:
-      - "3306:3306"
+      - "5432:5432"
     volumes:
-      - mysql_data:/var/lib/mysql
+      - postgres_data:/var/lib/postgresql/data
 
   users-service:
     build:
@@ -245,14 +244,14 @@ services:
     ports:
       - "8080:8080"
     environment:
-      QUARKUS_DATASOURCE_REACTIVE_URL: mysql://database:3306/users
+      QUARKUS_DATASOURCE_REACTIVE_URL: postgresql://users:userspassword@database:5432/users
       QUARKUS_DATASOURCE_USERNAME: users
       QUARKUS_DATASOURCE_PASSWORD: userspassword
     depends_on:
       - database
 
 volumes:
-  mysql_data:
+  postgres_data:
 ```
 
 Run with:

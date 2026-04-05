@@ -5,7 +5,7 @@
         <v-card>
           <v-card-title class="d-flex align-center">
             <v-icon class="mr-2">mdi-account-plus</v-icon>
-            Criar Novo Usuário
+            Create new user
             <v-spacer></v-spacer>
             <v-btn
               icon="mdi-arrow-left"
@@ -13,7 +13,7 @@
               @click="$router.push({ name: 'UsersList' })"
             >
               <v-icon>mdi-arrow-left</v-icon>
-              <v-tooltip activator="parent">Voltar</v-tooltip>
+              <v-tooltip activator="parent">Back</v-tooltip>
             </v-btn>
           </v-card-title>
 
@@ -23,7 +23,7 @@
             <v-form ref="userForm" v-model="valid" @submit.prevent="handleSubmit">
               <v-text-field
                 v-model="formData.name"
-                label="Nome"
+                label="Name"
                 :rules="nameRules"
                 required
                 prepend-inner-icon="mdi-account"
@@ -33,7 +33,7 @@
 
               <v-text-field
                 v-model="formData.email"
-                label="E-mail"
+                label="Email"
                 type="email"
                 :rules="emailRules"
                 required
@@ -44,7 +44,7 @@
 
               <v-text-field
                 v-model="formData.password"
-                label="Senha"
+                label="Password"
                 type="password"
                 :rules="passwordRules"
                 required
@@ -55,7 +55,7 @@
 
               <v-text-field
                 v-model="formData.confirmPassword"
-                label="Confirmar Senha"
+                label="Confirm password"
                 type="password"
                 :rules="confirmPasswordRules"
                 required
@@ -65,7 +65,7 @@
               ></v-text-field>
 
               <v-alert type="info" class="mb-4">
-                <strong>Informação:</strong> O usuário receberá um e-mail com o código de validação após a criação.
+                <strong>Note:</strong> The user will receive an email with the validation code after creation.
               </v-alert>
 
               <v-btn
@@ -76,7 +76,7 @@
                 :loading="loading"
                 :disabled="!valid"
               >
-                Criar Usuário
+                Create user
               </v-btn>
             </v-form>
           </v-card-text>
@@ -97,7 +97,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Fechar
+          Close
         </v-btn>
       </template>
     </v-snackbar>
@@ -130,23 +130,23 @@ const snackbar = ref({
 })
 
 const nameRules = [
-  v => !!v || 'Nome é obrigatório',
-  v => (v && v.trim().length > 0) || 'Nome não pode estar vazio'
+  v => !!v || 'Name is required',
+  v => (v && v.trim().length > 0) || 'Name cannot be empty'
 ]
 
 const emailRules = [
-  v => !!v || 'E-mail é obrigatório',
-  v => /.+@.+\..+/.test(v) || 'E-mail deve ser válido'
+  v => !!v || 'Email is required',
+  v => /.+@.+\..+/.test(v) || 'Email must be valid'
 ]
 
 const passwordRules = [
-  v => !!v || 'Senha é obrigatória',
-  v => (v && v.length >= 8) || 'Senha deve ter pelo menos 8 caracteres'
+  v => !!v || 'Password is required',
+  v => (v && v.length >= 8) || 'Password must be at least 8 characters'
 ]
 
 const confirmPasswordRules = [
-  v => !!v || 'Confirmação de senha é obrigatória',
-  v => v === formData.value.password || 'As senhas não coincidem'
+  v => !!v || 'Password confirmation is required',
+  v => v === formData.value.password || 'Passwords do not match'
 ]
 
 const handleSubmit = async () => {
@@ -161,7 +161,7 @@ const handleSubmit = async () => {
       password: formData.value.password
     })
 
-    showMessage('Usuário criado com sucesso!', 'success')
+    showMessage('User created successfully.', 'success')
     
     // Reset form
     formData.value = {
@@ -177,7 +177,7 @@ const handleSubmit = async () => {
       router.push({ name: 'UsersList' })
     }, 1500)
   } catch (error) {
-    showMessage(error.message || 'Erro ao criar usuário', 'error')
+    showMessage(error.message || 'Failed to create user', 'error')
   } finally {
     loading.value = false
   }

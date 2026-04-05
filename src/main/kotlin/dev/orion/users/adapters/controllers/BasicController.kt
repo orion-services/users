@@ -39,16 +39,47 @@ import com.google.zxing.common.BitMatrix
 
 import de.taimos.totp.TOTP
 import dev.orion.users.adapters.gateways.entities.UserEntity
+import dev.orion.users.domain.model.User as DomainUser
 import dev.orion.users.frameworks.mail.MailTemplate
 import dev.orion.users.frameworks.rest.ServiceException
 import io.smallrye.jwt.build.Jwt
 import io.smallrye.mutiny.Uni
 import jakarta.ws.rs.core.Response
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * The controller class.
  */
 open class BasicController {
+
+    /**
+     * Bridges a suspend block into a [Uni], keeping the Vert.x event-loop
+     * context via [Dispatchers.Unconfined].
+     */
+    protected fun <T> toUni(block: suspend () -> T): Uni<T> =
+        Uni.createFrom().emitter { em ->
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                try {
+                    em.complete(block())
+                } catch (e: Throwable) {
+                    em.fail(e)
+                }
+            }
+        }
+
+    protected fun toUniVoid(block: suspend () -> Unit): Uni<Void> =
+        Uni.createFrom().emitter { em ->
+            CoroutineScope(Dispatchers.Unconfined).launch {
+                try {
+                    block()
+                    em.complete(null)
+                } catch (e: Throwable) {
+                    em.fail(e)
+                }
+            }
+        }
 
     /** The encoding used in the QR code. */
     private val UTF_8 = "UTF-8"
@@ -71,6 +102,16 @@ open class BasicController {
      * @return Returns the JWT
      */
     fun generateJWT(user: UserEntity): String {
+        return Jwt.issuer(issuer)
+            .upn(user.email)
+            .groups(user.getRoleList().toSet())
+            .claim(Claims.c_hash, user.hash)
+            .claim(Claims.email, user.email)
+            .sign()
+    }
+
+    /** JWT from domain user (same claims as entity). */
+    fun generateJWT(user: DomainUser): String {
         return Jwt.issuer(issuer)
             .upn(user.email)
             .groups(user.getRoleList().toSet())

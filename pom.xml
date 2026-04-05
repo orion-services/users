@@ -5,18 +5,20 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>dev.orion</groupId>
   <artifactId>users</artifactId>
-  <version>0.0.6</version>
+  <version>0.0.7</version>
   <properties>
     <compiler-plugin.version>3.12.1</compiler-plugin.version>
-    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-    <quarkus.platform.version>3.29.0</quarkus.platform.version>
+    <quarkus.platform.version>3.34.1</quarkus.platform.version>
     <surefire-plugin.version>3.2.5</surefire-plugin.version>
-    <kotlin.version>2.1.0</kotlin.version>
+    <kotlin.version>2.3.0</kotlin.version>
     <kotlin.compiler.jvmTarget>21</kotlin.compiler.jvmTarget>
+    <!-- Admin (Vite): false = npm ci + build em generate-resources (quarkus dev, package, …). CI sem Node: -Dadmin.frontend.skip=true -->
+    <admin.frontend.skip>false</admin.frontend.skip>
   </properties>
   <dependencyManagement>
     <dependencies>
@@ -67,7 +69,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-reactive-mysql-client</artifactId>
+      <artifactId>quarkus-reactive-pg-client</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
@@ -104,6 +106,14 @@
       <artifactId>kotlin-stdlib-jdk8</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.jetbrains.kotlinx</groupId>
+      <artifactId>kotlinx-coroutines-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.smallrye.reactive</groupId>
+      <artifactId>mutiny-kotlin</artifactId>
+    </dependency>
+    <dependency>
       <groupId>commons-codec</groupId>
       <artifactId>commons-codec</artifactId>
       <version>1.15</version>
@@ -132,7 +142,7 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-junit5</artifactId>
+      <artifactId>quarkus-junit</artifactId>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -165,6 +175,45 @@
   </dependencies>
   <build>
     <plugins>
+      <!-- Admin Vue: compila para META-INF/resources/dashboard/ em todo mvn (incl. quarkus:dev) -->
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <version>3.5.0</version>
+        <executions>
+          <execution>
+            <id>admin-dashboard-npm-ci</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <skip>${admin.frontend.skip}</skip>
+              <workingDirectory>${project.basedir}/src/main/resources/META-INF/resources/admin</workingDirectory>
+              <executable>npm</executable>
+              <arguments>
+                <argument>ci</argument>
+              </arguments>
+            </configuration>
+          </execution>
+          <execution>
+            <id>admin-dashboard-npm-build</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>exec</goal>
+            </goals>
+            <configuration>
+              <skip>${admin.frontend.skip}</skip>
+              <workingDirectory>${project.basedir}/src/main/resources/META-INF/resources/admin</workingDirectory>
+              <executable>npm</executable>
+              <arguments>
+                <argument>run</argument>
+                <argument>build</argument>
+              </arguments>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>${quarkus.platform.group-id}</groupId>
         <artifactId>quarkus-maven-plugin</artifactId>
@@ -206,7 +255,7 @@
               </sourceDirs>
               <jvmTarget>${kotlin.compiler.jvmTarget}</jvmTarget>
               <args>
-                <arg>-Xjvm-default=all</arg>
+                <arg>-jvm-default=enable</arg>
               </args>
             </configuration>
           </execution>
@@ -222,7 +271,7 @@
               </sourceDirs>
               <jvmTarget>${kotlin.compiler.jvmTarget}</jvmTarget>
               <args>
-                <arg>-Xjvm-default=all</arg>
+                <arg>-jvm-default=enable</arg>
               </args>
             </configuration>
           </execution>
@@ -230,7 +279,7 @@
         <configuration>
           <jvmTarget>${kotlin.compiler.jvmTarget}</jvmTarget>
           <args>
-            <arg>-Xjvm-default=all</arg>
+            <arg>-jvm-default=enable</arg>
             <arg>-Xno-param-assertions</arg>
           </args>
         </configuration>

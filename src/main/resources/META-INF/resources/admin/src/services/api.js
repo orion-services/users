@@ -33,8 +33,8 @@ api.interceptors.response.use(
       localStorage.removeItem('auth_token')
       localStorage.removeItem('user')
       // Redirect to login if not already there
-      if (window.location.pathname !== '/console/login') {
-        window.location.href = '/console/login'
+      if (window.location.pathname !== '/dashboard/login') {
+        window.location.href = '/dashboard/login'
       }
     }
     return Promise.reject(error)

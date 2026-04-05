@@ -18,15 +18,15 @@ package dev.orion.users.application.usecases
 
 import org.apache.commons.validator.routines.EmailValidator
 
-import dev.orion.users.application.interfaces.WebAuthnUCI
+import dev.orion.users.application.port.`in`.WebAuthnUCI
+import jakarta.enterprise.context.ApplicationScoped
+import jakarta.inject.Inject
 
 /**
- * Use case implementation for WebAuthn.
- * This is a basic implementation that validates input.
- * The actual WebAuthn processing will be done in the controller layer
- * where we have access to webauthn4j library.
+ * Use case implementation for WebAuthn (input validation; protocol details stay in adapters).
  */
-class WebAuthnUC : WebAuthnUCI {
+@ApplicationScoped
+open class WebAuthnUC @Inject constructor() : WebAuthnUCI {
 
     /** Default blank arguments message. */
     private val BLANK = "Blank arguments"

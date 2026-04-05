@@ -197,9 +197,8 @@ class SocialAuthWS {
             val email = json.get("email")?.asText()
                 ?: return null // No email in token, might be an access_token
             
-            // Extract name (try name, then given_name + family_name, fallback to email)
             val name = json.get("name")?.asText()
-                ?: json.get("given_name")?.asText()?.plus(" ").plus(json.get("family_name")?.asText() ?: "")
+                ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
                 ?: email
 
             Uni.createFrom().item(Pair(email, name))
@@ -239,7 +238,7 @@ class SocialAuthWS {
                     ?: throw IllegalArgumentException("Email not found in Google API response")
                 
                 val name = json.get("name")?.asText()
-                    ?: json.get("given_name")?.asText()?.plus(" ").plus(json.get("family_name")?.asText() ?: "")
+                    ?: json.get("given_name")?.asText()?.let { "$it ${json.get("family_name")?.asText() ?: ""}" }
                     ?: email
 
                 Pair(email, name)

@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dev.orion.users.enterprise.model
+package dev.orion.users.domain.model
 
 /**
- * Represents a role in the system.
+ * Represents a role in the system (domain — no framework dependencies).
  */
 data class Role(
     /** The name of the role. */
     var name: String? = null
 )
-

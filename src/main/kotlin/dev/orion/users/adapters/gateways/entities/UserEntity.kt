@@ -36,7 +36,7 @@ import java.util.UUID
  * User Entity.
  */
 @Entity
-@Table(name = "User")
+@Table(name = "\"User\"")
 class UserEntity : PanacheEntityBase() {
 
     /** Default size for column. */
@@ -72,9 +72,9 @@ class UserEntity : PanacheEntityBase() {
     @JsonIgnore
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "User_Role",
-        joinColumns = [JoinColumn(name = "User_id")],
-        inverseJoinColumns = [JoinColumn(name = "roles_id")]
+        name = "\"User_Role\"",
+        joinColumns = [JoinColumn(name = "\"User_id\"")],
+        inverseJoinColumns = [JoinColumn(name = "\"roles_id\"")]
     )
     var roles: MutableList<RoleEntity> = mutableListOf()
 

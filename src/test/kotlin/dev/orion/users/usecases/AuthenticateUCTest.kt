@@ -21,9 +21,9 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 
-import dev.orion.users.application.interfaces.AuthenticateUCI
+import dev.orion.users.application.port.`in`.AuthenticateUCI
 import dev.orion.users.application.usecases.AuthenticateUC
-import dev.orion.users.enterprise.model.User
+import dev.orion.users.domain.model.User
 import io.smallrye.common.constraint.Assert
 
 /**

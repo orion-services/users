@@ -189,23 +189,16 @@ class AuthenticationWS {
         @QueryParam("email") @NotEmpty email: String,
         @QueryParam("code") @NotEmpty code: String
     ): Uni<Response> {
-        val result = controller.validateEmail(email, code)
-        return if (result != null) {
-            result
-                .onItem().ifNotNull().transform { user ->
-                    Response.ok(true).build()
-                }
-                .onItem().ifNull().continueWith {
-                    val message = "Invalid e-mail or code"
-                    throw ServiceException(message, Response.Status.BAD_REQUEST)
-                }
-                .onFailure().transform { e ->
-                    val message = e.message ?: "Unknown error"
-                    throw ServiceException(message, Response.Status.BAD_REQUEST)
-                }
-        } else {
-            Uni.createFrom().item(Response.status(Response.Status.BAD_REQUEST).build())
-        }
+        return controller.validateEmail(email, code)
+            .onItem().ifNotNull().transform { Response.ok(true).build() }
+            .onItem().ifNull().continueWith {
+                val message = "Invalid e-mail or code"
+                throw ServiceException(message, Response.Status.BAD_REQUEST)
+            }
+            .onFailure().transform { e ->
+                val message = e.message ?: "Unknown error"
+                throw ServiceException(message, Response.Status.BAD_REQUEST)
+            }
     }
 
     /**

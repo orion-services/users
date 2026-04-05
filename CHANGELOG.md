@@ -1,5 +1,11 @@
 # Users change Log
 
+## 0.0.7
+
+- Switch to Postgres
+- Modify to support hexagonal architecture
+- Create Dockerfile and docker-compose
+
 ## 0.0.6
 
 - LoginResponseDTO as a standard response object from all endpoints

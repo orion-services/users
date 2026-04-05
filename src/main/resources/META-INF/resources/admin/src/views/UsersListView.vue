@@ -5,14 +5,14 @@
         <v-card>
           <v-card-title class="d-flex align-center">
             <v-icon class="mr-2">mdi-account-group</v-icon>
-            Gerenciamento de Usuários
+            User management
             <v-spacer></v-spacer>
             <v-btn
               color="primary"
               prepend-icon="mdi-account-plus"
               @click="$router.push({ name: 'CreateUser' })"
             >
-              Criar Usuário
+              Create user
             </v-btn>
           </v-card-title>
 
@@ -24,7 +24,7 @@
               <v-col cols="12" md="4">
                 <v-text-field
                   v-model="searchQuery"
-                  label="Buscar (nome ou e-mail)"
+                  label="Search (name or email)"
                   prepend-inner-icon="mdi-magnify"
                   variant="outlined"
                   density="compact"
@@ -36,7 +36,7 @@
                 <v-select
                   v-model="filterEmailValid"
                   :items="emailValidOptions"
-                  label="Filtrar por validação de e-mail"
+                  label="Filter by email validation"
                   variant="outlined"
                   density="compact"
                   clearable
@@ -47,7 +47,7 @@
                 <v-select
                   v-model="filter2FA"
                   :items="twoFAOptions"
-                  label="Filtrar por 2FA"
+                  label="Filter by 2FA"
                   variant="outlined"
                   density="compact"
                   clearable
@@ -69,7 +69,7 @@
                   :color="item.emailValid ? 'success' : 'warning'"
                   size="small"
                 >
-                  {{ item.emailValid ? 'Sim' : 'Não' }}
+                  {{ item.emailValid ? 'Yes' : 'No' }}
                 </v-chip>
               </template>
 
@@ -78,7 +78,7 @@
                   :color="item.using2FA ? 'success' : 'default'"
                   size="small"
                 >
-                  {{ item.using2FA ? 'Sim' : 'Não' }}
+                  {{ item.using2FA ? 'Yes' : 'No' }}
                 </v-chip>
               </template>
 
@@ -90,7 +90,7 @@
                   @click="viewUser(item.email)"
                 >
                   <v-icon>mdi-eye</v-icon>
-                  <v-tooltip activator="parent">Visualizar</v-tooltip>
+                  <v-tooltip activator="parent">View</v-tooltip>
                 </v-btn>
                 <v-btn
                   icon="mdi-pencil"
@@ -99,7 +99,7 @@
                   @click="editUser(item.email)"
                 >
                   <v-icon>mdi-pencil</v-icon>
-                  <v-tooltip activator="parent">Editar</v-tooltip>
+                  <v-tooltip activator="parent">Edit</v-tooltip>
                 </v-btn>
                 <v-btn
                   icon="mdi-delete"
@@ -109,14 +109,14 @@
                   @click="confirmDelete(item)"
                 >
                   <v-icon>mdi-delete</v-icon>
-                  <v-tooltip activator="parent">Deletar</v-tooltip>
+                  <v-tooltip activator="parent">Delete</v-tooltip>
                 </v-btn>
               </template>
 
               <template v-slot:no-data>
                 <div class="text-center pa-4">
                   <v-icon size="48" color="grey">mdi-account-off</v-icon>
-                  <p class="text-grey mt-2">Nenhum usuário encontrado</p>
+                  <p class="text-grey mt-2">No users found</p>
                 </div>
               </template>
             </v-data-table>
@@ -145,7 +145,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Fechar
+          Close
         </v-btn>
       </template>
     </v-snackbar>
@@ -177,22 +177,22 @@ const snackbar = ref({
 })
 
 const headers = [
-  { title: 'Nome', key: 'name', sortable: true },
-  { title: 'E-mail', key: 'email', sortable: true },
-  { title: 'E-mail Validado', key: 'emailValid', sortable: true },
-  { title: '2FA Ativado', key: 'using2FA', sortable: true },
+  { title: 'Name', key: 'name', sortable: true },
+  { title: 'Email', key: 'email', sortable: true },
+  { title: 'Email validated', key: 'emailValid', sortable: true },
+  { title: '2FA enabled', key: 'using2FA', sortable: true },
   { title: 'Hash', key: 'hash', sortable: false },
-  { title: 'Ações', key: 'actions', sortable: false, align: 'end' }
+  { title: 'Actions', key: 'actions', sortable: false, align: 'end' }
 ]
 
 const emailValidOptions = [
-  { title: 'Validado', value: true },
-  { title: 'Não Validado', value: false }
+  { title: 'Validated', value: true },
+  { title: 'Not validated', value: false }
 ]
 
 const twoFAOptions = [
-  { title: 'Ativado', value: true },
-  { title: 'Desativado', value: false }
+  { title: 'Enabled', value: true },
+  { title: 'Disabled', value: false }
 ]
 
 const filteredUsers = computed(() => usersStore.filteredUsers)
@@ -213,9 +213,9 @@ const confirmDelete = (user) => {
 const handleDelete = async (email) => {
   try {
     await usersStore.deleteUser(email)
-    showMessage('Usuário deletado com sucesso!', 'success')
+    showMessage('User deleted successfully.', 'success')
   } catch (error) {
-    showMessage(error.message || 'Erro ao deletar usuário', 'error')
+    showMessage(error.message || 'Failed to delete user', 'error')
   } finally {
     deleteDialog.value.show = false
     deleteDialog.value.user = null
@@ -234,7 +234,7 @@ onMounted(async () => {
   try {
     await usersStore.fetchUsers()
   } catch (error) {
-    showMessage(error.message || 'Erro ao carregar usuários', 'error')
+    showMessage(error.message || 'Failed to load users', 'error')
   }
 })
 </script>

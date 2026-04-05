@@ -49,15 +49,15 @@ The playground includes:
 
 For detailed information about the playground, including how to run it in development and production modes, social login configuration, and user guide, see the [Playground Documentation](docs/playground/Playground.md).
 
-## Admin Console
+## Admin dashboard
 
-The project includes a Vue 3 admin console application built with Vuetify that provides an administrative interface for managing users in the Orion Users service.
+The project includes a Vue 3 admin application built with Vuetify that provides an administrative interface for managing users in the Orion Users service.
 
-**Access the admin console**: After starting the application, navigate to `http://localhost:8080/console`
+**Access the admin UI**: After starting the application, navigate to `http://localhost:8080/dashboard`
 
-**Authentication**: The admin console requires authentication with a JWT token that includes the `admin` role. Only users with admin privileges can access this interface.
+**Authentication**: The admin UI requires authentication with a JWT token that includes the `admin` role. Only users with admin privileges can access this interface.
 
-The admin console includes:
+The admin dashboard includes:
 - User authentication with admin role verification
 - User listing with filters and search functionality
 - User detail view with complete user information
@@ -65,7 +65,7 @@ The admin console includes:
 - User editing (update email and password)
 - User deletion (delete users with confirmation)
 
-For detailed information about the admin console, including development setup and features, see the [Admin Console README](src/main/resources/META-INF/resources/admin/README.md).
+For detailed information about the admin UI, including development setup and features, see the [Admin README](src/main/resources/META-INF/resources/admin/README.md).
 
 ## Packaging and running the application
 

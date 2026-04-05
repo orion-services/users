@@ -5,7 +5,7 @@
         <v-card>
           <v-card-title class="d-flex align-center">
             <v-icon class="mr-2">mdi-account-details</v-icon>
-            Detalhes do Usuário
+            User details
             <v-spacer></v-spacer>
             <v-btn
               icon="mdi-arrow-left"
@@ -13,7 +13,7 @@
               @click="$router.push({ name: 'UsersList' })"
             >
               <v-icon>mdi-arrow-left</v-icon>
-              <v-tooltip activator="parent">Voltar</v-tooltip>
+              <v-tooltip activator="parent">Back</v-tooltip>
             </v-btn>
           </v-card-title>
 
@@ -32,18 +32,18 @@
               <v-card variant="outlined" class="mb-4">
                 <v-card-title class="text-subtitle-1">
                   <v-icon class="mr-2">mdi-information</v-icon>
-                  Informações Básicas
+                  Basic information
                 </v-card-title>
                 <v-card-text>
                   <v-row>
                     <v-col cols="12" md="6">
                       <div class="mb-2">
-                        <strong>Nome:</strong> {{ user.name || 'N/A' }}
+                        <strong>Name:</strong> {{ user.name || 'N/A' }}
                       </div>
                     </v-col>
                     <v-col cols="12" md="6">
                       <div class="mb-2">
-                        <strong>E-mail:</strong> {{ user.email || 'N/A' }}
+                        <strong>Email:</strong> {{ user.email || 'N/A' }}
                       </div>
                     </v-col>
                     <v-col cols="12" md="6">
@@ -54,13 +54,13 @@
                     </v-col>
                     <v-col cols="12" md="6">
                       <div class="mb-2">
-                        <strong>E-mail Validado:</strong>
+                        <strong>Email validated:</strong>
                         <v-chip
                           :color="user.emailValid ? 'success' : 'warning'"
                           size="small"
                           class="ml-2"
                         >
-                          {{ user.emailValid ? 'Sim' : 'Não' }}
+                          {{ user.emailValid ? 'Yes' : 'No' }}
                         </v-chip>
                       </div>
                     </v-col>
@@ -72,43 +72,43 @@
               <v-card variant="outlined" class="mb-4">
                 <v-card-title class="text-subtitle-1">
                   <v-icon class="mr-2">mdi-shield-lock</v-icon>
-                  Autenticação de Dois Fatores (2FA)
+                  Two-factor authentication (2FA)
                 </v-card-title>
                 <v-card-text>
                   <v-row>
                     <v-col cols="12" md="6">
                       <div class="mb-2">
-                        <strong>2FA Ativado:</strong>
+                        <strong>2FA enabled:</strong>
                         <v-chip
                           :color="user.using2FA ? 'success' : 'default'"
                           size="small"
                           class="ml-2"
                         >
-                          {{ user.using2FA ? 'Sim' : 'Não' }}
+                          {{ user.using2FA ? 'Yes' : 'No' }}
                         </v-chip>
                       </div>
                     </v-col>
                     <v-col cols="12" md="6" v-if="user.using2FA">
                       <div class="mb-2">
-                        <strong>Requer 2FA para Login Básico:</strong>
+                        <strong>Require 2FA for basic login:</strong>
                         <v-chip
                           :color="user.require2FAForBasicLogin ? 'success' : 'default'"
                           size="small"
                           class="ml-2"
                         >
-                          {{ user.require2FAForBasicLogin ? 'Sim' : 'Não' }}
+                          {{ user.require2FAForBasicLogin ? 'Yes' : 'No' }}
                         </v-chip>
                       </div>
                     </v-col>
                     <v-col cols="12" md="6" v-if="user.using2FA">
                       <div class="mb-2">
-                        <strong>Requer 2FA para Login Social:</strong>
+                        <strong>Require 2FA for social login:</strong>
                         <v-chip
                           :color="user.require2FAForSocialLogin ? 'success' : 'default'"
                           size="small"
                           class="ml-2"
                         >
-                          {{ user.require2FAForSocialLogin ? 'Sim' : 'Não' }}
+                          {{ user.require2FAForSocialLogin ? 'Yes' : 'No' }}
                         </v-chip>
                       </div>
                     </v-col>
@@ -140,7 +140,7 @@
               <v-card variant="outlined">
                 <v-card-title class="text-subtitle-1">
                   <v-icon class="mr-2">mdi-cog</v-icon>
-                  Ações
+                  Actions
                 </v-card-title>
                 <v-card-text>
                   <v-btn
@@ -149,7 +149,7 @@
                     class="mr-2 mb-2"
                     @click="editUser"
                   >
-                    Editar Usuário
+                    Edit user
                   </v-btn>
                   <v-btn
                     color="error"
@@ -157,14 +157,14 @@
                     class="mb-2"
                     @click="confirmDelete"
                   >
-                    Deletar Usuário
+                    Delete user
                   </v-btn>
                 </v-card-text>
               </v-card>
             </div>
 
             <v-alert v-else type="error">
-              Usuário não encontrado
+              User not found
             </v-alert>
           </v-card-text>
         </v-card>
@@ -191,7 +191,7 @@
           variant="text"
           @click="snackbar.show = false"
         >
-          Fechar
+          Close
         </v-btn>
       </template>
     </v-snackbar>
@@ -234,12 +234,12 @@ const confirmDelete = () => {
 const handleDelete = async (email) => {
   try {
     await usersStore.deleteUser(email)
-    showMessage('Usuário deletado com sucesso!', 'success')
+    showMessage('User deleted successfully.', 'success')
     setTimeout(() => {
       router.push({ name: 'UsersList' })
     }, 1500)
   } catch (error) {
-    showMessage(error.message || 'Erro ao deletar usuário', 'error')
+    showMessage(error.message || 'Failed to delete user', 'error')
   } finally {
     deleteDialog.value.show = false
   }
@@ -260,7 +260,7 @@ onMounted(async () => {
   try {
     user.value = await usersStore.fetchUserByEmail(email)
   } catch (error) {
-    showMessage(error.message || 'Erro ao carregar usuário', 'error')
+    showMessage(error.message || 'Failed to load user', 'error')
     setTimeout(() => {
       router.push({ name: 'UsersList' })
     }, 2000)
