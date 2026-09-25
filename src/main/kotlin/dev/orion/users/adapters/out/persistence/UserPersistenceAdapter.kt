@@ -150,7 +150,7 @@ class UserPersistenceAdapter
             checkEmail(u.email ?: "")
                 .onItem()
                 .ifNotNull()
-                .transform { user -> user!! }
+                .transform<UserEntity> { throw IllegalArgumentException("The e-mail already exists") }
                 .onItem()
                 .ifNull()
                 .switchTo {

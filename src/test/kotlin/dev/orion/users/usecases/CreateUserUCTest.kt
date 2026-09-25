@@ -37,7 +37,7 @@ class CreateUserUCTest {
     fun createUserWithValidArguments() {
         val name = "Orion"
         val email = "orion@services.dev"
-        val password = "12345678"
+        val password = "Password@123"
         val user: User = uc.createUser(name, email, password)
         Assert.assertNotNull(user)
     }

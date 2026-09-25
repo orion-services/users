@@ -103,18 +103,20 @@ class AuthenticationWS {
     ): Uni<Response> =
         controller
             .login(email, password)
-            .onItem().ifNotNull()
-                .transform { response ->
-                    // Always return LoginResponseDTO complete
-                    Response.ok(response).build()
-                }
-            .onItem().ifNull()
-                .failWith(ServiceException("User not found", Response.Status.UNAUTHORIZED))
-                .onFailure()
-                    .transform { e ->
-                        val message = e.message ?: "Unknown error"
-                        throw ServiceException(message, Response.Status.BAD_REQUEST)
-                    }
+            .onItem()
+            .transform { response ->
+                // Always return LoginResponseDTO complete
+                Response.ok(response).build()
+            }
+            .onFailure()
+            .transform { e ->
+                // controller.login never emits null; any failure here means
+                // the credentials are invalid (wrong password or unknown
+                // e-mail). Both cases are treated the same way (401) to
+                // avoid leaking whether an account exists.
+                val message = e.message ?: "Invalid credentials"
+                throw ServiceException(message, Response.Status.UNAUTHORIZED)
+            }
 
     /**
      * Authenticates a user with 2FA code.
