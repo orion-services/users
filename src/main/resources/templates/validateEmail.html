@@ -1,15 +1,75 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Validação do e-mail</title>
+    <title>Confirme seu e-mail</title>
 </head>
-<body>
-    <div>
-        <h2>Acesse o link abaixo para confirmar o seu e-mail:</h2>
-        <p>{url}</p>
+<body style="margin:0;padding:0;background-color:#f4f7fa;font-family:Arial,Helvetica,sans-serif;color:#172b4d;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;">
+        Confirme seu endereço de e-mail para concluir seu cadastro na Orion Services.
     </div>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+           style="width:100%;background-color:#f4f7fa;">
+        <tr>
+            <td align="center" style="padding:32px 16px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0"
+                       style="width:100%;max-width:600px;background-color:#ffffff;border-radius:12px;
+                              box-shadow:0 4px 16px rgba(0,43,80,0.10);">
+                    <tr>
+                        <td align="center" style="padding:36px 32px 20px;">
+                            <img src="https://orion-services.dev/assets/img/logo-horizontal-1.png"
+                                 alt="Orion Services" width="260"
+                                 style="display:block;width:260px;max-width:100%;height:auto;border:0;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding:0 32px 12px;">
+                            <h1 style="margin:0;font-size:26px;line-height:1.3;color:#002b50;">
+                                Confirme seu e-mail
+                            </h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding:0 32px 28px;">
+                            <p style="margin:0;font-size:16px;line-height:1.6;color:#44546f;">
+                                Clique no botão abaixo para confirmar seu endereço de e-mail
+                                e concluir seu cadastro.
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding:0 32px 32px;">
+                            <a href="{url}"
+                               style="display:inline-block;background-color:#002b50;color:#ffffff;
+                                      padding:14px 26px;border-radius:7px;text-decoration:none;
+                                      font-size:16px;font-weight:bold;line-height:1.2;">
+                                Confirmar meu e-mail
+                            </a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0 32px 32px;">
+                            <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#6b778c;">
+                                Se o botão não funcionar, copie e cole este endereço no navegador:
+                            </p>
+                            <p style="margin:0;font-size:12px;line-height:1.5;word-break:break-all;">
+                                <a href="{url}" style="color:#005ea8;text-decoration:underline;">{url}</a>
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding:20px 32px;border-top:1px solid #e6ebf0;text-align:center;">
+                            <p style="margin:0;font-size:12px;line-height:1.5;color:#7a869a;">
+                                Se você não criou esta conta, ignore este e-mail.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>
