@@ -15,32 +15,26 @@ This use case is responsible for validating a user's email address using a valid
 * The service validates the input data and verifies if the user exists in the system.
 * The service checks if the validation code matches the code sent to the user's email.
 * If the validation code is correct and the user exists, the service marks the email as validated (`emailValid` set to `true`).
-* The service returns a boolean `true` value indicating successful validation.
+* The service returns a static HTML page saying the email was validated and that the browser tab can be closed.
 
 ## HTTPS endpoints
 
 * /users/validateEmail
   * Method: GET
   * Consumes: text/plain
-  * Produces: text/plain
+  * Produces: text/html
 
 ### Request Example
 
 ```shell
 curl -X GET \
   'http://localhost:8080/users/validateEmail?code=d32c2a8e-ea4b-4260-b4d7-b3e62d8488e1&email=orion%40test.com' \
-  --header 'Accept: text/plain'
+  --header 'Accept: text/html'
 ```
 
 ### Response Example
 
-When the email is successfully validated, the response contains:
-
-```txt
-true
-```
-
-**Note:** The endpoint returns HTTP 200 (OK) with a plain text response containing the boolean value `true` indicating successful validation.
+When the email is successfully validated, the response is the static page `email-validated.html` (HTTP 200, `text/html`). It confirms that the email was validated and that the browser tab can be closed.
 
 ## Exceptions
 

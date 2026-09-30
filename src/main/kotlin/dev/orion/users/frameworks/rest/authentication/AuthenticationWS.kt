@@ -184,14 +184,14 @@ class AuthenticationWS {
      *
      * @param email The e-mail of the user
      * @param code  The code sent to the user
-     * @return true if was possible to validate the e-mail
+     * @return an HTML page confirming the e-mail was validated
      * @throws Bad request if the the em-mail or code is invalid
      */
     @GET
     @PermitAll
     @Path("/validateEmail")
     @Consumes(MediaType.TEXT_PLAIN)
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.TEXT_HTML)
     @WithSession
     fun validateEmail(
         @QueryParam("email") @NotEmpty email: String,
@@ -201,7 +201,7 @@ class AuthenticationWS {
             .validateEmail(email, code)
             .onItem()
             .ifNotNull()
-            .transform { Response.ok(true).build() }
+            .transform { emailValidatedPage() }
             .onItem()
             .ifNull()
             .continueWith {
@@ -239,4 +239,22 @@ class AuthenticationWS {
                 val message = e.message ?: "Unknown error"
                 throw ServiceException(message, Response.Status.BAD_REQUEST)
             }
+
+    /**
+     * Static confirmation page shown after the e-mail is validated.
+     */
+    private fun emailValidatedPage(): Response {
+        val html =
+            javaClass.classLoader
+                .getResourceAsStream("META-INF/resources/email-validated.html")
+                ?.use { it.readBytes() }
+                ?: throw ServiceException(
+                    "Confirmation page unavailable",
+                    Response.Status.INTERNAL_SERVER_ERROR,
+                )
+        return Response
+            .ok(html)
+            .type("${MediaType.TEXT_HTML};charset=UTF-8")
+            .build()
+    }
 }

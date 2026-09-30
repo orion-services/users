@@ -124,7 +124,7 @@ The service provides the following endpoints:
 
 ### Email Validation
 
-- `GET /users/validateEmail` - Validate user email with validation code sent via email. Query parameters: `email` and `code`.
+- `GET /users/validateEmail` - Validate user email with validation code sent via email. Query parameters: `email` and `code`. Returns an HTML page confirming the email was validated.
 
 ### Password Recovery
 
